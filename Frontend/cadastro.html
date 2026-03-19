@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TELA DE CADASTRO - AAPM</title> 
+    <link rel="stylesheet" href="style.css"> 
+</head>
+
+<body>
+    <h1></h1>
+    
+    <p id="resultado"></p> 
+
+    <div id="quadro-login" class="form-quadro">
+        <h2 class="form-title">LOGIN</h2>
+        <label for="campo-login">Login</label>
+        <input type="text" id="campo-login" placeholder="Digite seu login" required>
+        <label for="campo-senha">Senha</label>
+        <input type="password" id="campo-senha" placeholder="Digite sua senha" required>
+        <button id="btn_login">ENTRAR</button> 
+        <button id="btn_associar">ASSOCIE-SE</button> 
+        <a class="link-transicao" onclick="mudarParaQuadroRecuperacao()">Esqueci minha senha</a>
+        <a class="link-transicao" onclick="mudarParaQuadroContato()">Fale Conosco</a>
+    </div>
+
+    <div id="quadro-recuperacao" class="form-quadro">
+        <h2 class="form-title">REDEFINIR SENHA</h2>
+        <label for="campo-login-recuperacao">Seu Login</label>
+        <input type="text" id="campo-login-recuperacao" placeholder="Digite seu login cadastrado" required>
+        <label for="campo-nova-senha-recuperacao">Nova Senha</label>
+        <input type="password" id="campo-nova-senha-recuperacao" placeholder="Mínimo de 6 caracteres" required>
+        <button id="btn_recuperar_senha">REDEFINIR SENHA</button>
+        <a class="link-transicao" onclick="mudarParaQuadroLogin()">Voltar para Login</a>
+        <a class="link-transicao" onclick="mudarParaQuadroContato()">Fale Conosco</a>
+    </div>
+
+    <div id="quadro-contato" class="form-quadro form-contato">
+        <h2 class="form-title">FALE CONOSCO!</h2>
+        <label for="campo-nome-contato">Nome Completo</label>
+        <input type="text" id="campo-nome-contato" placeholder="Digite seu nome completo" required>
+        <label for="campo-email-contato">E-mail</label>
+        <input type="email" id="campo-email-contato" placeholder="Digite seu e-mail" required>
+        <label for="campo-telefone-contato">Telefone</label>
+        <input type="text" id="campo-telefone-contato" placeholder="(XX) XXXXX-XXXX">
+        <label for="campo-assunto-contato">Assunto</label>
+        <input type="text" id="campo-assunto-contato" placeholder="Digite o assunto" required>
+        <label for="campo-mensagem-contato">Mensagem</label>
+        <textarea id="campo-mensagem-contato" placeholder="Digite sua mensagem" rows="5" required></textarea>
+        <button id="btn_enviar">ENVIAR MENSAGEM</button>
+        <a class="link-transicao" onclick="mudarParaQuadroLogin()">Voltar para Login</a>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3002';
+        const QUADROS = ['quadro-login', 'quadro-recuperacao', 'quadro-contato'];
+
+        function mudarParaQuadro(quadroId) {
+            QUADROS.forEach(id => {
+                const quadro = document.getElementById(id);
+                if (quadro) quadro.style.display = 'none';
+            });
+            const quadroDesejado = document.getElementById(quadroId);
+            if (quadroDesejado) {
+                quadroDesejado.style.display = 'block';
+            }
+            const resultado = document.getElementById('resultado');
+            if (resultado) {
+                resultado.textContent = ''; 
+                resultado.style.display = 'none';
+            }
+        }
+
+        function mudarParaQuadroLogin() { mudarParaQuadro('quadro-login'); }
+        function mudarParaQuadroRecuperacao() { mudarParaQuadro('quadro-recuperacao'); }
+        function mudarParaQuadroContato() { mudarParaQuadro('quadro-contato'); }
+
+        function exibirResultado(msg, sucesso = true) {
+            const resultado = document.getElementById('resultado');
+            if (resultado) {
+                resultado.textContent = msg;
+                resultado.style.backgroundColor = sucesso ? 'green' : 'red';
+                resultado.style.display = 'block'; 
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            mudarParaQuadroLogin();
+
+            // Associe-se
+            const btnAssociar = document.getElementById('btn_associar');
+            if (btnAssociar) {
+                btnAssociar.addEventListener('click', () => {
+                    // ABRIR FORMS
+                    window.open('https://docs.google.com/forms/d/e/1FAIpQLSfo7LTzOOmwGTGIIrDDMCDw3CHJ4sLPM2mcWVTotQtc1LrudQ/viewform', '_blank');
+                });
+            }
+        });
+
+        // LOGIN
+        const btnLogin = document.getElementById('btn_login');
+        if (btnLogin) {
+            btnLogin.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const login = document.getElementById('campo-login').value;
+                const senha = document.getElementById('campo-senha').value;
+                try {
+                    const response = await fetch(`${API_URL}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ login, senha })
+                    });
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        exibirResultado(data.resposta + '. Redirecionando...', true); 
+                        setTimeout(() => {
+                            window.location.href = 'landingpage.html'; 
+                        }, 1500);
+                    } else {
+                        exibirResultado(data.resposta, false);
+                    }
+                } catch (error) {
+                    exibirResultado('Erro de Conexão: O servidor está offline.', false);
+                }
+            });
+        }
+
+        // RECUPERAR SENHA
+        const btnRecuperarSenha = document.getElementById('btn_recuperar_senha');
+        if (btnRecuperarSenha) {
+            btnRecuperarSenha.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const login = document.getElementById('campo-login-recuperacao').value;
+                const nova_senha = document.getElementById('campo-nova-senha-recuperacao').value;
+                try {
+                    const response = await fetch(`${API_URL}/esqueci-senha`, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ login, nova_senha }) 
+                    });
+                    const data = await response.json();
+                    exibirResultado(data.resposta, response.ok);
+                    if (response.ok) setTimeout(mudarParaQuadroLogin, 3000);
+                } catch (error) {
+                    exibirResultado('Erro de Conexão.', false);
+                }
+            });
+        }
+
+        //CONTATO
+        const btnEnviar = document.getElementById('btn_enviar');
+        if (btnEnviar) {
+            btnEnviar.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const dados = {
+                    nome_usuario: document.getElementById('campo-nome-contato').value,
+                    email: document.getElementById('campo-email-contato').value,
+                    telefone: document.getElementById('campo-telefone-contato').value,
+                    assunto: document.getElementById('campo-assunto-contato').value,
+                    mensagem: document.getElementById('campo-mensagem-contato').value
+                };
+                try {
+                    const response = await fetch(`${API_URL}/enviar`, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify(dados) 
+                    });
+                    const data = await response.json();
+                    exibirResultado(data.resposta, response.ok);
+                    if (response.ok) {
+                        document.querySelectorAll('#quadro-contato input, #quadro-contato textarea').forEach(i => i.value = '');
+                    }
+                } catch (error) {
+                    exibirResultado('Erro de Conexão.', false);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

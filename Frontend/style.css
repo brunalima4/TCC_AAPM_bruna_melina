@@ -1,0 +1,199 @@
+#quadro-cadastro {
+    display: none;
+}
+:root {
+    
+    --cor-primaria-cherry: #f11815;     
+    --cor-secundaria-vermelha: #f11815; 
+    --cor-preto: #000000;               
+    --cor-branco: #FFFFFF;              
+
+    --cor-fundo-pagina: #f4f7f9;        
+    --cor-primaria: var(--cor-secundaria-vermelha); 
+    --cor-link: var(--cor-preto);                  
+    --cor-texto-principal: var(--cor-branco);      
+    
+    --border-color: #cccccc;
+    --input-bg: var(--cor-branco);
+    
+    --cor-botao-fundo-login: var(--cor-primaria-cherry);    
+    --cor-botao-fundo-cadastro: var(--cor-preto);           
+    --cor-botao-fundo-recuperar: var(--cor-primaria-cherry);
+    --cor-botao-fundo-enviar: var(--cor-preto);             
+    --cor-botao-fundo-associar: var(--cor-preto);
+    
+    --success-color: #28a745; 
+    --error-color: #dc3545;   
+    --texto-feedback: white; 
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+
+    background-color: #f8f4e6; 
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+h1 {
+    color: var(--cor-primaria-cherry); 
+    margin-bottom: 20px;
+    font-size: 2.5em;
+    text-align: center;
+}
+
+.form-quadro, .form-contato { 
+    max-width: 450px; 
+    width: 100%;
+    padding: 30px 40px; 
+    background-color: var(--cor-primaria); 
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); 
+    margin: 10px auto;
+}
+
+
+.form-title {
+    color: var(--cor-texto-principal); 
+    font-size: 2.2em; 
+    margin-bottom: 25px; 
+    text-align: center; 
+    font-weight: bold; 
+    text-transform: uppercase;
+}
+
+label {
+    display: block; 
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--cor-texto-principal); 
+}
+
+
+input[type="text"], 
+input[type="password"],
+input[type="email"],
+input[type="tel"], 
+textarea { 
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: var(--input-bg);
+    transition: border-color 0.3s;
+    resize: vertical;
+}
+
+input:focus, textarea:focus {
+    border-color: var(--cor-link);
+    border: 2px solid var(--cor-link); 
+    outline: none; 
+}
+
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px; 
+    font-size: 1.1em; 
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    text-transform: uppercase;
+    color: var(--cor-texto-principal);
+}
+
+/* Botão de ENVIAR (Fale Conosco) */
+#btn_enviar {
+    background-color: var(--cor-botao-fundo-enviar); 
+}
+#btn_enviar:hover {
+    background-color: var(--cor-primaria-cherry); 
+}
+
+#btn_login {
+    background-color:var(--cor-preto); 
+}
+#btn_login:hover {
+    background-color: var(--cor-primaria-cherry); 
+}
+
+#btn_cadastrar {
+    background-color: var(--cor-botao-fundo-cadastro); 
+}
+#btn_associar {
+    background-color: #000000;
+
+}
+#btn_cadastrar:hover {
+    background-color: var(--cor-primaria-cherry); 
+}
+
+#btn_recuperar_senha {
+    background-color: var(--cor-preto); 
+}
+#btn_recuperar_senha:hover {
+    background-color: var(--cor-primaria-cherry); 
+}
+
+.link-transicao {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: var(--cor-texto-principal); 
+    text-decoration: underline;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.link-transicao:hover {
+    color: var(--cor-link); 
+}
+
+
+#resultado { 
+    margin-top: 20px; 
+    padding: 10px;
+    text-align: center;
+    border-radius: 4px;
+    font-weight: bold;
+    color: var(--texto-feedback); 
+    display: none;
+    max-width: 450px;
+    width: 100%;
+}
+
+
+#resultado[style*="green"] {
+    background-color: var(--success-color); 
+    color: white !important; 
+}
+
+#resultado[style*="red"] {
+    background-color: var(--error-color); 
+    color: white !important; 
+}
+
+#quadro-login, #quadro-recuperacao, #quadro-contato {
+    display: none;
+}
+
+br {
+    display: none;
+}
