@@ -1,0 +1,112 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+      "title": "API de Autenticação e Suporte",
+      "description": "Documentação das rotas de Login, Recuperação de Senha e Fale Conosco.",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:3002",
+        "description": "Servidor Local"
+      }
+    ],
+    "paths": {
+      "/login": {
+        "post": {
+          "summary": "Realizar Autenticação",
+          "tags": ["Autenticação"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["login", "senha"],
+                  "properties": {
+                    "login": { "type": "string", "example": "usuario_teste" },
+                    "senha": { "type": "string", "example": "123456" }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Login realizado com sucesso",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "resposta": { "type": "string" },
+                      "usuario": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            },
+            "400": { "description": "Campos obrigatórios ausentes" },
+            "401": { "description": "Login ou senha incorretos" },
+            "500": { "description": "Erro interno no servidor" }
+          }
+        }
+      },
+      "/esqueci-senha": {
+        "post": {
+          "summary": "Redefinir Senha do Usuário",
+          "tags": ["Autenticação"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["login", "nova_senha"],
+                  "properties": {
+                    "login": { "type": "string", "example": "usuario_teste" },
+                    "nova_senha": { "type": "string", "example": "nova_senha_123", "minLength": 6 }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": { "description": "Senha redefinida com sucesso" },
+            "400": { "description": "Dados inválidos ou senha curta demais" },
+            "404": { "description": "Usuário não encontrado" },
+            "500": { "description": "Erro no servidor" }
+          }
+        }
+      },
+      "/enviar": {
+        "post": {
+          "summary": "Enviar Mensagem (Fale Conosco)",
+          "tags": ["Suporte"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["nome_usuario", "email", "assunto", "mensagem"],
+                  "properties": {
+                    "nome_usuario": { "type": "string", "minLength": 3, "example": "João Silva" },
+                    "email": { "type": "string", "format": "email", "example": "joao@email.com" },
+                    "telefone": { "type": "string", "example": "11999998888" },
+                    "assunto": { "type": "string", "minLength": 6, "example": "Dúvida sobre planos" },
+                    "mensagem": { "type": "string", "minLength": 6, "example": "Gostaria de saber mais sobre os benefícios." }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": { "description": "Mensagem enviada com sucesso" },
+            "400": { "description": "Erro de validação nos campos" },
+            "500": { "description": "Erro ao salvar no banco de dados" }
+          }
+        }
+      }
+    }
+  }
