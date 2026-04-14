@@ -15,8 +15,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
-
-
 -- Copiando estrutura do banco de dados para banco_projeto.sql
 DROP DATABASE IF EXISTS `banco_projeto.sql`;
 CREATE DATABASE IF NOT EXISTS `banco_projeto.sql` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;

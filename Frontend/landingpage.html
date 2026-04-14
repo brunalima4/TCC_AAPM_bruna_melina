@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Inicial - AAPM SENAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f8f4e6;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar.closed {
+            width: 0;
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .menu-header {
+            padding: 30px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- NOVO LAYOUT MENU HAMBÚRGUER --- */
+        .menu-icon {
+            width: 30px;
+            height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            z-index: 110;
+        }
+
+        .menu-icon span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: #d1d1d1;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-icon.open span { background-color: #f11815; }
+        .menu-icon.open span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
+        .menu-icon.open span:nth-child(2) { opacity: 0; }
+        .menu-icon.open span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            white-space: nowrap;
+        }
+
+        .nav-links a {
+            padding: 18px 30px;
+            text-decoration: none;
+            color: #333;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        /* --- BOTÃO ADMINISTRADOR --- */
+        .nav-links a.admin-btn {
+            background-color: #f1f1f1;
+            color: #f11815;
+            font-weight: 700;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            height: 100px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            position: relative;
+        }
+
+        .open-btn {
+            background: none;
+            border: none;
+            display: none;
+            cursor: pointer;
+        }
+
+        .search-area {
+            display: flex;
+            align-items: center;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            padding: 8px 15px;
+            width: 250px;
+            z-index: 2;
+            margin-left: 20px; 
+        }
+
+        .search-area input {
+            border: none;
+            background: transparent;
+            outline: none;
+            margin-left: 10px;
+            width: 100%;
+        }
+
+        .logo-central {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .logo-text { 
+            color: #f11815; 
+            font-weight: 900; 
+            font-size: 42px;
+            letter-spacing: 1px;
+        }
+
+        .logo-img-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .logo-img-circle img { 
+            width: 200%; 
+            height: auto; 
+        }
+
+        .header-icons { 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            z-index: 2;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background-color: #f11815;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        /* --- NOVO LAYOUT DOS BOTÕES VERMELHOS --- */
+        .cards-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .row { display: flex; gap: 50px; }
+
+        .btn-card {
+            background: linear-gradient(135deg, #f11815 0%, #b31210 100%);
+            color: #ffffff;
+            width: 350px;
+            height: 230px;
+            border: none;
+            border-radius: 40px;
+            font-size: 25px;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(179, 18, 16, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 30px;
+            line-height: 1.1;
+        }
+
+        /* Efeito de brilho ao passar o mouse */
+        .btn-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.6s;
+        }
+
+        .btn-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 40px rgba(179, 18, 16, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-card:hover::after {
+            left: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="menu-header">
+            <div class="menu-icon open" id="menuIconSidebar" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <nav class="nav-links">            
+            <a href="#">Meu perfil</a>
+            <a href="#">Sugestões</a>
+            <a href="#">Contato</a>
+            <a href="admin.html" class="admin-btn">Administrador</a>
+        </nav>
+    </aside>
+
+    <div class="main-content">
+        <header class="top-header">
+            <div style="display: flex; align-items: center;">
+                <button class="menu-icon open-btn" id="openBtn" onclick="toggleMenu()" style="display: none; border:none; background:none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                
+                <div class="search-area">
+                    <input type="text" placeholder="Pesquisar">
+                </div>
+            </div>
+
+            <div class="logo-central">
+                <span class="logo-text">AAPM</span>
+                <div class="logo-img-circle">
+                    <img src="fotoss.png" alt="Logo">
+                </div>
+                <span class="logo-text">SENAI</span>
+            </div>
+
+            <div class="header-icons">
+                <span style="font-size: 30px; cursor: pointer;">🔔</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </header>
+
+        <section class="cards-section">
+            <div class="row">
+                <a href="page.html" style="text-decoration: none;">
+                    <button class="btn-card">História da AAPM</button>
+                </a>                
+                <button class="btn-card">Eventos</button>
+                <button class="btn-card">Benefícios</button>
+            </div>
+            <div class="row">
+                <button class="btn-card">Oficinas</button>
+                <button class="btn-card">Avisos</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('openBtn');
+            const menuIconSidebar = document.getElementById('menuIconSidebar');
+            
+            sidebar.classList.toggle('closed');
+            
+            if (sidebar.classList.contains('closed')) {
+                openBtn.style.display = 'flex';
+                menuIconSidebar.classList.remove('open');
+            } else {
+                openBtn.style.display = 'none';
+                menuIconSidebar.classList.add('open');
+            }
+        }
+    </script>
+
+</body>
+</html>
