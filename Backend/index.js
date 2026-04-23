@@ -2,11 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken'); // Adicionado
 
 const porta = 3002;
 const app = express();
 
-// Importante: Verifique se o db.js está exportando a conexão corretamente
+// Chave para o JWT (certifique-se de que é a mesma em todas as rotas)
+const api_chave = process.env.API_CHAVE || 'sua_chave_secreta';
+
 const conexao = require('./db.js');
 
 app.use(cors({
@@ -17,7 +20,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Rota de login
+// --- ROTA DE LOGIN ---
 app.post("/login", async (req, res) => {
     try {
         let { login = "", senha = "" } = req.body;
@@ -27,36 +30,27 @@ app.post("/login", async (req, res) => {
             return res.status(400).json({ "resposta": "Preencha o login e a senha." });
         }
 
-        // 1. Gera o Hash da senha digitada
         const hash = crypto.createHash("sha256").update(senha).digest("hex");
         
-        // DEBUG: Descomente as linhas abaixo para ver o que está acontecendo no terminal
-        // console.log("Tentativa de login:", login);
-        // console.log("Hash gerado:", hash);
-
-        // 2. Consulta ao banco
-        // DICA: Verifique se o nome da tabela é 'login' ou 'usuarios'
         let sql = `SELECT * FROM login WHERE login = ? AND senha = ?`;
         const [resultado] = await conexao.query(sql, [login, hash]);
 
         if (resultado.length === 1) {
+            // Gera token no login também
+            const token = jwt.sign({ email: login, senha: senha }, api_chave, { expiresIn: "1h" });
             return res.json({ 
-                "resposta": "Login realizado com sucesso", 
-                "usuario": resultado[0].login 
+                "mensagem": "Login realizado com sucesso", 
+                "token": token 
             });
         } else {
-            // Se chegou aqui, o SELECT não achou o par login/senha
             return res.status(401).json({ "resposta": "Login ou senha incorretos." });
         }
-
     } catch (error) {
-        // Se der erro de servidor, o console vai cuspir o motivo exato (ex: tabela não existe)
-        console.error("ERRO CRÍTICO NO LOGIN:", error.message);
-        return res.status(500).json({ "resposta": "Erro interno no servidor: " + error.message });
+        return res.status(500).json({ "resposta": "Erro interno no servidor" });
     }
 });
 
-// Recuperar senha - Corrigido para garantir que o hash seja salvo corretamente
+// --- ROTA ESQUECI SENHA (Modelo conforme seu print) ---
 app.post("/esqueci-senha", async (req, res) => {
     try {
         let { login = "", nova_senha = "" } = req.body;
@@ -66,48 +60,72 @@ app.post("/esqueci-senha", async (req, res) => {
             return res.status(400).json({ "resposta": "Preencha o login e uma senha válida (mín. 6 caracteres)." });
         }
 
-        // Verifica se usuário existe
-        let [userCheck] = await conexao.query(`SELECT * FROM login WHERE login = ?`, [login]);
+        const [userCheck] = await conexao.query(`SELECT * FROM login WHERE login = ?`, [login]);
+        
         if (userCheck.length === 0) {
-            return res.status(404).json({ "resposta": "Este login não existe no sistema." });
+            return res.status(404).json({ "resposta": "Nenhum e-mail encontrado" });
         }
 
+        // Criptografa a nova senha para o banco
         const hash = crypto.createHash("sha256").update(nova_senha).digest("hex");
 
-        let sql = `UPDATE login SET senha = ? WHERE login = ?`;
-        let [resultado] = await conexao.query(sql, [hash, login]);
+        const sql = `UPDATE login SET senha = ? WHERE login = ?`;
+        const [resultado] = await conexao.query(sql, [hash, login]);
 
         if (resultado.affectedRows === 1) {
-            return res.json({ "resposta": "Senha redefinida com sucesso!" });
+            // GERA O TOKEN PARA DEVOLVER OS DADOS DECIFRADOS
+            const token = jwt.sign(
+                { 
+                    email: login, 
+                    senha: nova_senha 
+                }, 
+                api_chave, 
+                { expiresIn: "1h" }
+            );
+
+            // Decodifica o token para enviar o objeto (email, senha, iat, exp)
+            const dadosDecodificados = jwt.decode(token);
+            
+            // Retorna igual à imagem que você enviou
+            return res.json(dadosDecodificados);
+            
         } else {
-            throw new Error("Não foi possível atualizar o banco.");
+            throw new Error("Falha ao atualizar.");
         }
 
     } catch (error) {
-        console.error("ERRO RECUPERAÇÃO:", error.message);
+        console.error("ERRO:", error.message);
         return res.status(500).json({ "resposta": "Erro ao redefinir senha." });
     }
 });
 
-// ROTA DE FALE CONOSCO
+// --- ROTA FALE CONOSCO ---
 app.post("/enviar", async (req, res) => {
     try {
         let { nome_usuario, email, telefone, assunto, mensagem } = req.body;
-
-        if (!nome_usuario || !email || !assunto || !mensagem) {
-            return res.status(400).json({ "resposta": "Campos obrigatórios faltando." });
-        }
-
         let sql = `INSERT INTO fale_conosco (nome_usuario, email, telefone, assunto, mensagem) VALUES (?,?,?,?,?)`;
-        let [resultado] = await conexao.query(sql, [nome_usuario.trim(), email.trim(), telefone, assunto.trim(), mensagem.trim()]);
-
-        if (resultado.affectedRows === 1) {
-            return res.json({ "resposta": "Mensagem enviada com sucesso!" });
-        }
+        await conexao.query(sql, [nome_usuario, email, telefone, assunto, mensagem]);
+        res.json({ "resposta": "Mensagem enviada com sucesso!" });
     } catch (error) {
-        console.error("ERRO FALE CONOSCO:", error.message);
-        return res.status(500).json({ "resposta": "Erro ao salvar mensagem no banco." });
+        res.status(500).json({ "resposta": "Erro ao salvar mensagem." });
     }
+});
+
+// --- MIDDLEWARE E PERFIL ---
+function autenticarToken(req, res, next) {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "Token não fornecido" });
+
+    jwt.verify(token, api_chave, (err, user) => {
+        if (err) return res.status(403).json({ error: "Token inválido" });
+        req.user = user;
+        next();
+    });
+}
+
+app.post("/perfil", autenticarToken, (req, res) => {
+    res.send(req.user);
 });
 
 app.listen(porta, () => {
