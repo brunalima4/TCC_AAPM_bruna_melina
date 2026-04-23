@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Contribuintes - AAPM SENAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #f8f4e6;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* --- HEADER (Igual às outras páginas) --- */
+        .top-header {
+            height: 100px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo-central {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-text { color: #f11815; font-weight: 900; font-size: 32px; }
+
+        /* --- TABELA DE CONTRIBUINTES --- */
+        .container {
+            padding: 40px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            color: #333;
+            font-size: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-voltar {
+            background: #f11815;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            color: #f11815;
+            border-bottom: 2px solid #f1f1f1;
+            text-transform: uppercase;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f9f9f9;
+            color: #444;
+            font-size: 15px;
+        }
+
+        tr:hover { background-color: #fffaf9; }
+
+        /* --- PINS DE IDENTIFICAÇÃO --- */
+        .pin {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .pin-verde { background-color: #28a745; }   /* Recente (2 dias) */
+        .pin-amarelo { background-color: #ffc107; color: #333; } /* Médio (2 semanas) */
+        .pin-vermelho { background-color: #dc3545; } /* Antigo (3 semanas+) */
+
+        .search-table {
+            margin-bottom: 20px;
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            outline: none;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-header">
+        <div class="logo-central">
+            <span class="logo-text">AAPM</span>
+            <img src="fotoss.png" alt="Logo" style="width: 50px;">
+            <span class="logo-text">SENAI</span>
+        </div>
+        <div style="font-weight: bold; color: #666;">Painel Administrativo</div>
+    </header>
+
+    <div class="container">
+        <div class="table-card">
+            <h2>
+                Lista de Contribuintes
+                <a href="admin.html" class="btn-voltar">← Voltar ao Painel</a>
+            </h2>
+
+            <input type="text" class="search-table" placeholder="Pesquisar por nome, CPF ou turma...">
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nome Completo</th>
+                        <th>Nascimento</th>
+                        <th>CPF</th>
+                        <th>Turma</th>
+                        <th>Armário</th>
+                        <th>Associação</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="corpoTabela">
+                    <tr>
+                        <td>Bruna de Oliveira Lima</td>
+                        <td>20/01/2009</td>
+                        <td>123.456.789-10</td>
+                        <td>DEV A</td>
+                        <td>042</td>
+                        <td>21/04/2026</td>
+                        <td><span class="pin pin-verde">há 2 dias</span></td>
+                    </tr>
+                    <tr>
+                        <td>Melina Pecorari Pontes</td>
+                        <td>27/09/2008</td>
+                        <td>456.789.123-20</td>
+                        <td>DEV A</td>
+                        <td>115</td>
+                        <td>09/04/2026</td>
+                        <td><span class="pin pin-amarelo">há 2 semanas</span></td>
+                    </tr>
+                    <tr>
+                        <td>João Miguel Oliveira Campos</td>
+                        <td>12/07/2008</td>
+                        <td>789.123.456-30</td>
+                        <td>DEV A</td>
+                        <td>201</td>
+                        <td>01/03/2026</td>
+                        <td><span class="pin pin-vermelho">há 3 semanas ou mais</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Função simples para filtrar a tabela
+        document.querySelector('.search-table').addEventListener('keyup', function() {
+            let busca = this.value.toLowerCase();
+            let linhas = document.querySelectorAll('#corpoTabela tr');
+
+            linhas.forEach(linha => {
+                let texto = linha.innerText.toLowerCase();
+                linha.style.display = texto.includes(busca) ? '' : 'none';
+            });
+        });
+    </script>
+
+</body>
+</html>
