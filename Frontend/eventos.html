@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventos - AAPM SENAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: #f8f4e6;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar.closed {
+            width: 0;
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .menu-header {
+            padding: 30px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-icon {
+            width: 30px;
+            height: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            z-index: 110;
+        }
+
+        .menu-icon span {
+            display: block;
+            height: 3px;
+            width: 100%;
+            background-color: #d1d1d1;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .menu-icon.open span { background-color: #f11815; }
+        .menu-icon.open span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
+        .menu-icon.open span:nth-child(2) { opacity: 0; }
+        .menu-icon.open span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            white-space: nowrap;
+        }
+
+        .nav-links a {
+            padding: 18px 30px;
+            text-decoration: none;
+            color: #333;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .nav-links a.admin-btn {
+            background-color: #f1f1f1;
+            color: #f11815;
+            font-weight: 700;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .top-header {
+            height: 100px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .open-btn {
+            background: none;
+            border: none;
+            display: none;
+            cursor: pointer;
+        }
+
+        .search-area {
+            display: flex;
+            align-items: center;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            padding: 8px 15px;
+            width: 250px;
+            z-index: 2;
+            margin-left: 20px;
+        }
+
+        .search-area input {
+            border: none;
+            background: transparent;
+            outline: none;
+            margin-left: 10px;
+            width: 100%;
+        }
+
+        .logo-central {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .logo-text {
+            color: #f11815;
+            font-weight: 900;
+            font-size: 42px;
+            letter-spacing: 1px;
+        }
+
+        .logo-img-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .logo-img-circle img {
+            width: 200%;
+            height: auto;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 2;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background-color: #f11815;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        /* --- VITRINE DE EVENTOS --- */
+        .vitrine-container {
+            padding: 40px;
+            flex: 1;
+        }
+
+        .vitrine-titulo {
+            color: #f11815;
+            font-size: 2.2em;
+            font-weight: 900;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .eventos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .evento-card {
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            border: 1px solid #e0e0e0;
+        }
+
+        .evento-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(241, 24, 21, 0.2);
+        }
+
+        .evento-banner {
+            height: 140px;
+            background: linear-gradient(135deg, #f11815 0%, #b31210 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .evento-banner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transition: 0.6s;
+        }
+
+        .evento-card:hover .evento-banner::after {
+            left: 100%;
+        }
+
+        .evento-icone {
+            font-size: 60px;
+            z-index: 2;
+        }
+
+        .evento-conteudo {
+            padding: 25px;
+        }
+
+        .evento-titulo {
+            color: #333;
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .evento-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .info-linha {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+            font-size: 1em;
+        }
+
+        .info-icone {
+            width: 28px;
+            height: 28px;
+            background-color: #f11815;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .info-texto {
+            font-weight: 500;
+        }
+
+        .evento-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #f11815;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 3;
+        }
+
+        .sem-eventos {
+            text-align: center;
+            color: #777;
+            font-size: 1.2em;
+            padding: 60px 20px;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .eventos-grid {
+                grid-template-columns: 1fr;
+                padding: 0 10px;
+            }
+
+            .vitrine-container {
+                padding: 20px;
+            }
+
+            .vitrine-titulo {
+                font-size: 1.6em;
+            }
+
+            .top-header {
+                padding: 0 20px;
+            }
+
+            .logo-text {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="menu-header">
+            <div class="menu-icon open" id="menuIconSidebar" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="landingpage.html">Página Inicial</a>
+            <a href="#">Meu perfil</a>
+            <a href="#">Sugestões</a>
+            <a href="#">Contato</a>
+            <a href="admin.html" class="admin-btn">Administrador</a>
+        </nav>
+    </aside>
+
+    <div class="main-content">
+        <header class="top-header">
+            <div style="display: flex; align-items: center;">
+                <button class="menu-icon open-btn" id="openBtn" onclick="toggleMenu()" style="display: none; border:none; background:none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+
+                <div class="search-area">
+                    <input type="text" placeholder="Pesquisar eventos..." oninput="filtrarEventos(this.value)">
+                </div>
+            </div>
+
+            <div class="logo-central">
+                <span class="logo-text">AAPM</span>
+                <div class="logo-img-circle">
+                    <img src="fotoss.png" alt="Logo">
+                </div>
+                <span class="logo-text">SENAI</span>
+            </div>
+
+            <div class="header-icons">
+                <span style="font-size: 30px; cursor: pointer;">🔔</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </header>
+
+        <section class="vitrine-container">
+            <h1 class="vitrine-titulo"> Eventos</h1>
+            <div class="eventos-grid" id="eventosGrid">
+                <!-- Os cards serão gerados pelo JavaScript -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('openBtn');
+            const menuIconSidebar = document.getElementById('menuIconSidebar');
+
+            sidebar.classList.toggle('closed');
+
+            if (sidebar.classList.contains('closed')) {
+                openBtn.style.display = 'flex';
+                menuIconSidebar.classList.remove('open');
+            } else {
+                openBtn.style.display = 'none';
+                menuIconSidebar.classList.add('open');
+            }
+        }
+
+        // Dados dos eventos da AAPM
+        const eventos = [
+            {
+                titulo: "Feira de Ciências",
+                data: "2025-06-15",
+                hora: "08:00 - 17:00",
+                local: "Auditório Principal",
+                icone: "",
+                tipo: "Acadêmico"
+            },
+            {
+                titulo: "Campeonato de Futsal",
+                data: "2025-06-22",
+                hora: "14:00 - 18:00",
+                local: "Quadra Poliesportiva",
+                icone: "",
+                tipo: "Esporte"
+            },
+            {
+                titulo: "Workshop de Robótica",
+                data: "2025-07-05",
+                hora: "09:00 - 12:00",
+                local: "Laboratório de Informática",
+                icone: "",
+                tipo: "Tecnologia"
+            },
+            {
+                titulo: "Dia da Família",
+                data: "2025-07-12",
+                hora: "10:00 - 16:00",
+                local: "Área externa do SENAI",
+                icone: "",
+                tipo: "Social"
+            },
+            {
+                titulo: "Semana da Indústria",
+                data: "2025-08-18",
+                hora: "08:00 - 18:00",
+                local: "Hall de Entrada",
+                icone: "",
+                tipo: "Acadêmico"
+            },
+            {
+                titulo: "Gincana Cultural",
+                data: "2025-08-25",
+                hora: "13:00 - 17:00",
+                local: "Pátio Central",
+                icone: "",
+                tipo: "Cultural"
+            }
+        ];
+
+        const diasSemana = [
+            "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
+            "Quinta-feira", "Sexta-feira", "Sábado"
+        ];
+
+        function formatarData(dataStr) {
+            const data = new Date(dataStr + "T00:00:00");
+            const dia = String(data.getDate()).padStart(2, '0');
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const ano = data.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function obterDiaSemana(dataStr) {
+            const data = new Date(dataStr + "T00:00:00");
+            return diasSemana[data.getDay()];
+        }
+
+        function renderizarEventos(listaEventos) {
+            const grid = document.getElementById('eventosGrid');
+
+            if (listaEventos.length === 0) {
+                grid.innerHTML = '<div class="sem-eventos">Nenhum evento encontrado.</div>';
+                return;
+            }
+
+            grid.innerHTML = listaEventos.map(evento => `
+                <div class="evento-card">
+                    <span class="evento-badge">${evento.tipo}</span>
+                    <div class="evento-banner">
+                        <div class="evento-icone">${evento.icone}</div>
+                    </div>
+                    <div class="evento-conteudo">
+                        <h3 class="evento-titulo">${evento.titulo}</h3>
+                        <div class="evento-info">
+                            <div class="info-linha">
+                                <div class="info-icone">📅</div>
+                                <span class="info-texto">${formatarData(evento.data)}</span>
+                            </div>
+                            <div class="info-linha">
+                                <div class="info-icone">📆</div>
+                                <span class="info-texto">${obterDiaSemana(evento.data)}</span>
+                            </div>
+                            <div class="info-linha">
+                                <div class="info-icone">🕐</div>
+                                <span class="info-texto">${evento.hora}</span>
+                            </div>
+                            <div class="info-linha">
+                                <div class="info-icone">📍</div>
+                                <span class="info-texto">${evento.local}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filtrarEventos(termo) {
+            const termoLower = termo.toLowerCase().trim();
+            if (termoLower === '') {
+                renderizarEventos(eventos);
+                return;
+            }
+
+            const filtrados = eventos.filter(e =>
+                e.titulo.toLowerCase().includes(termoLower) ||
+                e.local.toLowerCase().includes(termoLower) ||
+                e.tipo.toLowerCase().includes(termoLower) ||
+                obterDiaSemana(e.data).toLowerCase().includes(termoLower) ||
+                formatarData(e.data).includes(termoLower)
+            );
+
+            renderizarEventos(filtrados);
+        }
+
+        // Renderiza todos os eventos ao carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarEventos(eventos);
+        });
+    </script>
+
+</body>
+</html>
+

@@ -102,24 +102,32 @@
         if (btnLogin) {
             btnLogin.addEventListener('click', async (e) => {
                 e.preventDefault();
+                
                 const login = document.getElementById('campo-login').value;
                 const senha = document.getElementById('campo-senha').value;
+
                 try {
                     const response = await fetch(`${API_URL}/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ login, senha })
                     });
+
                     const data = await response.json();
                     
                     if (response.ok) {
+                        localStorage.setItem('token', data.token); 
+
                         exibirResultado(data.resposta + '. Redirecionando...', true); 
+                        
                         setTimeout(() => {
                             window.location.href = 'landingpage.html'; 
                         }, 1500);
                     } else {
+                        // Caso o backend retorne erro (ex: senha errada)
                         exibirResultado(data.resposta, false);
                     }
+                    
                 } catch (error) {
                     exibirResultado('Erro de Conexão: O servidor está offline.', false);
                 }
