@@ -259,6 +259,8 @@ app.delete("/eventos/:id", async (req, res) => {
     }
 });
 
+
+
 // --- MIDDLEWARE E PERFIL ---
 function autenticarToken(req, res, next) {
     const authHeader = req.headers["authorization"];
