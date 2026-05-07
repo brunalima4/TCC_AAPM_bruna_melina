@@ -3,86 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>História da AAPM - SENAI</title>
+    <title>História da AAPM | SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #f11815;
+            --primary-dark: #b31210;
+            --bg-body: #f8faff;
+            --text-main: #1a1a1a;
+            --text-sub: #64748b;
+            --card-bg: #ffffff;
+            --radius: 24px;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
-            background-color: #f8f4e6;
+            background: linear-gradient(180deg, #fff1f1 0%, var(--bg-body) 100%);
             min-height: 100vh;
+            color: var(--text-main);
+            padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
         }
 
         .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* --- NAVEGAÇÃO --- */
+        .top-nav {
+            width: 100%;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            width: 100%;
+            justify-content: space-between;
+            margin-bottom: 50px;
         }
 
-        /* --- SEÇÃO PRINCIPAL --- */
-        .section-header {
-            margin-bottom: 40px;
-            text-align: center;
-        }
-
-        h1.main-title {
-            color: #000000;
-            font-size: 48px;
-            font-weight: bold;
-            margin-bottom: 24px;
-            text-transform: uppercase;
-        }
-
-        h2.sub-title {
-            color: #000000;
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            text-transform: uppercase;
-        }
-
-        /* --- CARDS VERMELHOS --- */
-        .content-box {
-            background-color: #f11815;
-            color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            max-width: 1000px; /* max-w-5xl */
-            width: 100%;
-            line-height: 1.6;
-            font-size: 18px;
-        }
-
-        .content-box-small {
-            background-color: #f11815;
-            color: #ffffff;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            max-width: 900px; /* max-w-4xl */
-            width: 100%;
+        .btn-back {
+            background: white;
+            color: var(--text-main);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 15px;
             display: flex;
-            flex-direction: column;
-            gap: 20px; /* space-y-4 */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: 0.3s;
         }
 
-        p {
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        /* --- CABEÇALHO --- */
+        .header-section {
             text-align: center;
+            margin-bottom: 40px;
         }
 
-        .margin-top {
-            margin-top: 40px;
+        .main-title {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--primary); /* Alterado para vermelho */
+            letter-spacing: -1.5px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .sub-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-top: 60px;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        /* --- CARDS DE TEXTO --- */
+        .content-card {
+            background: var(--card-bg);
+            padding: 45px;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.03);
+            line-height: 1.8;
+            font-size: 18px;
+            color: var(--text-sub);
+            border-left: 8px solid var(--primary);
+        }
+
+        .content-card p {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .content-card strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* --- GRID DE PROPÓSITOS --- */
+        .purpose-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .purpose-item {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            transition: 0.3s;
+            border: 1px solid #f1f5f9;
+        }
+
+        .purpose-item:hover {
+            transform: scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .purpose-text strong {
+            display: block;
+            color: var(--text-main);
+            font-size: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .purpose-text p {
+            font-size: 16px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        /* --- LOGO --- */
+        .logo-img {
+            height: 45px;
+            filter: grayscale(0.2);
         }
 
     </style>
@@ -90,34 +166,57 @@
 <body>
 
     <div class="container">
-        
-        <div class="section-header">
-            <h1 class="main-title">CONHEÇA A HISTÓRIA DA AAPM!</h1>
-            
-            <div class="content-box">
-                <p>
-                    A AAPM (Associação de Alunos, Ex-Alunos, Pais e Mestres) do SENAI é uma entidade sem fins lucrativos presente em diversas unidades do SENAI-SP, criada com o propósito de aproximar a comunidade escolar da gestão da escola, promovendo o desenvolvimento educacional, social e cultural dos estudantes. Diferente da criação do próprio SENAI (fundado em 1942), as AAPMs no SENAI são associações civis de direito privado que, geralmente, formalizaram-se ao longo das últimas décadas para apoiar unidades específicas.
-                </p>
-            </div>
+        <nav class="top-nav">
+            <button class="btn-back" onclick="window.history.back()">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <img src="fotoss.png" alt="Logo SENAI" class="logo-img">
+            <div style="width: 45px;"></div> 
+        </nav>
+
+        <header class="header-section">
+            <h1 class="main-title">História da AAPM</h1>
+        </header>
+
+        <div class="content-card">
+            <p>
+                A <strong>AAPM (Associação de Alunos, Ex-Alunos, Pais e Mestres)</strong> do SENAI é uma entidade sem fins lucrativos presente em diversas unidades do SENAI-SP, criada com o propósito de aproximar a comunidade escolar da gestão da escola, promovendo o desenvolvimento educacional, social e cultural dos estudantes.
+            </p>
+            <p>
+                As AAPMs no SENAI são associações civis de direito privado que se formalizaram ao longo das últimas décadas para apoiar unidades específicas, colaborando diretamente para a melhoria do ambiente acadêmico.
+            </p>
         </div>
 
-        <div class="section-header margin-top">
-            <h2 class="sub-title">ORIGEM E PROPÓSITO</h2>
-            
-            <div class="content-box-small">
-                <p>
-                    ▶ <strong>Fortalecimento Escolar:</strong> As AAPMs nasceram para colaborar com a gestão escolar, buscando a excelência no ensino e integrando a escola à comunidade.
-                </p>
-                <p>
-                    ▶ <strong>Apoio à Comunidade:</strong> A associação mobiliza recursos humanos, financeiros e materiais para beneficiar alunos, funcionários e pais.
-                </p>
-                <p>
-                    ▶ <strong>Sem Fins Lucrativos:</strong> As associações focam em ações sociais e educativas, sem caráter político, racial ou religioso.
-                </p>
-            </div>
-        </div>
+        <h2 class="sub-title">Origem e Propósito</h2>
 
+        <div class="purpose-grid">
+            
+            <div class="purpose-item">
+                <div class="purpose-text">
+                    <strong>Fortalecimento Escolar</strong>
+                    <p>Colaboração mútua com a gestão para buscar a excelência no ensino e integrar a escola à comunidade externa.</p>
+                </div>
+            </div>
+
+            <div class="purpose-item">
+                <div class="purpose-text">
+                    <strong>Apoio à Comunidade</strong>
+                    <p>Mobilização de recursos para beneficiar diretamente alunos e funcionários através de melhorias materiais e sociais.</p>
+                </div>
+            </div>
+
+            <div class="purpose-item">
+                <div class="purpose-text">
+                    <strong>Sem Fins Lucrativos</strong>
+                    <p>Foco exclusivo em ações educativas e sociais, mantendo total independência política, racial ou religiosa.</p>
+                </div>
+            </div>
+
+        </div>
     </div>
 
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>

@@ -4,95 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Página Inicial - AAPM SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #f11815;
+            --primary-dark: #b31210;
+            --bg-body: #f8faff;
+            --sidebar-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #64748b;
+            --radius: 24px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
             display: flex;
             height: 100vh;
-            background-color: #f8f4e6;
+            background-color: var(--bg-body);
             overflow: hidden;
         }
 
+        /* --- SIDEBAR --- */
         .sidebar {
-            width: 260px;
-            background-color: #ffffff;
-            border-right: 1px solid #e0e0e0;
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 100;
+            padding: 20px;
         }
 
         .sidebar.closed {
             width: 0;
+            padding: 0;
             opacity: 0;
             pointer-events: none;
-            overflow: hidden;
         }
 
         .menu-header {
-            padding: 30px;
-            height: 100px;
+            height: 80px;
             display: flex;
             align-items: center;
-        }
-
-        /* --- NOVO LAYOUT MENU HAMBÚRGUER --- */
-        .menu-icon {
-            width: 30px;
-            height: 20px;
-            display: flex;
-            flex-direction: column;
             justify-content: space-between;
-            cursor: pointer;
-            z-index: 110;
+            margin-bottom: 20px;
+            padding: 0 10px;
         }
-
-        .menu-icon span {
-            display: block;
-            height: 3px;
-            width: 100%;
-            background-color: #d1d1d1;
-            border-radius: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .menu-icon.open span { background-color: #f11815; }
-        .menu-icon.open span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
-        .menu-icon.open span:nth-child(2) { opacity: 0; }
-        .menu-icon.open span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
 
         .nav-links {
             display: flex;
             flex-direction: column;
-            white-space: nowrap;
+            gap: 8px;
         }
 
         .nav-links a {
-            padding: 18px 30px;
-            text-decoration: none;
-            color: #333;
-            font-size: 20px;
-            font-weight: 500;
-        }
-
-        /* --- BOTÃO ADMINISTRADOR --- */
-        .nav-links a.admin-btn {
-            background-color: #f1f1f1;
-            color: #f11815;
-            font-weight: 700;
-            border-bottom: 2px solid #e0e0e0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            padding: 14px 18px;
+            text-decoration: none;
+            color: var(--text-sub);
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 16px;
+            transition: 0.3s;
         }
 
+        .nav-links a:hover {
+            background-color: #fff1f1;
+            color: var(--primary);
+        }
+
+        .nav-links a.admin-btn {
+            margin-top: 10px;
+            background-color: #f1f5f9;
+            color: var(--primary);
+            border: 1px dashed var(--primary);
+        }
+
+        /* --- BOTÃO MENU --- */
+        .btn-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-sub);
+            padding: 10px;
+            border-radius: 12px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
         .main-content {
             flex: 1;
             display: flex;
@@ -100,9 +112,9 @@
         }
 
         .top-header {
-            height: 100px;
+            height: 90px;
             background-color: #ffffff;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -110,33 +122,37 @@
             position: relative;
         }
 
-        .open-btn {
-            background: none;
-            border: none;
-            display: none;
-            cursor: pointer;
-        }
-
+        /* --- BUSCA ESTILIZADA --- */
         .search-area {
+            background: #f1f5f9;
+            padding: 12px 20px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            padding: 8px 15px;
+            gap: 12px;
             width: 250px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
             z-index: 2;
-            margin-left: 20px; 
+        }
+
+        .search-area:focus-within {
+            border-color: var(--primary);
+            background: #ffffff;
+            width: 320px;
+            box-shadow: 0 10px 25px rgba(241, 24, 21, 0.1);
         }
 
         .search-area input {
             border: none;
             background: transparent;
             outline: none;
-            margin-left: 10px;
             width: 100%;
+            font-weight: 600;
+            color: var(--text-main);
         }
 
+        /* --- LOGO CENTRAL --- */
         .logo-central {
             position: absolute;
             left: 50%;
@@ -144,103 +160,99 @@
             transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             z-index: 1;
         }
 
         .logo-text { 
-            color: #f11815; 
-            font-weight: 900; 
-            font-size: 42px;
-            letter-spacing: 1px;
+            color: var(--primary); 
+            font-weight: 800; 
+            font-size: 32px;
+            letter-spacing: -1px;
         }
 
         .logo-img-circle {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
+            height: 55px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            flex-shrink: 0;
         }
 
-        .logo-img-circle img { 
-            width: 200%; 
-            height: auto; 
-        }
+        .logo-img-circle img { height: 100%; width: auto; }
 
         .header-icons { 
             display: flex; 
             align-items: center; 
-            gap: 20px; 
+            gap: 15px; 
             z-index: 2;
         }
 
         .user-avatar {
-            width: 50px;
-            height: 50px;
-            background-color: #f11815;
-            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary);
+            border-radius: 14px;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 24px;
+            box-shadow: 0 8px 15px rgba(241, 24, 21, 0.2);
         }
 
-        /* --- NOVO LAYOUT DOS BOTÕES VERMELHOS --- */
+        /* --- CARDS SECTION --- */
         .cards-section {
             flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 50px;
+            gap: 30px;
+            padding: 40px;
         }
 
-        .row { display: flex; gap: 50px; }
+        .row { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
 
         .btn-card {
             background: linear-gradient(135deg, #f11815 0%, #b31210 100%);
             color: #ffffff;
-            width: 350px;
-            height: 230px;
+            width: 320px;
+            height: 200px;
             border: none;
-            border-radius: 40px;
-            font-size: 25px;
-            font-weight: 700;
+            border-radius: var(--radius);
+            font-size: 22px;
+            font-weight: 800;
             text-transform: uppercase;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 20px rgba(179, 18, 16, 0.3);
+            box-shadow: 0 15px 35px rgba(179, 18, 16, 0.25);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            padding: 30px;
-            line-height: 1.1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
         }
 
-        /* Efeito de brilho ao passar o mouse */
-        .btn-card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.6s;
-        }
+        .btn-card i { opacity: 0.8; transition: 0.3s; }
 
         .btn-card:hover {
-            transform: translateY(-15px);
-            box-shadow: 0 20px 40px rgba(179, 18, 16, 0.4);
-            filter: brightness(1.1);
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px rgba(179, 18, 16, 0.4);
         }
 
-        .btn-card:hover::after {
-            left: 100%;
+        .btn-card:hover i { transform: scale(1.2); opacity: 1; }
+
+        /* Efeito de brilho */
+        .btn-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: 0.6s;
         }
+        .btn-card:hover::before { left: 100%; }
 
     </style>
 </head>
@@ -248,31 +260,29 @@
 
     <aside class="sidebar" id="sidebar">
         <div class="menu-header">
-            <div class="menu-icon open" id="menuIconSidebar" onclick="toggleMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+            <h2 style="font-size: 18px; font-weight: 800; color: var(--text-main);">MENU</h2>
+            <button class="btn-toggle" onclick="toggleMenu()">
+                <i data-lucide="x"></i>
+            </button>
         </div>
         <nav class="nav-links">            
-            <a href="#">Meu perfil</a>
-            <a href="#">Sugestões</a>
-            <a href="#">Contato</a>
-            <a href="admin.html" class="admin-btn">Administrador</a>
+            <a href=""><i data-lucide="user"></i> Meu perfil</a>
+            <a href="#"><i data-lucide="lightbulb"></i> Sugestões</a>
+            <a href="#"><i data-lucide="mail"></i> Contato</a>
+            <a href="admin.html" class="admin-btn"><i data-lucide="shield-check"></i> Administrador</a>
         </nav>
     </aside>
 
     <div class="main-content">
         <header class="top-header">
-            <div style="display: flex; align-items: center;">
-                <button class="menu-icon open-btn" id="openBtn" onclick="toggleMenu()" style="display: none; border:none; background:none;">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn-toggle" id="openBtn" onclick="toggleMenu()" style="display: none;">
+                    <i data-lucide="menu"></i>
                 </button>
                 
                 <div class="search-area">
-                    <input type="text" placeholder="Pesquisar">
+                    <i data-lucide="search" size="18" color="#64748b"></i>
+                    <input type="text" placeholder="O que você procura?">
                 </div>
             </div>
 
@@ -285,42 +295,52 @@
             </div>
 
             <div class="header-icons">
-                <span style="font-size: 30px; cursor: pointer;">🔔</span>
-                <div class="user-avatar">👤</div>
+                <button class="btn-toggle"><i data-lucide="bell"></i></button>
+                <div class="user-avatar"><i data-lucide="user" size="24"></i></div>
             </div>
         </header>
 
         <section class="cards-section">
             <div class="row">
-                <a href="page.html" style="text-decoration: none;">
-                    <button class="btn-card">História da AAPM</button>
+                <a href="page.html" class="btn-card">
+                    <i data-lucide="book-open" size="40"></i>
+                    História da AAPM
                 </a>                
-<a href="eventos.html" style="text-decoration: none;">
-                    <button class="btn-card">Eventos</button>
+                <a href="eventos.html" class="btn-card">
+                    <i data-lucide="calendar" size="40"></i>
+                    Eventos
                 </a>
-                <button class="btn-card">Benefícios</button>
+                <a href="#" class="btn-card">
+                    <i data-lucide="award" size="40"></i>
+                    Benefícios
+                </a>
             </div>
             <div class="row">
-                <button class="btn-card">Oficinas</button>
-                <button class="btn-card">Avisos</button>
+                <a href="#" class="btn-card">
+                    <i data-lucide="layers" size="40"></i>
+                    Oficinas
+                </a>
+                <a href="#" class="btn-card">
+                    <i data-lucide="megaphone" size="40"></i>
+                    Avisos
+                </a>
             </div>
         </section>
     </div>
 
     <script>
+        lucide.createIcons();
+
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
             const openBtn = document.getElementById('openBtn');
-            const menuIconSidebar = document.getElementById('menuIconSidebar');
             
             sidebar.classList.toggle('closed');
             
             if (sidebar.classList.contains('closed')) {
                 openBtn.style.display = 'flex';
-                menuIconSidebar.classList.remove('open');
             } else {
                 openBtn.style.display = 'none';
-                menuIconSidebar.classList.add('open');
             }
         }
     </script>

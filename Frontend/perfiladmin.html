@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil Admin | AAPM SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f11815;
+            --primary-dark: #b31210;
+            --bg: #f8faff;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --text-light: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background: linear-gradient(180deg, #fff1f1 0%, var(--bg) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            margin-top: 20px;
+        }
+
+        /* --- BARRA SUPERIOR --- */
+        .top-nav {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+
+        .btn-back {
+            background: white;
+            color: var(--text);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text);
+            text-transform: uppercase;
+        }
+
+        /* --- CARD DO PERFIL ADMIN --- */
+        .profile-card {
+            background: var(--card);
+            padding: 35px 25px;
+            border-radius: 35px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.04);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .input-group label {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-left: 12px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px 16px 16px 52px;
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 18px;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            transition: 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 18px;
+            top: 36px;
+            color: var(--primary);
+        }
+
+        .badge-admin {
+            display: inline-block;
+            background: #ffebeb;
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            margin-left: 12px;
+        }
+
+        /* --- BOTÃO --- */
+        .btn-save {
+            width: 100%;
+            padding: 18px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-3px);
+            background: var(--primary-dark);
+            box-shadow: 0 10px 20px rgba(241, 24, 21, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="top-nav">
+            <button class="btn-back" onclick="window.history.back()">
+                <i data-lucide="arrow-left" size="24"></i>
+            </button>
+            <h1 class="page-title">Perfil Admin</h1>
+            <div style="width: 45px;"></div>
+        </nav>
+
+        <div class="profile-card">
+            <span class="badge-admin">ACESSO ADMINISTRATIVO</span>
+            
+            <form id="adminPerfilForm">
+                
+                <div class="input-group">
+                    <label>Nome do Administrador</label>
+                    <i data-lucide="shield-check" class="input-icon" size="20"></i>
+                    <input type="text" class="input-field" placeholder="Nome completo do admin">
+                </div>
+
+                <div class="input-group">
+                    <label>NIF (Número de Identificação)</label>
+                    <i data-lucide="id-card" class="input-icon" size="20"></i>
+                    <input type="text" class="input-field" placeholder="00000000">
+                </div>
+
+                <div class="input-group">
+                    <label>Cargo / Função</label>
+                    <i data-lucide="briefcase" class="input-icon" size="20"></i>
+                    <input type="text" class="input-field" placeholder="Ex: Diretor, Secretário, Gestor">
+                </div>
+
+                <div class="input-group">
+                    <label>E-mail Corporativo</label>
+                    <i data-lucide="mail" class="input-icon" size="20"></i>
+                    <input type="email" class="input-field" placeholder="admin@senai.br">
+                </div>
+
+                <div class="input-group">
+                    <label>Telefone de Contato</label>
+                    <i data-lucide="phone" class="input-icon" size="20"></i>
+                    <input type="text" class="input-field" placeholder="(00) 00000-0000">
+                </div>
+
+                <button type="submit" class="btn-save">
+                    SALVAR ALTERAÇÕES
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

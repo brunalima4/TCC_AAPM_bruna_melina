@@ -3,556 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventos - AAPM SENAI</title>
+    <title>Dashboard AAPM | SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+        :root {
+            --primary: #f11815;
+            --primary-dark: #b31210;
+            --sidebar-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-secondary: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+            --shadow: 0 10px 40px rgba(0,0,0,0.04);
+            --radius: 24px;
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
             display: flex;
             height: 100vh;
-            background-color: #f8f4e6;
+            background: radial-gradient(circle at top right, #fff5f5, #f8faff);
+            color: var(--text-main);
             overflow: hidden;
         }
 
+        /* --- SIDEBAR --- */
         .sidebar {
-            width: 260px;
-            background-color: #ffffff;
-            border-right: 1px solid #e0e0e0;
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            transition: all 0.3s ease;
-            z-index: 100;
+            padding: 40px 20px;
         }
 
-        .sidebar.closed {
-            width: 0;
-            opacity: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
+        .logo h2 { color: var(--primary); font-weight: 800; letter-spacing: -1px; margin-bottom: 40px; }
 
-        .menu-header {
-            padding: 30px;
-            height: 100px;
-            display: flex;
-            align-items: center;
-        }
-
-        .menu-icon {
-            width: 30px;
-            height: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            cursor: pointer;
-            z-index: 110;
-        }
-
-        .menu-icon span {
-            display: block;
-            height: 3px;
-            width: 100%;
-            background-color: #d1d1d1;
-            border-radius: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .menu-icon.open span { background-color: #f11815; }
-        .menu-icon.open span:nth-child(1) { transform: translateY(8.5px) rotate(45deg); }
-        .menu-icon.open span:nth-child(2) { opacity: 0; }
-        .menu-icon.open span:nth-child(3) { transform: translateY(-8.5px) rotate(-45deg); }
-
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            white-space: nowrap;
-        }
-
+        .nav-links { list-style: none; flex: 1; }
         .nav-links a {
-            padding: 18px 30px;
-            text-decoration: none;
-            color: #333;
-            font-size: 20px;
-            font-weight: 500;
-        }
-
-        .nav-links a.admin-btn {
-            background-color: #f1f1f1;
-            color: #f11815;
-            font-weight: 700;
-            border-bottom: 2px solid #e0e0e0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            padding: 16px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            transition: 0.3s;
         }
 
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+        .nav-links a:hover, .nav-links a.active {
+            background: #fff1f1;
+            color: var(--primary);
         }
 
-        .top-header {
-            height: 100px;
-            background-color: #ffffff;
-            border-bottom: 1px solid #e0e0e0;
+        .nav-icon { margin-right: 15px; width: 20px; height: 20px; }
+
+        /* --- CONTEÚDO PRINCIPAL --- */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 40px;
-            position: relative;
-            flex-shrink: 0;
+            margin-bottom: 50px;
         }
 
-        .open-btn {
-            background: none;
-            border: none;
-            display: none;
-            cursor: pointer;
-        }
-
-        .search-area {
+        .search-wrapper {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 12px 25px;
+            border-radius: 50px;
+            width: 400px;
+            box-shadow: var(--shadow);
             display: flex;
             align-items: center;
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            padding: 8px 15px;
-            width: 250px;
-            z-index: 2;
-            margin-left: 20px;
         }
 
-        .search-area input {
-            border: none;
-            background: transparent;
-            outline: none;
-            margin-left: 10px;
-            width: 100%;
-        }
+        .search-wrapper input { border: none; background: transparent; outline: none; width: 100%; margin-left: 10px; }
 
-        .logo-central {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            z-index: 1;
-        }
-
-        .logo-text {
-            color: #f11815;
-            font-weight: 900;
-            font-size: 42px;
-            letter-spacing: 1px;
-        }
-
-        .logo-img-circle {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .logo-img-circle img {
-            width: 200%;
-            height: auto;
-        }
-
-        .header-icons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            z-index: 2;
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            background-color: #f11815;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 24px;
-        }
-
-        /* --- VITRINE DE EVENTOS --- */
-        .vitrine-container {
-            padding: 40px;
-            flex: 1;
-        }
-
-        .vitrine-titulo {
-            color: #f11815;
-            font-size: 2.2em;
-            font-weight: 900;
-            margin-bottom: 30px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
+        /* --- GRID DE EVENTOS --- */
         .eventos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
         }
 
         .evento-card {
-            background: #ffffff;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--sidebar-bg);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: 0.4s ease;
             position: relative;
-            border: 1px solid #e0e0e0;
         }
 
-        .evento-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(241, 24, 21, 0.2);
+        .evento-card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px rgba(241, 24, 21, 0.1); }
+
+        .evento-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .evento-icon-box {
+            width: 50px; height: 50px; background: #fff5f5;
+            border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; color: var(--primary);
         }
 
-        .evento-banner {
-            height: 140px;
-            background: linear-gradient(135deg, #f11815 0%, #b31210 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
+        .info-item { display: flex; align-items: center; margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; }
+        .info-icon { width: 32px; height: 32px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: var(--primary); }
+
+        .btn-edit-float {
+            position: absolute; top: 20px; right: 20px; background: var(--primary);
+            color: white; border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; opacity: 0; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
         }
+        .evento-card:hover .btn-edit-float { opacity: 1; }
 
-        .evento-banner::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-            transition: 0.6s;
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
         }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: white; width: 95%; max-width: 500px; border-radius: 32px; padding: 40px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .form-input { width: 100%; padding: 14px; background: #f8fafc; border: 2px solid transparent; border-radius: 14px; font-size: 15px; }
+        .form-input:focus { border-color: var(--primary); outline: none; background: white; transition: 0.3s; }
 
-        .evento-card:hover .evento-banner::after {
-            left: 100%;
-        }
-
-        .evento-icone {
-            font-size: 60px;
-            z-index: 2;
-        }
-
-        .evento-conteudo {
-            padding: 25px;
-        }
-
-        .evento-titulo {
-            color: #333;
-            font-size: 1.4em;
-            font-weight: 700;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .evento-info {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .info-linha {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #555;
-            font-size: 1em;
-        }
-
-        .info-icone {
-            width: 28px;
-            height: 28px;
-            background-color: #f11815;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-
-        .info-texto {
-            font-weight: 500;
-        }
-
-        .evento-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(255, 255, 255, 0.95);
-            color: #f11815;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.85em;
-            text-transform: uppercase;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            z-index: 3;
-        }
-
-        .sem-eventos {
-            text-align: center;
-            color: #777;
-            font-size: 1.2em;
-            padding: 60px 20px;
-            grid-column: 1 / -1;
-        }
-
-        @media (max-width: 768px) {
-            .eventos-grid {
-                grid-template-columns: 1fr;
-                padding: 0 10px;
-            }
-
-            .vitrine-container {
-                padding: 20px;
-            }
-
-            .vitrine-titulo {
-                font-size: 1.6em;
-            }
-
-            .top-header {
-                padding: 0 20px;
-            }
-
-            .logo-text {
-                font-size: 28px;
-            }
-        }
+        .btn-save { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="menu-header">
-            <div class="menu-icon open" id="menuIconSidebar" onclick="toggleMenu()">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>AAPM <span>SENAI</span></h2>
         </div>
         <nav class="nav-links">
-            <a href="landingpage.html">Página Inicial</a>
-            <a href="#">Meu perfil</a>
-            <a href="#">Sugestões</a>
-            <a href="#">Contato</a>
-            <a href="admin.html" class="admin-btn">Administrador</a>
+            <a href="landingpage.html"><i data-lucide="home" class="nav-icon"></i> Tela Inicial</a>
+            <a href="perfil.html"><i data-lucide="user" class="nav-icon"></i> Meu Perfil</a>
+            <a href="sugestoes.html"><i data-lucide="lightbulb" class="nav-icon"></i> Sugestões</a>
+            <a href="contato.html"><i data-lucide="phone" class="nav-icon"></i> Contato</a>
+            <a href="admin.html" class="active"><i data-lucide="shield-check" class="nav-icon"></i> Administrador</a>
         </nav>
     </aside>
 
-    <div class="main-content">
-        <header class="top-header">
-            <div style="display: flex; align-items: center;">
-                <button class="menu-icon open-btn" id="openBtn" onclick="toggleMenu()" style="display: none; border:none; background:none;">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-
-                <div class="search-area">
-                    <input type="text" placeholder="Pesquisar eventos..." oninput="filtrarEventos(this.value)">
-                </div>
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="search-wrapper">
+                <i data-lucide="search" size="18" color="#64748b"></i>
+                <input type="text" placeholder="Procurar evento..." oninput="filtrarEventos(this.value)">
             </div>
-
-            <div class="logo-central">
-                <span class="logo-text">AAPM</span>
-                <div class="logo-img-circle">
-                    <img src="fotoss.png" alt="Logo">
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="text-align: right">
+                    <p style="font-weight: 700; font-size: 14px;">Administrador</p>
+                    <p style="color: var(--text-secondary); font-size: 12px;">Gestão</p>
                 </div>
-                <span class="logo-text">SENAI</span>
-            </div>
-
-            <div class="header-icons">
-                <span style="font-size: 30px; cursor: pointer;">🔔</span>
-                <div class="user-avatar">👤</div>
+                <div style="width: 45px; height: 45px; background: #eee; border-radius: 12px; overflow: hidden;">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="avatar">
+                </div>
             </div>
         </header>
 
-        <section class="vitrine-container">
-            <h1 class="vitrine-titulo"> Eventos</h1>
-            <div class="eventos-grid" id="eventosGrid">
-                <!-- Os cards serão gerados pelo JavaScript -->
-            </div>
-        </section>
+        <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 40px;">Gerenciar Eventos</h1>
+        
+        <div class="eventos-grid" id="eventosGrid"></div>
+    </main>
+
+    <div class="modal-overlay" id="modalEdicao">
+        <div class="modal-card">
+            <h2 style="margin-bottom: 25px; font-weight: 800;">Atualizar Informações</h2>
+            <form id="formUpdate">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Título do Evento</label>
+                    <input type="text" id="editTitulo" class="form-input" required>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Data</label>
+                        <input type="date" id="editData" class="form-input" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Horário</label>
+                        <input type="text" id="editHora" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Local</label>
+                    <input type="text" id="editLocal" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-save">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" style="width:100%; background:none; border:none; margin-top:10px; cursor:pointer; color:var(--text-secondary); font-weight: 600;">Cancelar</button>
+            </form>
+        </div>
     </div>
 
     <script>
-        function toggleMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const openBtn = document.getElementById('openBtn');
-            const menuIconSidebar = document.getElementById('menuIconSidebar');
+        const API_URL = 'http://localhost:3002/eventos';
+        let eventos = [];
 
-            sidebar.classList.toggle('closed');
-
-            if (sidebar.classList.contains('closed')) {
-                openBtn.style.display = 'flex';
-                menuIconSidebar.classList.remove('open');
-            } else {
-                openBtn.style.display = 'none';
-                menuIconSidebar.classList.add('open');
+        async function carregarEventos() {
+            try {
+                const res = await fetch(API_URL);
+                eventos = await res.json();
+                renderizar(eventos);
+            } catch (err) {
+                console.error("Erro ao carregar do banco banco_projeto.sql:", err);
+                // Dados temporários caso o servidor esteja offline
+                eventos = [{ id: 1, titulo: "Servidor Offline", data: "2024-01-01", horario: "00:00", local: "Verifique o Node.js" }];
+                renderizar(eventos);
             }
         }
 
-        // Dados dos eventos da AAPM
-        const eventos = [
-            {
-                titulo: "Feira de Ciências",
-                data: "2025-06-15",
-                hora: "08:00 - 17:00",
-                local: "Auditório Principal",
-                icone: "",
-                tipo: "Acadêmico"
-            },
-            {
-                titulo: "Campeonato de Futsal",
-                data: "2025-06-22",
-                hora: "14:00 - 18:00",
-                local: "Quadra Poliesportiva",
-                icone: "",
-                tipo: "Esporte"
-            },
-            {
-                titulo: "Workshop de Robótica",
-                data: "2025-07-05",
-                hora: "09:00 - 12:00",
-                local: "Laboratório de Informática",
-                icone: "",
-                tipo: "Tecnologia"
-            },
-            {
-                titulo: "Dia da Família",
-                data: "2025-07-12",
-                hora: "10:00 - 16:00",
-                local: "Área externa do SENAI",
-                icone: "",
-                tipo: "Social"
-            },
-            {
-                titulo: "Semana da Indústria",
-                data: "2025-08-18",
-                hora: "08:00 - 18:00",
-                local: "Hall de Entrada",
-                icone: "",
-                tipo: "Acadêmico"
-            },
-            {
-                titulo: "Gincana Cultural",
-                data: "2025-08-25",
-                hora: "13:00 - 17:00",
-                local: "Pátio Central",
-                icone: "",
-                tipo: "Cultural"
-            }
-        ];
-
-        const diasSemana = [
-            "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
-            "Quinta-feira", "Sexta-feira", "Sábado"
-        ];
-
-        function formatarData(dataStr) {
-            const data = new Date(dataStr + "T00:00:00");
-            const dia = String(data.getDate()).padStart(2, '0');
-            const mes = String(data.getMonth() + 1).padStart(2, '0');
-            const ano = data.getFullYear();
-            return `${dia}/${mes}/${ano}`;
-        }
-
-        function obterDiaSemana(dataStr) {
-            const data = new Date(dataStr + "T00:00:00");
-            return diasSemana[data.getDay()];
-        }
-
-        function renderizarEventos(listaEventos) {
+        function renderizar(lista) {
             const grid = document.getElementById('eventosGrid');
-
-            if (listaEventos.length === 0) {
-                grid.innerHTML = '<div class="sem-eventos">Nenhum evento encontrado.</div>';
-                return;
-            }
-
-            grid.innerHTML = listaEventos.map(evento => `
+            grid.innerHTML = lista.map(ev => `
                 <div class="evento-card">
-                    <span class="evento-badge">${evento.tipo}</span>
-                    <div class="evento-banner">
-                        <div class="evento-icone">${evento.icone}</div>
+                    <button class="btn-edit-float" onclick="abrirModal(${ev.id})"><i data-lucide="pencil" size="18"></i></button>
+                    <div class="evento-header">
+                        <div class="evento-icon-box"><i data-lucide="calendar"></i></div>
+                        <h3 class="evento-titulo">${ev.titulo}</h3>
                     </div>
-                    <div class="evento-conteudo">
-                        <h3 class="evento-titulo">${evento.titulo}</h3>
-                        <div class="evento-info">
-                            <div class="info-linha">
-                                <div class="info-icone">📅</div>
-                                <span class="info-texto">${formatarData(evento.data)}</span>
-                            </div>
-                            <div class="info-linha">
-                                <div class="info-icone">📆</div>
-                                <span class="info-texto">${obterDiaSemana(evento.data)}</span>
-                            </div>
-                            <div class="info-linha">
-                                <div class="info-icone">🕐</div>
-                                <span class="info-texto">${evento.hora}</span>
-                            </div>
-                            <div class="info-linha">
-                                <div class="info-icone">📍</div>
-                                <span class="info-texto">${evento.local}</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="info-item"><div class="info-icon"><i data-lucide="calendar" size="14"></i></div><span>${new Date(ev.data).toLocaleDateString('pt-BR')}</span></div>
+                    <div class="info-item"><div class="info-icon"><i data-lucide="clock" size="14"></i></div><span>${ev.horario || ev.hora}</span></div>
+                    <div class="info-item"><div class="info-icon"><i data-lucide="map-pin" size="14"></i></div><span>${ev.local}</span></div>
                 </div>
             `).join('');
+            lucide.createIcons();
         }
 
-        function filtrarEventos(termo) {
-            const termoLower = termo.toLowerCase().trim();
-            if (termoLower === '') {
-                renderizarEventos(eventos);
-                return;
+        function abrirModal(id) {
+            const ev = eventos.find(e => e.id === id);
+            if(!ev) return;
+            document.getElementById('editId').value = ev.id;
+            document.getElementById('editTitulo').value = ev.titulo;
+            document.getElementById('editData').value = ev.data.split('T')[0];
+            document.getElementById('editHora').value = ev.horario || ev.hora;
+            document.getElementById('editLocal').value = ev.local;
+            document.getElementById('modalEdicao').classList.add('active');
+        }
+
+        function fecharModal() { document.getElementById('modalEdicao').classList.remove('active'); }
+
+        // SALVAMENTO AUTOMÁTICO E ATUALIZAÇÃO DA INTERFACE
+        document.getElementById('formUpdate').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const dados = {
+                titulo: document.getElementById('editTitulo').value,
+                data: document.getElementById('editData').value,
+                horario: document.getElementById('editHora').value,
+                local: document.getElementById('editLocal').value
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dados)
+                });
+
+                if(res.ok) {
+                    // Atualiza o banco banco_projeto.sql e recarrega a lista local
+                    await carregarEventos(); 
+                    fecharModal();
+                } else {
+                    alert("Erro ao salvar informações.");
+                }
+            } catch (err) {
+                alert("Erro ao conectar com o servidor.");
             }
+        };
 
-            const filtrados = eventos.filter(e =>
-                e.titulo.toLowerCase().includes(termoLower) ||
-                e.local.toLowerCase().includes(termoLower) ||
-                e.tipo.toLowerCase().includes(termoLower) ||
-                obterDiaSemana(e.data).toLowerCase().includes(termoLower) ||
-                formatarData(e.data).includes(termoLower)
-            );
-
-            renderizarEventos(filtrados);
+        function filtrarEventos(val) {
+            const filtrados = eventos.filter(ev => ev.titulo.toLowerCase().includes(val.toLowerCase()));
+            renderizar(filtrados);
         }
 
-        // Renderiza todos os eventos ao carregar
-        document.addEventListener('DOMContentLoaded', () => {
-            renderizarEventos(eventos);
-        });
+        window.onload = carregarEventos;
     </script>
-
 </body>
 </html>
-

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | AAPM SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #f11815;
+            --primary-dark: #b31210;
+            --sidebar-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-secondary: #64748b;
+            --glass: rgba(255, 255, 255, 0.8);
+            --shadow: 0 10px 40px rgba(0,0,0,0.04);
+            --radius: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background: radial-gradient(circle at top right, #fff5f5, #f8faff);
+            color: var(--text-main);
+            overflow: hidden;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px;
+        }
+
+        .logo h2 { color: var(--primary); font-weight: 800; letter-spacing: -1px; margin-bottom: 40px; }
+
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: #fff1f1;
+            color: var(--primary);
+        }
+
+        .nav-icon { margin-right: 15px; width: 20px; height: 20px; }
+
+        /* --- CONTEÚDO --- */
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .search-wrapper {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 12px 25px;
+            border-radius: 50px;
+            width: 400px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+        }
+
+        .search-wrapper input { border: none; background: transparent; outline: none; width: 100%; margin-left: 10px; }
+
+        /* --- GRID DE EVENTOS --- */
+        .eventos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .evento-card {
+            background: var(--sidebar-bg);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: 0.4s ease;
+            position: relative;
+        }
+
+        .evento-card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px rgba(241, 24, 21, 0.1); }
+
+        .evento-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .evento-icon-box {
+            width: 50px; height: 50px; background: #fff5f5;
+            border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; color: var(--primary);
+        }
+
+        .info-item { display: flex; align-items: center; margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; }
+        .info-icon { width: 32px; height: 32px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: var(--primary); }
+
+        .btn-edit-float {
+            position: absolute; top: 20px; right: 20px; background: var(--primary);
+            color: white; border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; opacity: 0; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .evento-card:hover .btn-edit-float { opacity: 1; }
+
+        /* --- MODAL --- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: white; width: 95%; max-width: 500px; border-radius: 32px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; display: block; }
+        .form-input { width: 100%; padding: 14px; background: #f8fafc; border: 2px solid transparent; border-radius: 14px; font-size: 15px; }
+        .form-input:focus { border-color: var(--primary); outline: none; background: white; transition: 0.3s; }
+
+        .btn-save { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-save:hover { background: var(--primary-dark); }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>AAPM <span>SENAI</span></h2>
+        </div>
+        <nav class="nav-links">
+            <a href="landingpage.html"><i data-lucide="home" class="nav-icon"></i> Tela Inicial</a>
+            <a href="perfil.html"><i data-lucide="user" class="nav-icon"></i> Meu Perfil</a>
+            <a href="sugestoes.html"><i data-lucide="lightbulb" class="nav-icon"></i> Sugestões</a>
+            <a href="contato.html"><i data-lucide="phone" class="nav-icon"></i> Contato</a>
+            <a href="admin.html" class="active"><i data-lucide="shield-check" class="nav-icon"></i> Administrador</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="search-wrapper">
+                <i data-lucide="search" size="18" color="#64748b"></i>
+                <input type="text" placeholder="Procurar evento..." oninput="filtrarEventos(this.value)">
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="text-align: right">
+                    <p style="font-weight: 700; font-size: 14px;">Administrador</p>
+                    <p style="color: var(--text-secondary); font-size: 12px;">Gestão AAPM</p>
+                </div>
+                <div style="width: 45px; height: 45px; background: #eee; border-radius: 12px; overflow: hidden;">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="avatar">
+                </div>
+            </div>
+        </header>
+
+        <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 40px;">Gerenciar Eventos</h1>
+        
+        <div class="eventos-grid" id="eventosGrid">
+            </div>
+    </main>
+
+    <div class="modal-overlay" id="modalEdicao">
+        <div class="modal-card">
+            <h2 style="margin-bottom: 25px; font-weight: 800;">Atualizar Informações</h2>
+            <form id="formUpdate">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Título do Evento</label>
+                    <input type="text" id="editTitulo" class="form-input" required>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Data</label>
+                        <input type="date" id="editData" class="form-input" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Horário</label>
+                        <input type="text" id="editHora" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Localização / Bloco</label>
+                    <input type="text" id="editLocal" class="form-input" required>
+                </div>
+                <button type="submit" class="btn-save">Salvar Alterações</button>
+                <button type="button" onclick="fecharModal()" style="width:100%; background:none; border:none; margin-top:10px; cursor:pointer; color:var(--text-secondary); font-weight: 600;">Cancelar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3002/eventos';
+        let eventos = [];
+
+        // Carrega os dados do banco_projeto.sql via API
+        async function carregarEventos() {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error("Erro na rede");
+                eventos = await res.json();
+                renderizar(eventos);
+            } catch (err) {
+                console.error("Erro ao carregar eventos:", err);
+                // Fallback visual
+                eventos = [{ id: 0, titulo: "Erro ao conectar", data: "2026-01-01", horario: "--:--", local: "Servidor Offline" }];
+                renderizar(eventos);
+            }
+        }
+
+        // Gera os cards na tela
+        function renderizar(lista) {
+            const grid = document.getElementById('eventosGrid');
+            grid.innerHTML = lista.map(ev => `
+                <div class="evento-card">
+                    <button class="btn-edit-float" onclick="abrirModal(${ev.id})">
+                        <i data-lucide="pencil" size="18"></i>
+                    </button>
+                    <div class="evento-header">
+                        <div class="evento-icon-box"><i data-lucide="calendar"></i></div>
+                        <h3 class="evento-titulo">${ev.titulo}</h3>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i data-lucide="calendar" size="14"></i></div>
+                        <span>${new Date(ev.data).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i data-lucide="clock" size="14"></i></div>
+                        <span>${ev.horario || ev.hora || 'Não definido'}</span>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-icon"><i data-lucide="map-pin" size="14"></i></div>
+                        <span>${ev.local}</span>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons(); // Ativa os ícones do Lucide
+        }
+
+        // Abre o modal com os dados atuais
+        function abrirModal(id) {
+            const ev = eventos.find(e => e.id === id);
+            if(!ev) return;
+            document.getElementById('editId').value = ev.id;
+            document.getElementById('editTitulo').value = ev.titulo;
+            document.getElementById('editData').value = ev.data.split('T')[0];
+            document.getElementById('editHora').value = ev.horario || ev.hora || '';
+            document.getElementById('editLocal').value = ev.local;
+            document.getElementById('modalEdicao').classList.add('active');
+        }
+
+        function fecharModal() { document.getElementById('modalEdicao').classList.remove('active'); }
+
+        // SALVAMENTO AUTOMÁTICO E SINCRONIZAÇÃO
+        document.getElementById('formUpdate').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const dados = {
+                titulo: document.getElementById('editTitulo').value,
+                data: document.getElementById('editData').value,
+                horario: document.getElementById('editHora').value,
+                local: document.getElementById('editLocal').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(dados)
+                });
+
+                if(response.ok) {
+                    // Atualiza a lista local e re-renderiza sem recarregar a página
+                    await carregarEventos(); 
+                    fecharModal();
+                } else {
+                    alert("Erro ao salvar no servidor.");
+                }
+            } catch (err) {
+                console.error("Erro na requisição:", err);
+                alert("Falha na comunicação com o servidor Node.js.");
+            }
+        };
+
+        // Filtro de pesquisa rápida
+        function filtrarEventos(val) {
+            const filtrados = eventos.filter(ev => ev.titulo.toLowerCase().includes(val.toLowerCase()));
+            renderizar(filtrados);
+        }
+
+        window.onload = carregarEventos;
+    </script>
+</body>
+</html>
