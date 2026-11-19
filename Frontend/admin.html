@@ -1,369 +1,856 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+        if (localStorage.getItem('tipoUsuario') !== 'admin') {
+            alert('Acesso restrito para administradores.');
+            window.location.replace('logincadastro.html?modo=admin');
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo - AAPM SENAI</title>
+    <title>AAPM SENAI - Painel do Administrador</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #f11815;
-            --primary-dark: #b31210;
-            --bg-body: #f8faff;
-            --sidebar-bg: #ffffff;
-            --text-main: #1a1a1a;
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --primary-light: #fff1f1;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
             --text-sub: #64748b;
-            --radius: 24px;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --border-color: #e2e8f0;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-dark); height: 100vh; display: flex; overflow: hidden; position: relative; }
 
-        body {
-            display: flex;
-            height: 100vh;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            overflow: hidden;
+        /* OVERLAY & SIDEBAR IGUAL AO PORTAL DO ALUNO */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
         }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
-            padding: 20px;
+        aside {
+            position: fixed; top: 0; left: 0; width: 290px; height: 100vh;
+            background: #fff; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 28px 20px; overflow-y: auto; z-index: 999;
+            transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 15px 0 35px rgba(0, 0, 0, 0.08);
         }
-
-        .sidebar.closed {
-            width: 0;
-            padding: 0;
-            opacity: 0;
-            pointer-events: none;
-        }
+        aside.open { transform: translateX(0); }
 
         .sidebar-header {
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 0 10px;
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 12px; font-weight: 800; color: var(--text-sub);
+            letter-spacing: 1px; margin-bottom: 20px;
         }
 
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .btn-close-menu {
+            width: 32px; height: 32px; border: none; background: transparent;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-sub);
+        }
+        .btn-close-menu:hover { background: #f1f5f9; color: var(--text-dark); }
+
+        .badge-admin-btn {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #fff; padding: 14px 20px; border-radius: 16px;
+            font-weight: 800; font-size: 14px; display: flex; align-items: center;
+            gap: 12px; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+            cursor: pointer; user-select: none; border: none; width: 100%; text-align: left;
         }
 
-        .nav-links a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 14px 18px;
+        .menu-category {
+            font-size: 11px; font-weight: 800; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1.2px; margin: 20px 0 10px 8px;
+        }
+
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            border-radius: 14px; font-weight: 700; font-size: 14px; color: #475569;
+            cursor: pointer; transition: transform 0.2s ease, background 0.2s ease;
             text-decoration: none;
-            color: var(--text-sub);
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 16px;
-            transition: all 0.3s;
+        }
+        .menu-item:hover { background: #f1f5f9; color: var(--primary); transform: translateX(4px); }
+        .menu-item.active-page { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+
+        .btn-sair {
+            background: #fff1f1; color: var(--primary); border: none;
+            padding: 14px 18px; border-radius: 14px; font-weight: 800; font-size: 14px;
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
+            width: 100%; margin-top: 24px; transition: background 0.2s ease, color 0.2s ease;
+        }
+        .btn-sair:hover { background: var(--primary); color: #fff; box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25); }
+
+        .wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+
+        /* CABEÇALHO UNIFICADO */
+        header {
+            height: 90px; background: #fff; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 48px; position: sticky; top: 0; z-index: 100; flex-shrink: 0;
         }
 
-        /* Ajuste específico para os ícones do menu lateral */
-        .nav-links a i {
-            width: 20px;
-            height: 20px;
+        .header-left { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: flex-start; }
+        .btn-toggle-menu {
+            background: #fff; border: 1px solid var(--border-color); color: var(--text-dark);
+            width: 48px; height: 48px; border-radius: 14px; display: flex;
+            align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s ease; flex-shrink: 0;
         }
+        .btn-toggle-menu:hover { background: #f8fafc; border-color: #cbd5e1; }
 
-        .nav-links a:hover {
-            background-color: #fff1f1;
-            color: var(--primary);
-        }
-
-        .nav-links a.active {
-            background-color: var(--primary);
-            color: #ffffff;
-            box-shadow: 0 10px 20px rgba(241, 24, 21, 0.2);
-        }
-
-        .nav-links a.active i {
-            color: #ffffff;
-        }
-
-        /* Estilo para o link de Administrador (Destaque igual à landing page) */
-        .nav-links a.admin-btn {
-            margin-top: 10px;
-            background-color: #f1f5f9;
-            color: var(--primary);
-            border: 1px dashed var(--primary);
-        }
-
-        /* --- BOTÃO MENU (HAMBÚRGUER) --- */
-        .btn-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-sub);
-            padding: 10px;
-            border-radius: 12px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-        }
-
-        .btn-toggle:hover {
-            background: #f1f5f9;
-            color: var(--primary);
-        }
-
-        /* --- CONTEÚDO PRINCIPAL --- */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        .top-header {
-            height: 90px;
-            background-color: #ffffff;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            position: sticky;
-            top: 0;
-            z-index: 90;
-        }
-
+        .search-container { position: relative; width: 280px; }
         .search-bar {
-            background: #f1f5f9;
-            padding: 12px 20px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 300px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 12px; background: #f1f5f9;
+            padding: 12px 20px; border-radius: 20px; width: 100%; border: 1px solid transparent;
+            transition: border-color 0.2s ease, background 0.2s ease;
         }
+        .search-bar:focus-within { background: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1); }
+        .search-bar input { border: none; background: transparent; outline: none; font-size: 14px; font-weight: 700; width: 100%; color: var(--text-dark); }
 
-        .search-bar:focus-within {
-            border-color: var(--primary);
-            background: #ffffff;
-            width: 350px;
-            box-shadow: var(--shadow);
+        .search-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0; width: 320px;
+            background: #fff; border: 1px solid var(--border-color); border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12); padding: 10px; display: none;
+            flex-direction: column; gap: 8px; z-index: 200;
         }
-
-        .search-bar input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 100%;
-            font-weight: 600;
-            color: var(--text-main);
+        .search-dropdown.active { display: flex; }
+        .search-dropdown-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 14px; border-radius: 12px; background: #fff;
+            border: 1px solid var(--border-color); cursor: pointer; transition: 0.2s;
         }
-
-        .logo-central {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .search-dropdown-item:hover { background: var(--primary-light); border-color: var(--primary); transform: translateY(-1px); }
+        .search-dropdown-item .item-left { display: flex; align-items: center; gap: 12px; }
+        .search-dropdown-item .item-icon {
+            width: 36px; height: 36px; border-radius: 10px; background: var(--primary-light);
+            color: var(--primary); display: flex; align-items: center; justify-content: center;
         }
+        .search-dropdown-item span { font-size: 13px; font-weight: 700; color: var(--text-dark); }
 
-        .logo-text { 
-            color: var(--primary); 
-            font-weight: 800; 
-            font-size: 32px; 
-            letter-spacing: -1px;
+        .brand-center {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center; gap: 0px;
+            font-size: 24px; font-weight: 800; letter-spacing: -0.5px; cursor: pointer; user-select: none;
         }
+        .brand-center .aapm-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-right: -12px; }
+        .brand-center .senai-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-left: -12px; }
+        .brand-center img { height: 68px; width: auto; object-fit: contain; display: block; }
 
-        .user-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex: 1; }
+        .profile-btn {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--primary);
+            color: #fff; border: none; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 12px rgba(241, 43, 44, 0.3); transition: transform 0.2s ease;
         }
+        .profile-btn:hover { transform: scale(1.05); }
 
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            background-color: var(--primary);
-            border-radius: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            box-shadow: 0 8px 15px rgba(241, 24, 21, 0.2);
+        /* BARRA DE CATEGORIAS HORIZONTAL */
+        .nav-categories-bar {
+            background: #fff; border-bottom: 1px solid var(--border-color); padding: 0 40px;
+            display: flex; align-items: center; justify-content: center; gap: 28px;
+            overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0;
         }
+        .nav-categories-bar::-webkit-scrollbar { display: none; }
 
-        /* --- GRID DE CARDS --- */
-        .dashboard-container {
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .btn-card {
-            background: #ffffff;
-            color: var(--text-main);
-            padding: 40px 30px;
-            border: 1px solid rgba(0,0,0,0.05);
-            border-radius: var(--radius);
-            font-size: 18px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
+        .nav-cat-item {
+            position: relative; padding: 14px 0; font-size: 13.5px; font-weight: 700;
+            color: #64748b; cursor: pointer; user-select: none; transition: opacity 0.2s ease;
             text-decoration: none;
-            text-align: center;
+        }
+        .nav-cat-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
+            background: var(--primary); opacity: 0; transition: opacity 0.2s ease;
+        }
+        .nav-cat-item:hover { color: var(--text-dark); }
+        .nav-cat-item.active { color: var(--primary); }
+        .nav-cat-item.active::after { opacity: 1; }
+
+        /* ÁREA PRINCIPAL */
+        main.content-area {
+            flex: 1; padding: 24px 40px 40px; display: flex; flex-direction: column;
+            align-items: center; gap: 24px; max-width: 1280px; width: 100%; margin: 0 auto;
         }
 
-        .btn-card i {
-            color: var(--primary);
-            transition: 0.3s;
+        .welcome-header {
+            width: 100%; max-width: 1200px; display: flex; flex-direction: column;
+            align-items: center; text-align: center; position: relative;
+        }
+        .welcome-title {
+            font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+        }
+        .welcome-title::before, .welcome-title::after {
+            content: ''; display: inline-block; width: 30px; height: 3px;
+            background-color: #f59e0b; border-radius: 2px;
+        }
+        .welcome-subtitle { font-size: 13.5px; color: #64748b; margin-top: 6px; font-weight: 700; }
+
+        .btn-manage-ads {
+            margin-top: 14px;
+            background: #0f172a; color: #ffffff; border: none;
+            padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 800;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2); transition: all 0.2s ease;
+        }
+        .btn-manage-ads:hover {
+            background: var(--primary); transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(241, 43, 44, 0.3);
         }
 
-        .btn-card:hover {
-            transform: translateY(-8px);
-            background: var(--primary);
-            color: #ffffff;
-            border-color: var(--primary);
+        /* CARROSSEL EXATAMENTE IGUAL AO DA PÁGINA DOS ALUNOS (SEM CORTES) */
+        .ads-carousel {
+            width: 100%; max-width: 1200px; position: relative; border-radius: 24px;
+            overflow: hidden; box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.12);
+            border: 1px solid var(--border-color); background: #fff; aspect-ratio: 16/9;
+        }
+        .ads-slides-wrapper { display: flex; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .ad-slide-img {
+            min-width: 100%; width: 100%; height: 100%;
+            object-fit: cover; object-position: center; display: block;
+            user-select: none; aspect-ratio: 16/9;
+        }
+        .carousel-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 48px; height: 48px; border-radius: 50%; background: #fff;
+            border: 1px solid var(--border-color); color: var(--text-dark);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.2s ease; z-index: 10;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .carousel-btn:hover { background: #f8fafc; transform: translateY(-50%) scale(1.08); }
+        .carousel-btn.prev { left: 20px; }
+        .carousel-btn.next { right: 20px; }
+
+        .carousel-dots {
+            position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; z-index: 10; background: rgba(255, 255, 255, 0.88);
+            padding: 6px 14px; border-radius: 20px; backdrop-filter: blur(8px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1;
+            cursor: pointer; transition: transform 0.3s ease, background 0.3s ease; border: none;
+        }
+        .dot.active { width: 22px; border-radius: 10px; background: var(--primary); }
+
+        /* CARDS DE MÓDULOS COM A MESMA ESTÉTICA DO ALUNO */
+        .cards-container { width: 100%; max-width: 1200px; }
+        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; }
+
+        .card-btn {
+            position: relative; background: #fff; border: 1px solid var(--border-color);
+            height: 90px; border-radius: 16px; display: flex; align-items: center;
+            justify-content: space-between; padding: 0 20px; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            user-select: none; overflow: hidden; text-align: left; text-decoration: none;
+        }
+        .card-btn::after {
+            content: ''; position: absolute; bottom: 0; left: 0;
+            width: 100%; height: 4px; border-radius: 0 0 16px 16px;
+        }
+        .card-btn .card-left-content { display: flex; align-items: center; gap: 14px; }
+        .card-icon-box {
+            width: 44px; height: 44px; border-radius: 12px; display: flex;
+            align-items: center; justify-content: center;
+            background: var(--primary-light); color: var(--primary);
+        }
+        .card-btn span { font-size: 13.5px; font-weight: 700; color: #1e293b; }
+        .card-arrow { color: #94a3b8; transition: transform 0.2s ease; }
+        .card-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06); }
+        .card-btn:hover .card-arrow { transform: translateX(3px); color: #0f172a; }
+
+        .card-historia::after { background: #f12b2c; }
+        .card-eventos::after { background: #2563eb; }
+        .card-beneficios::after { background: #d97706; }
+        .card-oficinas::after { background: #059669; }
+        .card-avisos::after { background: #9333ea; }
+        .card-comprovante::after { background: #0891b2; }
+        .card-contribuintes::after { background: #0f172a; }
+        .card-sugestoes::after { background: #eab308; }
+        .card-chat::after { background: #16a34a; }
+
+        /* --- MODAL GERENCIADOR DE ANÚNCIOS --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(5px);
+            z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background: #ffffff; border-radius: 24px; width: 100%; max-width: 780px;
+            max-height: 90vh; display: flex; flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25); overflow: hidden;
+        }
+        .modal-header {
+            padding: 22px 28px; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; background: #f8fafc;
+        }
+        .modal-header h2 { font-size: 19px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+
+        .modal-body { padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+
+        .ad-manager-item {
+            display: flex; align-items: center; gap: 18px; padding: 16px;
+            border: 1px solid var(--border-color); border-radius: 16px;
+            background: #ffffff; flex-wrap: wrap;
+        }
+        .ad-thumb {
+            width: 176px; height: 99px; border-radius: 12px; object-fit: cover;
+            border: 1px solid var(--border-color); background: #f1f5f9; flex-shrink: 0;
+        }
+        .ad-item-controls { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 8px; }
+        .ad-item-controls label { font-size: 12px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; }
+        .ad-input-text {
+            width: 100%; padding: 9px 12px; border: 1px solid var(--border-color);
+            border-radius: 10px; font-size: 13px; font-weight: 600; outline: none;
+        }
+        .ad-input-text:focus { border-color: var(--primary); }
+
+        .ad-actions-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+        .btn-upload-foto {
+            background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;
+            padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 800;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;
+        }
+        .btn-upload-foto:hover { background: #dbeafe; }
+
+        .btn-remove-ad {
+            background: #fff1f1; color: var(--primary); border: 1px solid #fecaca;
+            padding: 8px 12px; border-radius: 10px; font-size: 12px; font-weight: 800;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+        }
+        .btn-remove-ad:hover { background: #fee2e2; }
+
+        .modal-footer {
+            padding: 18px 28px; border-top: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center;
+            background: #f8fafc; flex-wrap: wrap; gap: 12px;
+        }
+        .btn-add-ad {
+            background: #0f172a; color: #fff; border: none; padding: 11px 18px;
+            border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .btn-save-ads {
+            background: var(--primary); color: #fff; border: none; padding: 11px 22px;
+            border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 6px 15px rgba(241, 43, 44, 0.25);
         }
 
-        .btn-card:hover i {
-            color: #ffffff;
-            transform: scale(1.1);
+        @media (max-width: 1024px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) {
+            .cards-grid { grid-template-columns: 1fr; }
+            header { padding: 0 20px; }
+            .nav-categories-bar { padding: 0 20px; justify-content: flex-start; }
+            main.content-area { padding: 16px 20px; }
+            .carousel-btn { width: 36px; height: 36px; }
         }
-
-        .btn-card.special {
-            background: #1e293b;
-            color: #ffffff;
-        }
-
-        .btn-card.special i { color: #38bdf8; }
-
-        .btn-card.special:hover {
-            background: #0f172a;
-        }
-
     </style>
 </head>
 <body>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2 style="font-size: 18px; font-weight: 800; color: var(--text-main);">MENU</h2>
-            <button class="btn-toggle" onclick="toggleMenu()">
-                <i data-lucide="x"></i>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebarMenu" aria-label="Menu Administrativo">
+        <div>
+            <div class="sidebar-header">
+                <span>GESTÃO AAPM</span>
+                <button class="btn-close-menu" onclick="toggleSidebar()" aria-label="Fechar Menu">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+
+            <button class="badge-admin-btn" data-target="admin.html">
+                <i data-lucide="shield-check" size="20"></i> Painel Admin
             </button>
+
+            <ul class="menu-list">
+                <li class="menu-item" data-target="page.html"><i data-lucide="book-open" size="18"></i> História da AAPM</li>
+                <li class="menu-item" data-target="eventos_admin.html"><i data-lucide="calendar" size="18"></i> Eventos</li>
+                <li class="menu-item" data-target="beneficios_admin.html"><i data-lucide="award" size="18"></i> Benefícios</li>
+                <li class="menu-item" data-target="oficinas_admin.html"><i data-lucide="layers" size="18"></i> Oficinas</li>
+                <li class="menu-item" data-target="avisos_admin.html"><i data-lucide="megaphone" size="18"></i> Avisos</li>
+                <li class="menu-item" data-target="comprovante_admin.html"><i data-lucide="file-check" size="18"></i> Confirmação Comprovante</li>
+                <li class="menu-item" data-target="contribuintes.html"><i data-lucide="users" size="18"></i> Lista de Contribuintes</li>
+            </ul>
+
+            <div class="menu-category">Minha Conta</div>
+            <ul class="menu-list">
+                <li class="menu-item" data-target="perfiladmin.html"><i data-lucide="user" size="18"></i> Meu Perfil</li>
+                <li class="menu-item" data-target="sugestoes_admin.html"><i data-lucide="lightbulb" size="18"></i> Sugestões</li>
+                <li class="menu-item" data-target="contato_chat.html"><i data-lucide="message-square" size="18"></i> Contato / Chat</li>
+            </ul>
         </div>
-        <nav class="nav-links">
-            <a href="landingpage.html"><i data-lucide="home"></i> Tela Inicial</a>
-            <a href="perfiladmin.html"><i data-lucide="user"></i> Meu Perfil</a>
-            <a href="#"><i data-lucide="lightbulb"></i> Sugestões</a>
-            <a href="#"><i data-lucide="mail"></i> Contato</a>
-            <a href="#" class="active admin-btn"><i data-lucide="shield-check"></i> Administrador</a>
-        </nav>
+
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18"></i> Sair da Conta</button>
     </aside>
 
-    <div class="main-content">
-        <header class="top-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <button class="btn-toggle" id="openBtn" onclick="toggleMenu()" style="display: none;">
-                    <i data-lucide="menu"></i>
+    <div class="wrapper">
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()" aria-label="Abrir Menu de Navegação">
+                    <i data-lucide="menu" size="24"></i>
                 </button>
-                <div class="search-bar">
-                    <i data-lucide="search" size="18" color="#64748b"></i>
-                    <input type="text" placeholder="Buscar no painel...">
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i data-lucide="search" size="18" style="color: var(--text-sub);"></i>
+                        <input type="text" id="inputBuscaPainel" placeholder="Pesquisar..." oninput="filtrarPainel()" autocomplete="off">
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown"></div>
                 </div>
             </div>
 
-            <div class="logo-central">
-                <span class="logo-text">AAPM</span>
-                <img src="fotoss.png" alt="Logo" style="height: 50px;">
-                <span class="logo-text">SENAI</span>
+            <div class="brand-center" data-target="admin.html">
+                <span class="aapm-text">AAPM</span>
+                <img src="img/fotoss.png" alt="Logotipo AAPM SENAI" width="160" height="68" onerror="this.src='fotoss.png'; this.onerror=null;">
+                <span class="senai-text">SENAI</span>
             </div>
 
-            <div class="user-actions">
-                <button class="btn-toggle"><i data-lucide="bell"></i></button>
-                <div class="user-avatar"><i data-lucide="user" size="24"></i></div>
+            <div class="header-right">
+                <button class="profile-btn" data-target="perfiladmin.html" aria-label="Meu Perfil" title="Meu Perfil">
+                    <i data-lucide="user" size="22"></i>
+                </button>
             </div>
         </header>
 
-        <div class="dashboard-container">
-            <div class="cards-grid">
-                <a href="page.html" class="btn-card">
-                    <i data-lucide="book-open" size="32"></i>
-                    História da AAPM
-                </a>
-                <a href="eventos.html?admin=true" class="btn-card">
-                    <i data-lucide="calendar" size="32"></i>
-                    Eventos
-                </a>
-                <a href="#" class="btn-card">
-                    <i data-lucide="award" size="32"></i>
-                    Benefícios
-                </a>
-                <a href="#" class="btn-card">
-                    <i data-lucide="layers" size="32"></i>
-                    Oficinas
-                </a>
-                <a href="#" class="btn-card">
-                    <i data-lucide="megaphone" size="32"></i>
-                    Avisos
-                </a>
-                <a href="contribuintes.html" class="btn-card special">
-                    <i data-lucide="users" size="32"></i>
-                    Lista de Contribuintes
-                </a>
+        <nav class="nav-categories-bar" aria-label="Categorias principais">
+            <div class="nav-cat-item active" data-target="admin.html">Início</div>
+            <div class="nav-cat-item" data-target="page.html">História da AAPM</div>
+            <div class="nav-cat-item" data-target="eventos_admin.html">Eventos</div>
+            <div class="nav-cat-item" data-target="beneficios_admin.html">Benefícios</div>
+            <div class="nav-cat-item" data-target="oficinas_admin.html">Oficinas</div>
+            <div class="nav-cat-item" data-target="avisos_admin.html">Avisos</div>
+            <div class="nav-cat-item" data-target="comprovante_admin.html">Comprovantes</div>
+            <div class="nav-cat-item" data-target="contribuintes.html">Contribuintes</div>
+        </nav>
+
+        <main class="content-area" id="main-content">
+            <section class="welcome-header">
+                <h1 class="welcome-title">Painel Administrativo AAPM</h1>
+                <p class="welcome-subtitle">Gerencie os anúncios, eventos, benefícios e atendimentos do SENAI.</p>
+                <button class="btn-manage-ads" onclick="abrirGerenciadorAnuncios()">
+                    <i data-lucide="image" size="16"></i> Gerenciar Anúncios
+                </button>
+            </section>
+
+            <!-- CARROSSEL DE ANÚNCIOS (EXATAMENTE IGUAL À PÁGINA DOS ALUNOS) -->
+            <section class="ads-carousel" id="adsCarouselAdmin" aria-label="Carrossel de Anúncios" onmouseenter="pausarAutoSlide()" onmouseleave="iniciarAutoSlide()">
+                <button class="carousel-btn prev" onclick="mudarSlide(-1)" aria-label="Anúncio Anterior">
+                    <i data-lucide="chevron-left" size="22"></i>
+                </button>
+                <button class="carousel-btn next" onclick="mudarSlide(1)" aria-label="Próximo Anúncio">
+                    <i data-lucide="chevron-right" size="22"></i>
+                </button>
+
+                <div class="ads-slides-wrapper" id="slidesWrapperAdmin"></div>
+                <div class="carousel-dots" id="carouselDotsAdmin"></div>
+            </section>
+
+            <!-- MÓDULOS DE GESTÃO COM MESMA ESTÉTICA DO PORTAL DO ALUNO -->
+            <section class="cards-container" aria-label="Módulos Administrativos">
+                <div class="cards-grid" id="painelCards">
+                    <button class="card-btn card-historia" data-target="page.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="book-open" size="20"></i></div>
+                            <span>História da AAPM</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-eventos" data-target="eventos_admin.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="calendar" size="20"></i></div>
+                            <span>Eventos</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-beneficios" data-target="beneficios_admin.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="award" size="20"></i></div>
+                            <span>Benefícios</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-oficinas" data-target="oficinas_admin.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="layers" size="20"></i></div>
+                            <span>Oficinas</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-avisos" data-target="avisos_admin.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="megaphone" size="20"></i></div>
+                            <span>Avisos</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-comprovante" data-target="comprovante_admin.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="file-check" size="20"></i></div>
+                            <span>Confirmação de Comprovante</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-contribuintes" data-target="contribuintes.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="users" size="20"></i></div>
+                            <span>Lista de Contribuintes</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-sugestoes" data-target="sugestoes_admin.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="lightbulb" size="20"></i></div>
+                            <span>Sugestões</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+
+                    <button class="card-btn card-chat" data-target="contato_chat.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="message-square" size="20"></i></div>
+                            <span>Atendimento / Chat</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18"></i>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL GERENCIADOR DE ANÚNCIOS -->
+    <div class="modal-overlay" id="modalAnuncios">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i data-lucide="images" size="22" style="color: var(--primary);"></i> Gerenciar Anúncios</h2>
+                <button class="btn-close-menu" onclick="fecharGerenciadorAnuncios()">
+                    <i data-lucide="x" size="22"></i>
+                </button>
+            </div>
+
+            <div class="modal-body" id="listaAnunciosEditor"></div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-add-ad" onclick="adicionarNovoAnuncio()">
+                    <i data-lucide="plus-circle" size="16"></i> Novo Anúncio
+                </button>
+                <button type="button" class="btn-save-ads" onclick="salvarAnuncios()">
+                    <i data-lucide="check" size="16"></i> Salvar Alterações
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Inicializa os ícones Lucide
-        lucide.createIcons();
+        const CHAVE_ANUNCIOS = 'aapm_anuncios_banners';
+        const ANUNCIOS_PADRAO = [
+            { src: 'img/anuncio1.png', alt: 'III Mostra Cultural Meu Brasil Brasileiro' },
+            { src: 'img/anuncio2.png', alt: 'Venha Conhecer a Biblioteca do SENAI' },
+            { src: 'img/anuncio3.png', alt: 'Biblio 9.14 Recomenda' },
+            { src: 'img/anuncio4.png', alt: 'Biblio 9.14 Incentiva a Criação' }
+        ];
 
-        function toggleMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const openBtn = document.getElementById('openBtn');
-            
-            sidebar.classList.toggle('closed');
-            
-            if (sidebar.classList.contains('closed')) {
-                openBtn.style.display = 'flex';
-            } else {
-                openBtn.style.display = 'none';
+        let anunciosAtuais = [];
+        let anunciosTemporarios = [];
+        let slideIndex = 0;
+        let slideTimer = null;
+
+        function obterAnunciosSalvos() {
+            try {
+                const salvos = JSON.parse(localStorage.getItem(CHAVE_ANUNCIOS));
+                if (Array.isArray(salvos) && salvos.length > 0) return salvos;
+            } catch (e) {}
+            return [...ANUNCIOS_PADRAO];
+        }
+
+        function renderizarCarrosselAdmin() {
+            anunciosAtuais = obterAnunciosSalvos();
+            const wrapper = document.getElementById('slidesWrapperAdmin');
+            const dotsContainer = document.getElementById('carouselDotsAdmin');
+
+            wrapper.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            if (slideIndex >= anunciosAtuais.length) slideIndex = 0;
+
+            anunciosAtuais.forEach((ad, idx) => {
+                const img = document.createElement('img');
+                img.src = ad.src;
+                img.alt = ad.alt || `Anúncio ${idx + 1}`;
+                img.className = 'ad-slide-img';
+                img.width = 1150;
+                img.height = 648;
+                wrapper.appendChild(img);
+
+                const dot = document.createElement('button');
+                dot.className = `dot ${idx === slideIndex ? 'active' : ''}`;
+                dot.setAttribute('aria-label', `Ir para Anúncio ${idx + 1}`);
+                dot.onclick = () => irParaSlide(idx);
+                dotsContainer.appendChild(dot);
+            });
+
+            atualizarPosicaoSlide();
+        }
+
+        function atualizarPosicaoSlide() {
+            const wrapper = document.getElementById('slidesWrapperAdmin');
+            const dots = document.querySelectorAll('#carouselDotsAdmin .dot');
+            if (!wrapper || anunciosAtuais.length === 0) return;
+
+            wrapper.style.transform = `translateX(-${slideIndex * 100}%)`;
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === slideIndex);
+            });
+        }
+
+        function mudarSlide(direcao) {
+            if (anunciosAtuais.length === 0) return;
+            slideIndex = (slideIndex + direcao + anunciosAtuais.length) % anunciosAtuais.length;
+            atualizarPosicaoSlide();
+        }
+
+        function irParaSlide(index) {
+            slideIndex = index;
+            atualizarPosicaoSlide();
+        }
+
+        function iniciarAutoSlide() {
+            if (!slideTimer && anunciosAtuais.length > 1) {
+                slideTimer = setInterval(() => mudarSlide(1), 5000);
             }
         }
+
+        function pausarAutoSlide() {
+            clearInterval(slideTimer);
+            slideTimer = null;
+        }
+
+        /* --- GERENCIADOR DE ANÚNCIOS --- */
+        function abrirGerenciadorAnuncios() {
+            pausarAutoSlide();
+            anunciosTemporarios = JSON.parse(JSON.stringify(obterAnunciosSalvos()));
+            renderizarListaEditor();
+            document.getElementById('modalAnuncios').classList.add('active');
+        }
+
+        function fecharGerenciadorAnuncios() {
+            document.getElementById('modalAnuncios').classList.remove('active');
+            iniciarAutoSlide();
+        }
+
+        function renderizarListaEditor() {
+            const container = document.getElementById('listaAnunciosEditor');
+            container.innerHTML = '';
+
+            anunciosTemporarios.forEach((ad, idx) => {
+                const item = document.createElement('div');
+                item.className = 'ad-manager-item';
+                item.innerHTML = `
+                    <img src="${ad.src}" alt="Preview" class="ad-thumb" id="thumbPreview_${idx}">
+                    <div class="ad-item-controls">
+                        <label>Anúncio #${idx + 1} - Título / Descrição</label>
+                        <input type="text" class="ad-input-text" value="${ad.alt || ''}" placeholder="Descrição do anúncio..." oninput="atualizarTextoAnuncio(${idx}, this.value)">
+                        
+                        <div class="ad-actions-row">
+                            <label class="btn-upload-foto">
+                                <i data-lucide="upload" size="14"></i> Trocar Foto
+                                <input type="file" accept="image/*" style="display: none;" onchange="carregarNovaFoto(event, ${idx})">
+                            </label>
+                            ${anunciosTemporarios.length > 1 ? `
+                                <button type="button" class="btn-remove-ad" onclick="removerAnuncio(${idx})">
+                                    <i data-lucide="trash-2" size="14"></i> Remover
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function atualizarTextoAnuncio(idx, novoTexto) {
+            anunciosTemporarios[idx].alt = novoTexto;
+        }
+
+        function carregarNovaFoto(event, idx) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxWidth = 1280;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    anunciosTemporarios[idx].src = dataUrl;
+                    document.getElementById(`thumbPreview_${idx}`).src = dataUrl;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function adicionarNovoAnuncio() {
+            anunciosTemporarios.push({
+                src: 'img/anuncio1.png',
+                alt: `Novo Anúncio ${anunciosTemporarios.length + 1}`
+            });
+            renderizarListaEditor();
+        }
+
+        function removerAnuncio(idx) {
+            if (anunciosTemporarios.length <= 1) {
+                alert('É necessário manter pelo menos 1 anúncio ativo.');
+                return;
+            }
+            anunciosTemporarios.splice(idx, 1);
+            renderizarListaEditor();
+        }
+
+        function salvarAnuncios() {
+            const houveAlteracao = JSON.stringify(anunciosAtuais) !== JSON.stringify(anunciosTemporarios);
+
+            if (!houveAlteracao) {
+                alert('Não foi realizada nenhuma modificação.');
+                fecharGerenciadorAnuncios();
+                return;
+            }
+
+            try {
+                localStorage.setItem(CHAVE_ANUNCIOS, JSON.stringify(anunciosTemporarios));
+                renderizarCarrosselAdmin();
+                fecharGerenciadorAnuncios();
+                alert('Anúncios atualizados com sucesso! Já estão visíveis para os alunos.');
+            } catch (err) {
+                alert('A imagem escolhida é muito pesada para o armazenamento local. Tente uma imagem menor.');
+            }
+        }
+
+        /* --- NAVEGAÇÃO E BUSCA --- */
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function filtrarPainel() {
+            const termo = document.getElementById('inputBuscaPainel').value.toLowerCase().trim();
+            const dropdown = document.getElementById('searchDropdown');
+            const cartoes = document.querySelectorAll('.card-btn');
+
+            dropdown.innerHTML = '';
+
+            if (!termo) {
+                dropdown.classList.remove('active');
+                cartoes.forEach(btn => btn.style.display = 'flex');
+                return;
+            }
+
+            let encontrou = false;
+
+            cartoes.forEach(btn => {
+                const texto = btn.innerText.toLowerCase();
+                const destino = btn.getAttribute('data-target');
+                const iconeHtml = btn.querySelector('.card-icon-box').innerHTML;
+                const titulo = btn.querySelector('span').innerText;
+
+                if (texto.includes(termo)) {
+                    encontrou = true;
+                    btn.style.display = 'flex';
+
+                    const item = document.createElement('div');
+                    item.className = 'search-dropdown-item';
+                    item.innerHTML = `
+                        <div class="item-left">
+                            <div class="item-icon">${iconeHtml}</div>
+                            <span>${titulo}</span>
+                        </div>
+                        <i data-lucide="arrow-right" size="16" style="color: #94a3b8;"></i>
+                    `;
+                    item.addEventListener('click', () => {
+                        window.location.href = destino;
+                    });
+
+                    dropdown.appendChild(item);
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+
+            if (encontrou) {
+                dropdown.classList.add('active');
+                if (window.lucide) lucide.createIcons();
+            } else {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        function fazerLogout() {
+            if (confirm("Deseja realmente sair do Painel Administrativo?")) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('tipoUsuario');
+                localStorage.removeItem('nomeUsuario');
+                localStorage.removeItem('usuarioLogado');
+                window.location.replace('logincadastro.html?modo=admin');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+
+            document.querySelectorAll('[data-target]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const destino = el.getAttribute('data-target');
+                    if (destino) window.location.href = destino;
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    document.getElementById('searchDropdown').classList.remove('active');
+                }
+            });
+
+            renderizarCarrosselAdmin();
+            iniciarAutoSlide();
+        });
     </script>
 </body>
 </html>

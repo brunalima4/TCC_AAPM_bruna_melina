@@ -3,214 +3,836 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil Admin | AAPM SENAI</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Meu Perfil - Portal do Aluno AAPM</title>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #f11815;
-            --primary-dark: #b31210;
-            --bg: #f8faff;
-            --card: #ffffff;
-            --text: #1a1a1a;
-            --text-light: #64748b;
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --primary-light: #fff1f1;
+            --success: #10b981;
+            --success-dark: #059669;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --radius-card: 20px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
-            background: linear-gradient(180deg, #fff1f1 0%, var(--bg) 100%);
-            min-height: 100vh;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 450px;
-            margin-top: 20px;
-        }
-
-        /* --- BARRA SUPERIOR --- */
-        .top-nav {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 40px;
-        }
-
-        .btn-back {
-            background: white;
-            color: var(--text);
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: 0.3s;
-        }
-
-        .btn-back:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateX(-5px);
-        }
-
-        .page-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text);
-            text-transform: uppercase;
-        }
-
-        /* --- CARD DO PERFIL ADMIN --- */
-        .profile-card {
-            background: var(--card);
-            padding: 35px 25px;
-            border-radius: 35px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.04);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .input-group {
-            margin-bottom: 22px;
+            overflow: hidden;
             position: relative;
         }
 
-        .input-group label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-light);
-            text-transform: uppercase;
-            margin-left: 12px;
-            margin-bottom: 6px;
-            display: block;
+        /* Sidebar & Overlay */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        aside {
+            position: fixed; top: 0; left: 0; width: 290px; height: 100vh;
+            background: #ffffff; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 28px 20px; overflow-y: auto; z-index: 999;
+            transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 15px 0 35px rgba(0,0,0,0.08);
+        }
+        aside.open { transform: translateX(0); }
+
+        .sidebar-header { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 20px; }
+        .btn-close-menu { width: 32px; height: 32px; border: none; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); }
+        .btn-close-menu:hover { background: #f1f5f9; color: var(--text-dark); }
+
+        .badge-aluno-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 24px; cursor: pointer; border: none; width: 100%; text-align: left;
+            box-shadow: 0 8px 20px rgba(241,43,44,0.25);
         }
 
-        .input-field {
-            width: 100%;
-            padding: 16px 16px 16px 52px;
-            background: #f1f5f9;
-            border: 2px solid transparent;
-            border-radius: 18px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-            transition: 0.3s;
+        .menu-category { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin: 20px 0 10px 8px; }
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px;
+            font-weight: 700; font-size: 14px; color: #475569; cursor: pointer; transition: 0.2s;
+        }
+        .menu-item:hover { background: #f1f5f9; color: var(--primary); transform: translateX(4px); }
+        .menu-item.active-page { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+
+        .btn-sair {
+            background: #fff1f1; color: var(--primary); border: none; padding: 14px 18px;
+            border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 24px; transition: 0.2s;
+        }
+        .btn-sair:hover { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25); }
+
+        .wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+
+        /* Cabeçalho */
+        header {
+            height: 90px; background: #ffffff;
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 48px; position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: flex-start; }
+
+        .btn-toggle-menu {
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+            width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+        }
+        .btn-toggle-menu:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .search-container { position: relative; width: 280px; }
+        .search-bar {
+            display: flex; align-items: center; gap: 12px; background: #f1f5f9;
+            padding: 12px 20px; border-radius: 20px; width: 100%; border: 1px solid transparent; transition: 0.2s;
+        }
+        .search-bar:focus-within { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1); }
+        .search-bar input { border: none; background: transparent; outline: none; font-size: 14px; font-weight: 700; width: 100%; color: var(--text-dark); }
+
+        .search-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0; width: 320px; background: #fff;
+            border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+            padding: 10px; display: none; flex-direction: column; gap: 8px; z-index: 200;
+        }
+        .search-dropdown.active { display: flex; }
+        .search-dropdown-item {
+            display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
+            border-radius: 12px; background: #fff; border: 1px solid var(--border-color); cursor: pointer; transition: 0.2s;
+        }
+        .search-dropdown-item:hover { background: var(--primary-light); border-color: var(--primary); }
+        .search-dropdown-item .item-left { display: flex; align-items: center; gap: 12px; }
+        .search-dropdown-item .item-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; }
+        .search-dropdown-item span { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+        .brand-center {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center; gap: 0px; font-size: 24px; font-weight: 800;
+            letter-spacing: -0.5px; cursor: pointer; user-select: none;
+        }
+        .brand-center .aapm-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-right: -12px; }
+        .brand-center .senai-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-left: -12px; }
+        .brand-center img { height: 68px; width: auto; object-fit: contain; display: block; }
+
+        .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex: 1; }
+
+        .profile-btn {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--primary);
+            color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(241, 43, 44, 0.3); transition: transform 0.2s;
+        }
+        .profile-btn:hover { transform: scale(1.05); }
+
+        /* --- NOTIFICAÇÕES (ÍCONE DE SINO + PAINEL SUSPENSO) --- */
+        .notif-container { position: relative; }
+        .notif-btn {
+            position: relative; width: 48px; height: 48px; border-radius: 14px;
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;
+        }
+        .notif-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: var(--primary); }
+        .notif-badge {
+            position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px; padding: 0 6px;
+            border-radius: 999px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 800;
+            display: none; align-items: center; justify-content: center; border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(241, 43, 44, 0.35);
+        }
+        .notif-badge.visible { display: flex; }
+
+        .notif-dropdown {
+            position: absolute; top: calc(100% + 12px); right: 0; width: 390px; max-width: calc(100vw - 32px);
+            background: #fff; border: 1px solid var(--border-color); border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.16); display: none; flex-direction: column;
+            overflow: hidden; z-index: 250;
+        }
+        .notif-dropdown.active { display: flex; animation: fadeSlideDown 0.2s ease; }
+        @keyframes fadeSlideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .notif-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; background: #f8fafc;
+        }
+        .notif-header h3 { font-size: 15px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+        .btn-ler-todas { background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.2s; }
+        .btn-ler-todas:hover { background: var(--primary-light); }
+
+        .notif-list { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; }
+        .notif-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s ease; position: relative; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item.unread { background: #fff8f8; }
+        .notif-item.unread::before { content: ''; position: absolute; left: 8px; top: 24px; width: 7px; height: 7px; border-radius: 50%; background: var(--primary); }
+
+        .notif-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .notif-icon.oficina { background: #ecfdf5; color: #059669; }
+        .notif-icon.evento { background: #eff6ff; color: #2563eb; }
+        .notif-icon.beneficio { background: #fffbeb; color: #d97706; }
+        .notif-icon.aviso { background: #faf5ff; color: #9333ea; }
+
+        .notif-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .notif-title { font-size: 13.5px; font-weight: 800; color: var(--text-dark); }
+        .notif-desc { font-size: 12.5px; font-weight: 600; color: #475569; line-height: 1.45; }
+        .notif-time { font-size: 11px; font-weight: 700; color: #94a3b8; margin-top: 2px; }
+
+        .notif-empty { padding: 36px 20px; text-align: center; color: var(--text-sub); font-size: 13.5px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+        .nav-categories-bar {
+            background: #ffffff; border-bottom: 1px solid var(--border-color);
+            padding: 0 40px; display: flex; align-items: center; justify-content: center; gap: 32px;
+            overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0;
+        }
+        .nav-categories-bar::-webkit-scrollbar { display: none; }
+
+        .nav-cat-item {
+            position: relative; padding: 14px 0; font-size: 13.5px; font-weight: 700;
+            color: #64748b; cursor: pointer; transition: opacity 0.2s ease; user-select: none;
+        }
+        .nav-cat-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 2px; background: var(--primary); opacity: 0; transition: opacity 0.2s ease;
+        }
+        .nav-cat-item:hover { color: var(--text-dark); }
+        .nav-cat-item.active { color: var(--primary); }
+        .nav-cat-item.active::after { opacity: 1; }
+
+        /* CONTEÚDO DO PERFIL */
+        .content-body { flex: 1; padding: 36px 40px; max-width: 620px; margin: 0 auto; width: 100%; }
+        .profile-card { background: #ffffff; padding: 32px; border-radius: var(--radius-card); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+
+        .header-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .badge-aluno { background: #e0f2fe; color: #0284c7; padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; }
+
+        .btn-toggle-edit { background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-toggle-edit:hover { background: #e2e8f0; }
+
+        .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
+        .avatar-wrapper { position: relative; width: 110px; height: 110px; }
+        .avatar-img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); background: #f1f5f9; }
+        .btn-edit-photo { position: absolute; bottom: 2px; right: 2px; background: var(--primary); color: white; border: 2px solid white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        .input-group { margin-bottom: 18px; position: relative; }
+        .input-group label { font-size: 11px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; margin-left: 8px; margin-bottom: 6px; display: block; }
+        
+        .input-field { 
+            width: 100%; 
+            padding: 14px 14px 14px 48px; 
+            background: #ffffff; 
+            border: 1px solid var(--border-color); 
+            border-radius: 14px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: var(--text-dark); 
+            outline: none; 
         }
 
         .input-field:focus {
-            outline: none;
             border-color: var(--primary);
-            background: white;
+            box-shadow: 0 0 0 3px rgba(241, 43, 44, 0.1);
         }
 
-        .input-icon {
-            position: absolute;
-            left: 18px;
-            top: 36px;
-            color: var(--primary);
+        .input-field[readonly] { 
+            background: #f1f5f9 !important; 
+            color: var(--text-sub) !important; 
+            border-color: transparent !important; 
+            cursor: not-allowed !important; 
+            pointer-events: none;
         }
 
-        .badge-admin {
-            display: inline-block;
-            background: #ffebeb;
-            color: var(--primary);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            margin-left: 12px;
+        .input-field.editable {
+            background: #ffffff !important;
+            color: var(--text-dark) !important;
+            border-color: var(--primary) !important;
+            cursor: text !important;
+            pointer-events: auto !important;
         }
 
-        /* --- BOTÃO --- */
-        .btn-save {
-            width: 100%;
-            padding: 18px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: 0.3s;
-            text-align: center;
-        }
+        .input-icon { position: absolute; left: 16px; top: 34px; color: var(--primary); pointer-events: none; }
 
-        .btn-save:hover {
-            transform: translateY(-3px);
-            background: var(--primary-dark);
-            box-shadow: 0 10px 20px rgba(241, 24, 21, 0.2);
-        }
+        .actions-container { display: none; gap: 10px; margin-top: 24px; }
+        .btn-save { flex: 2; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .btn-save:hover { background: var(--primary-dark); }
+        .btn-cancel { flex: 1; padding: 14px; background: #f1f5f9; color: var(--text-sub); border: 1px solid var(--border-color); border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
+        @media (max-width: 768px) {
+            .content-body { padding: 24px 20px; }
+            header { padding: 0 20px; }
+            .search-container { width: 170px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <nav class="top-nav">
-            <button class="btn-back" onclick="window.history.back()">
-                <i data-lucide="arrow-left" size="24"></i>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebarMenu">
+        <div>
+            <div class="sidebar-header">
+                <button class="btn-close-menu" onclick="toggleSidebar()" aria-label="Fechar Menu">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+
+            <button class="badge-aluno-btn" data-target="landingpage.html">
+                <i data-lucide="user-check" size="20"></i> Portal do Aluno
             </button>
-            <h1 class="page-title">Perfil Admin</h1>
-            <div style="width: 45px;"></div>
+
+            <ul class="menu-list">
+                <li class="menu-item" data-target="historia_aluno.html"><i data-lucide="book-open" size="18"></i> História da AAPM</li>
+                <li class="menu-item" data-target="eventos.html"><i data-lucide="calendar" size="18"></i> Eventos</li>
+                <li class="menu-item" data-target="beneficios.html"><i data-lucide="award" size="18"></i> Benefícios</li>
+                <li class="menu-item" data-target="oficinas.html"><i data-lucide="layers" size="18"></i> Oficinas</li>
+                <li class="menu-item" data-target="avisos.html"><i data-lucide="megaphone" size="18"></i> Avisos</li>
+            </ul>
+
+            <div class="menu-category">Minha Conta</div>
+            <ul class="menu-list">
+                <li class="menu-item active-page" data-target="perfil.html"><i data-lucide="user" size="18"></i> Meu Perfil</li>
+                <li class="menu-item" data-target="chat_aluno.html"><i data-lucide="message-square" size="18"></i> Contato / Chat</li>
+            </ul>
+        </div>
+
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18"></i> Sair da Conta</button>
+    </aside>
+
+    <div class="wrapper">
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()" title="Menu de Opções"><i data-lucide="menu" size="24"></i></button>
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i data-lucide="search" size="18" style="color: var(--text-sub);"></i>
+                        <input type="text" id="inputBuscaPainel" placeholder="Pesquisar" oninput="filtrarPainel()" autocomplete="off">
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown"></div>
+                </div>
+            </div>
+
+            <div class="brand-center" data-target="landingpage.html">
+                <span class="aapm-text">AAPM</span>
+                <img src="img/fotoss.png" alt="Logotipo AAPM SENAI" width="160" height="68" onerror="this.src='fotoss.png'; this.onerror=null;">
+                <span class="senai-text">SENAI</span>
+            </div>
+
+            <div class="header-right">
+                <div class="notif-container" id="notifContainer">
+                    <button class="notif-btn" onclick="toggleNotificacoes(event)" aria-label="Notificações" title="Notificações">
+                        <i data-lucide="bell" size="22"></i>
+                        <span class="notif-badge" id="notifBadge">0</span>
+                    </button>
+
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h3><i data-lucide="bell-ring" size="16" style="color: var(--primary);"></i> Notificações</h3>
+                            <button class="btn-ler-todas" onclick="marcarTodasLidas()">Marcar todas como lidas</button>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">
+                                <i data-lucide="loader-2" size="24"></i>
+                                <span>Carregando notificações...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="profile-btn" data-target="perfil.html" title="Meu Perfil"><i data-lucide="user" size="22"></i></button>
+            </div>
+        </header>
+
+        <nav class="nav-categories-bar">
+            <div class="nav-cat-item" data-target="landingpage.html">Início</div>
+            <div class="nav-cat-item" data-target="historia_aluno.html">História da AAPM</div>
+            <div class="nav-cat-item" data-target="eventos.html">Eventos</div>
+            <div class="nav-cat-item" data-target="beneficios.html">Benefícios</div>
+            <div class="nav-cat-item" data-target="oficinas.html">Oficinas</div>
+            <div class="nav-cat-item" data-target="avisos.html">Avisos</div>
         </nav>
 
-        <div class="profile-card">
-            <span class="badge-admin">ACESSO ADMINISTRATIVO</span>
-            
-            <form id="adminPerfilForm">
+        <div class="content-body">
+            <div class="profile-card">
+                <div class="header-profile">
+                    <span class="badge-aluno">DADOS DE MATRÍCULA</span>
+                    <button type="button" class="btn-toggle-edit" id="btnModificar" onclick="ativarEdicao()">
+                        <i data-lucide="edit-3" size="16"></i> Modificar Dados
+                    </button>
+                </div>
                 
-                <div class="input-group">
-                    <label>Nome do Administrador</label>
-                    <i data-lucide="shield-check" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="Nome completo do admin">
+                <div class="avatar-container">
+                    <div class="avatar-wrapper">
+                        <img id="fotoPreview" src="https://via.placeholder.com/150/f1f5f9/64748b?text=Aluno" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/f1f5f9/64748b?text=Aluno';" class="avatar-img" alt="Foto de Perfil">
+                        <button type="button" class="btn-edit-photo" id="btnCamera" style="display: none;" onclick="document.getElementById('inputFoto').click()">
+                            <i data-lucide="camera" size="18"></i>
+                        </button>
+                    </div>
+                    <input type="file" id="inputFoto" accept="image/*" style="display: none;" onchange="previewImagem(event)">
                 </div>
 
-                <div class="input-group">
-                    <label>NIF (Número de Identificação)</label>
-                    <i data-lucide="id-card" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="00000000">
-                </div>
+                <form id="alunoPerfilForm" onsubmit="salvarPerfil(event)">
+                    <div class="input-group">
+                        <label>Nome Completo</label>
+                        <i data-lucide="user" class="input-icon" size="18"></i>
+                        <input type="text" id="nome" class="input-field" readonly required>
+                    </div>
 
-                <div class="input-group">
-                    <label>Cargo / Função</label>
-                    <i data-lucide="briefcase" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="Ex: Diretor, Secretário, Gestor">
-                </div>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Matrícula / RA</label>
+                            <i data-lucide="id-card" class="input-icon" size="18"></i>
+                            <input type="text" id="matricula" class="input-field" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>Turma</label>
+                            <i data-lucide="users" class="input-icon" size="18"></i>
+                            <input type="text" id="turma" class="input-field" readonly>
+                        </div>
+                    </div>
 
-                <div class="input-group">
-                    <label>E-mail Corporativo</label>
-                    <i data-lucide="mail" class="input-icon" size="20"></i>
-                    <input type="email" class="input-field" placeholder="admin@senai.br">
-                </div>
+                    <div class="input-group">
+                        <label>E-mail Cadastrado</label>
+                        <i data-lucide="mail" class="input-icon" size="18"></i>
+                        <input type="email" id="email" class="input-field" readonly required>
+                    </div>
 
-                <div class="input-group">
-                    <label>Telefone de Contato</label>
-                    <i data-lucide="phone" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="(00) 00000-0000">
-                </div>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Turno</label>
+                            <i data-lucide="clock" class="input-icon" size="18"></i>
+                            <input type="text" id="turno" class="input-field" readonly>
+                        </div>
+                        <div class="input-group">
+                            <label>Telefone / WhatsApp</label>
+                            <i data-lucide="phone" class="input-icon" size="18"></i>
+                            <input type="text" id="telefone" class="input-field" placeholder="Não informado" readonly>
+                        </div>
+                    </div>
 
-                <button type="submit" class="btn-save">
-                    SALVAR ALTERAÇÕES
-                </button>
+                    <div class="input-group">
+                        <label>Curso Atual</label>
+                        <i data-lucide="graduation-cap" class="input-icon" size="18"></i>
+                        <input type="text" id="curso" class="input-field" placeholder="Não informado" readonly>
+                    </div>
 
-            </form>
+                    <div class="actions-container" id="actionsContainer">
+                        <button type="button" class="btn-cancel" onclick="cancelarEdicao()">Cancelar</button>
+                        <button type="submit" class="btn-save" id="btnSalvar">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-        lucide.createIcons();
+        const BASE_API_URL = 'http://localhost:3002';
+        const API_PERFIL_URL = `${BASE_API_URL}/api/perfil-aluno`;
+        const AVATAR_PADRAO = 'https://via.placeholder.com/150/f1f5f9/64748b?text=Aluno';
+
+        const modulosBusca = [
+            { titulo: 'História da AAPM', destino: 'historia_aluno.html', icone: 'book-open' },
+            { titulo: 'Eventos', destino: 'eventos.html', icone: 'calendar' },
+            { titulo: 'Benefícios', destino: 'beneficios.html', icone: 'award' },
+            { titulo: 'Oficinas', destino: 'oficinas.html', icone: 'graduation-cap' },
+            { titulo: 'Avisos', destino: 'avisos.html', icone: 'megaphone' },
+            { titulo: 'Falar com a AAPM', destino: 'chat_aluno.html', icone: 'message-square' }
+        ];
+
+        let arquivoFotoSelecionado = null;
+        let dadosUsuarioOriginais = {};
+        let carregandoPagina = false;
+
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function ir(pagina) {
+            if (!pagina || carregandoPagina) return;
+            carregandoPagina = true;
+            window.location.href = pagina;
+        }
+
+        function fazerLogout() {
+            localStorage.clear();
+            window.location.href = 'logincadastro.html';
+        }
+
+        // --- BUSCA DO CABEÇALHO ---
+        function filtrarPainel() {
+            const termo = document.getElementById('inputBuscaPainel').value.trim().toLowerCase();
+            const dropdown = document.getElementById('searchDropdown');
+
+            if (!termo) {
+                dropdown.classList.remove('active');
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            const resultados = modulosBusca.filter(m => m.titulo.toLowerCase().includes(termo));
+            if (resultados.length === 0) {
+                dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--text-sub); text-align: center; font-weight: 600;">Nenhum resultado encontrado.</div>`;
+            } else {
+                dropdown.innerHTML = resultados.map(m => `
+                    <div class="search-dropdown-item" onclick="ir('${m.destino}')">
+                        <div class="item-left">
+                            <div class="item-icon"><i data-lucide="${m.icone}" size="18"></i></div>
+                            <span>${m.titulo}</span>
+                        </div>
+                        <i data-lucide="chevron-right" size="16" style="color: var(--text-sub);"></i>
+                    </div>
+                `).join('');
+            }
+            dropdown.classList.add('active');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // --- SISTEMA DE NOTIFICAÇÕES ---
+        function toggleNotificacoes(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notifDropdown');
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                carregarNotificacoes();
+            }
+        }
+
+        function formatarTempoNotificacao(dataIso) {
+            if (!dataIso) return 'Agora';
+            const data = new Date(dataIso);
+            const agora = new Date();
+            const diffMin = Math.floor((agora - data) / 60000);
+
+            if (diffMin < 1) return 'Agora mesmo';
+            if (diffMin < 60) return `Há ${diffMin} min`;
+            const diffHoras = Math.floor(diffMin / 60);
+            if (diffHoras < 24) return `Há ${diffHoras}h`;
+            return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function obterIconeNotificacao(tipo) {
+            switch (tipo) {
+                case 'oficina': return { classe: 'oficina', icone: 'graduation-cap' };
+                case 'evento': return { classe: 'evento', icone: 'calendar' };
+                case 'beneficio': return { classe: 'beneficio', icone: 'award' };
+                default: return { classe: 'aviso', icone: 'megaphone' };
+            }
+        }
+
+        async function carregarNotificacoes() {
+            const token = localStorage.getItem('token');
+            const badge = document.getElementById('notifBadge');
+            const listaEl = document.getElementById('notifList');
+
+            if (!token) {
+                listaEl.innerHTML = `<div class="notif-empty"><i data-lucide="bell-off" size="24"></i><span>Faça login para ver suas notificações.</span></div>`;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            try {
+                const resp = await fetch(`${BASE_API_URL}/api/notificacoes`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await resp.json();
+
+                if (!dados.sucesso) return;
+
+                if (dados.naoLidas > 0) {
+                    badge.textContent = dados.naoLidas > 9 ? '9+' : dados.naoLidas;
+                    badge.classList.add('visible');
+                } else {
+                    badge.classList.remove('visible');
+                }
+
+                if (!dados.notificacoes || dados.notificacoes.length === 0) {
+                    listaEl.innerHTML = `
+                        <div class="notif-empty">
+                            <i data-lucide="bell-off" size="26" style="color:#cbd5e1;"></i>
+                            <span>Nenhuma notificação por enquanto.</span>
+                        </div>
+                    `;
+                } else {
+                    listaEl.innerHTML = dados.notificacoes.map(n => {
+                        const infoIcone = obterIconeNotificacao(n.tipo);
+                        const naoLidaClass = n.lida === 0 ? 'unread' : '';
+                        return `
+                            <div class="notif-item ${naoLidaClass}" onclick="abrirNotificacao(${n.id}, '${n.link}')">
+                                <div class="notif-icon ${infoIcone.classe}">
+                                    <i data-lucide="${infoIcone.icone}" size="18"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title">${n.titulo}</div>
+                                    <div class="notif-desc">${n.mensagem}</div>
+                                    <div class="notif-time">${formatarTempoNotificacao(n.data_criacao)}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                if (window.lucide) lucide.createIcons();
+            } catch (err) {
+                console.warn('Erro ao carregar notificações:', err);
+            }
+        }
+
+        async function abrirNotificacao(id, link) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                await fetch(`${BASE_API_URL}/api/notificacoes/${id}/ler`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }).catch(() => {});
+            }
+            if (link) ir(link);
+        }
+
+        async function marcarTodasLidas() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            await fetch(`${BASE_API_URL}/api/notificacoes/ler-todas`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            }).catch(() => {});
+            carregarNotificacoes();
+        }
+
+        document.addEventListener('click', (e) => {
+            const notifContainer = document.getElementById('notifContainer');
+            if (notifContainer && !notifContainer.contains(e.target)) {
+                document.getElementById('notifDropdown').classList.remove('active');
+            }
+            const searchContainer = document.querySelector('.search-container');
+            if (searchContainer && !searchContainer.contains(e.target)) {
+                document.getElementById('searchDropdown').classList.remove('active');
+            }
+        });
+
+        // --- PERFIL DO ALUNO ---
+        function resolverUrlFoto(fotoPerfil) {
+            if (!fotoPerfil || String(fotoPerfil).trim() === '' || fotoPerfil === 'null' || fotoPerfil === 'undefined') {
+                return AVATAR_PADRAO;
+            }
+            const valor = String(fotoPerfil).trim().replace(/\\/g, '/');
+            if (valor.startsWith('data:') || valor.startsWith('http://') || valor.startsWith('https://')) {
+                return valor;
+            }
+            const caminhoLimpo = valor.replace(/^\/?uploads\//i, '').replace(/^\//, '');
+            return `${BASE_API_URL}/uploads/${caminhoLimpo}?v=${Date.now()}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+
+            document.querySelectorAll('[data-target]').forEach(el => {
+                el.addEventListener('click', () => ir(el.getAttribute('data-target')));
+            });
+
+            const cacheInicial = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+            if (cacheInicial && Object.keys(cacheInicial).length > 0) {
+                dadosUsuarioOriginais = cacheInicial;
+                preencherCampos(cacheInicial);
+            }
+
+            carregarPerfil();
+            carregarNotificacoes();
+        });
+
+        async function carregarPerfil() {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = 'logincadastro.html';
+                return;
+            }
+
+            try {
+                const resposta = await fetch(API_PERFIL_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+
+                if (resposta.status === 401 || resposta.status === 403) {
+                    localStorage.clear();
+                    window.location.href = 'logincadastro.html';
+                    return;
+                }
+
+                if (resposta.ok) {
+                    const dados = await resposta.json();
+                    if (dados.sucesso && dados.usuario) {
+                        dadosUsuarioOriginais = dados.usuario;
+                        localStorage.setItem('usuarioLogado', JSON.stringify(dados.usuario));
+                        localStorage.setItem('nomeUsuario', dados.usuario.nome_completo || dados.usuario.nome || '');
+                        preencherCampos(dados.usuario);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.warn('Erro ao buscar perfil no servidor:', error);
+            }
+
+            const cacheLocal = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+            dadosUsuarioOriginais = cacheLocal;
+            preencherCampos(cacheLocal);
+        }
+
+        function preencherCampos(u) {
+            document.getElementById('nome').value = u.nome_completo || u.nome || '';
+            document.getElementById('matricula').value = u.matricula || u.ra || '';
+            document.getElementById('email').value = u.email || '';
+            document.getElementById('turma').value = u.turma || '';
+            document.getElementById('turno').value = u.turno || '';
+            document.getElementById('curso').value = u.curso || '';
+            document.getElementById('telefone').value = u.telefone || '';
+            document.getElementById('fotoPreview').src = resolverUrlFoto(u.foto_perfil);
+        }
+
+        function encerrarModoEdicaoVisual() {
+            const ids = ['nome', 'email', 'turma', 'turno', 'curso', 'telefone', 'matricula'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('readonly', 'readonly');
+                    el.readOnly = true;
+                    el.classList.remove('editable');
+                }
+            });
+
+            arquivoFotoSelecionado = null;
+            document.getElementById('inputFoto').value = '';
+            document.getElementById('actionsContainer').style.display = 'none';
+            document.getElementById('btnCamera').style.display = 'none';
+            document.getElementById('btnModificar').style.display = 'flex';
+        }
+
+        function ativarEdicao() {
+            const ids = ['nome', 'email', 'turma', 'turno', 'curso', 'telefone', 'matricula'];
+            
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.removeAttribute('readonly');
+                    el.readOnly = false;
+                    el.classList.add('editable');
+                }
+            });
+
+            document.getElementById('actionsContainer').style.display = 'flex';
+            document.getElementById('btnCamera').style.display = 'flex';
+            document.getElementById('btnModificar').style.display = 'none';
+
+            setTimeout(() => {
+                document.getElementById('nome').focus();
+            }, 50);
+        }
+
+        function cancelarEdicao() {
+            preencherCampos(dadosUsuarioOriginais);
+            encerrarModoEdicaoVisual();
+        }
+
+        function previewImagem(event) {
+            const file = event.target.files[0];
+            if (file) {
+                arquivoFotoSelecionado = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('fotoPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function salvarPerfil(event) {
+            event.preventDefault();
+            const btnSalvar = document.getElementById('btnSalvar');
+            btnSalvar.disabled = true;
+            btnSalvar.innerText = "Salvando...";
+
+            const valMatricula = document.getElementById('matricula').value.trim();
+
+            const novosDados = {
+                nome: document.getElementById('nome').value.trim(),
+                nome_completo: document.getElementById('nome').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                matricula: valMatricula,
+                ra: valMatricula,
+                turma: document.getElementById('turma').value.trim(),
+                turno: document.getElementById('turno').value.trim(),
+                curso: document.getElementById('curso').value.trim(),
+                telefone: document.getElementById('telefone').value.trim()
+            };
+
+            const token = localStorage.getItem('token');
+            if (token) {
+                const formData = new FormData();
+                formData.append('nome_completo', novosDados.nome_completo);
+                formData.append('email', novosDados.email);
+                formData.append('matricula', novosDados.matricula);
+                formData.append('ra', novosDados.ra);
+                formData.append('turma', novosDados.turma);
+                formData.append('turno', novosDados.turno);
+                formData.append('curso', novosDados.curso);
+                formData.append('telefone', novosDados.telefone);
+
+                if (arquivoFotoSelecionado) {
+                    formData.append('foto', arquivoFotoSelecionado);
+                }
+
+                try {
+                    const resp = await fetch(API_PERFIL_URL, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: formData
+                    });
+
+                    const dadosResp = await resp.json();
+
+                    if (resp.ok && dadosResp.sucesso && dadosResp.usuario) {
+                        dadosUsuarioOriginais = dadosResp.usuario;
+                        localStorage.setItem('usuarioLogado', JSON.stringify(dadosResp.usuario));
+                        localStorage.setItem('nomeUsuario', dadosResp.usuario.nome_completo || dadosResp.usuario.nome || '');
+
+                        preencherCampos(dadosResp.usuario);
+                        encerrarModoEdicaoVisual();
+                        alert('Informações e foto atualizadas com sucesso!');
+
+                        btnSalvar.disabled = false;
+                        btnSalvar.innerText = "Salvar Alterações";
+                        return;
+                    } else {
+                        alert(dadosResp.mensagem || 'Erro ao atualizar perfil no servidor.');
+                        btnSalvar.disabled = false;
+                        btnSalvar.innerText = "Salvar Alterações";
+                        return;
+                    }
+                } catch (error) {
+                    alert('Erro de conexão com o servidor. Verifique se o backend está rodando.');
+                    btnSalvar.disabled = false;
+                    btnSalvar.innerText = "Salvar Alterações";
+                    return;
+                }
+            }
+
+            btnSalvar.disabled = false;
+            btnSalvar.innerText = "Salvar Alterações";
+        }
     </script>
 </body>
 </html>

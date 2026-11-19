@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script>
+    if (localStorage.getItem('tipoUsuario') !== 'admin') {
+        alert('Acesso restrito para administradores.');
+        window.location.href = 'login_admin.html';
+    }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Sugestões - AAPM SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f11815;
+            --primary-dark: #b31210;
+            --bg-body: #f8faff;
+            --sidebar-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #64748b;
+            --radius: 24px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            --border-color: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { display: flex; height: 100vh; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; }
+
+        /* --- SIDEBAR ADMIN PADRONIZADO --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 18px;
+            transition: all 0.3s ease;
+            z-index: 100;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar.closed {
+            width: 0;
+            padding: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 6px;
+        }
+
+        .sidebar-section-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #94a3b8;
+            letter-spacing: 0.8px;
+            margin: 20px 0 10px 10px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #334155;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-item i {
+            width: 20px;
+            height: 20px;
+            color: #475569;
+        }
+
+        .nav-item:hover {
+            background-color: #fff1f1;
+            color: var(--primary);
+        }
+
+        .nav-item:hover i {
+            color: var(--primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 8px 18px rgba(241, 24, 21, 0.25);
+        }
+
+        .nav-item.active i {
+            color: #ffffff;
+        }
+
+        .nav-badge-admin {
+            background-color: #d92d20;
+            color: #ffffff !important;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font-weight: 800;
+            box-shadow: 0 8px 20px rgba(217, 45, 32, 0.25);
+            margin-bottom: 10px;
+        }
+
+        .nav-badge-admin i {
+            color: #ffffff !important;
+        }
+
+        .nav-badge-admin:hover {
+            background-color: #b31210;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background-color: #fff5f5;
+            color: var(--primary);
+            border: 1px solid #ffe3e3;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout i {
+            color: var(--primary);
+        }
+
+        .btn-logout:hover {
+            background-color: #ffe8e8;
+        }
+
+        .btn-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-sub);
+            padding: 8px;
+            border-radius: 12px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-toggle:hover { background-color: #f1f5f9; color: var(--primary); }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-header { height: 90px; background-color: #ffffff; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 40px; position: sticky; top: 0; z-index: 90; }
+
+        .search-bar { background: #f1f5f9; padding: 12px 20px; border-radius: 18px; display: flex; align-items: center; gap: 12px; width: 320px; border: 1.5px solid transparent; transition: all 0.2s ease; }
+        .search-bar:focus-within { border-color: var(--primary); background-color: #ffffff; box-shadow: 0 0 0 4px rgba(241, 24, 21, 0.1); }
+        .search-bar input { border: none; background: transparent; outline: none; width: 100%; font-weight: 600; color: var(--text-main); font-size: 14px; }
+
+        .logo-central { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 15px; }
+        .logo-text { color: var(--primary); font-weight: 800; font-size: 32px; letter-spacing: -1px; }
+
+        .user-actions { display: flex; align-items: center; gap: 15px; }
+        
+        .user-avatar { 
+            width: 45px; 
+            height: 45px; 
+            background-color: var(--primary); 
+            border-radius: 14px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: white; 
+            box-shadow: 0 8px 15px rgba(241, 24, 21, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .content-body { padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+
+        .filter-select { padding: 12px 18px; border-radius: 14px; border: 1px solid var(--border-color); background: #ffffff; font-weight: 700; color: var(--text-main); outline: none; cursor: pointer; }
+
+        /* --- GRID DE SUGESTÕES --- */
+        .sugestoes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
+        
+        .sugestao-card { background: #ffffff; border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
+        .sugestao-card:hover { transform: translateY(-4px); }
+
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        
+        .badge-status { font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-transform: uppercase; }
+        .badge-pendente { background: #fef3c7; color: #d97706; }
+        .badge-lido { background: #e0f2fe; color: #0284c7; }
+        .badge-respondido { background: #dcfce7; color: #15803d; }
+
+        .aluno-nome { font-size: 16px; font-weight: 800; color: var(--text-main); }
+        .aluno-detalhes { font-size: 12px; color: var(--text-sub); margin-bottom: 15px; }
+
+        .sugestao-texto { font-size: 14px; color: var(--text-main); line-height: 1.5; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .sugestao-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #f1f5f9; }
+        .sugestao-data { font-size: 12px; color: var(--text-sub); font-weight: 600; display: flex; align-items: center; gap: 6px; }
+
+        .btn-ler { background: #fff1f1; color: var(--primary); border: none; padding: 8px 16px; border-radius: 12px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn-ler:hover { background: var(--primary); color: white; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: #ffffff; width: 100%; max-width: 550px; border-radius: var(--radius); padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 20px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+
+        .box-sugestao-completa { background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 16px; font-size: 14px; line-height: 1.6; color: var(--text-main); max-height: 180px; overflow-y: auto; }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 13px; font-weight: 700; color: var(--text-sub); }
+        .form-group select, .form-group textarea { padding: 12px 16px; border-radius: 12px; border: 1px solid #e2e8f0; outline: none; font-weight: 600; font-size: 14px; }
+        .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+
+        .btn-save { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn-save:hover { background: var(--primary-dark); }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR ADMIN PADRONIZADO -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i data-lucide="layout-grid" style="color: #475569;"></i>
+                <span style="font-weight: 800; font-size: 14px; color: #475569; letter-spacing: 0.5px;">MENU PRINCIPAL</span>
+            </div>
+            <button class="btn-toggle" onclick="toggleMenu()">
+                <i data-lucide="x"></i>
+            </button>
+        </div>
+
+        <a href="admin.html" class="nav-item nav-badge-admin">
+            <i data-lucide="shield-check"></i>
+            <span>Painel Admin</span>
+        </a>
+
+        <div class="sidebar-section-title">GESTÃO</div>
+        <nav class="nav-links">
+            <a href="page.html" class="nav-item"><i data-lucide="book-open"></i> História da AAPM</a>
+            <a href="eventos_admin.html" class="nav-item"><i data-lucide="calendar"></i> Eventos</a>
+            <a href="beneficios_admin.html" class="nav-item"><i data-lucide="award"></i> Benefícios</a>
+            <a href="oficinas_admin.html" class="nav-item"><i data-lucide="layers"></i> Oficinas</a>
+            <a href="avisos_admin.html" class="nav-item"><i data-lucide="megaphone"></i> Avisos</a>
+            <a href="comprovante_admin.html" class="nav-item"><i data-lucide="file-check"></i> Confirmação Comprovante</a>
+            <a href="contribuintes.html" class="nav-item"><i data-lucide="users"></i> Lista de Contribuintes</a>
+        </nav>
+
+        <div class="sidebar-section-title">MINHA CONTA</div>
+        <nav class="nav-links">
+            <a href="perfiladmin.html" class="nav-item"><i data-lucide="user"></i> Meu Perfil</a>
+            <a href="sugestoes_admin.html" class="nav-item active"><i data-lucide="lightbulb"></i> Sugestões</a>
+            <a href="contato_chat.html" class="nav-item"><i data-lucide="message-square"></i> Contato / Chat</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a onclick="fazerLogout()" class="btn-logout">
+                <i data-lucide="log-out"></i>
+                <span>Sair</span>
+            </a>
+        </div>
+    </aside>
+
+    <div class="main-content">
+        <header class="top-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button class="btn-toggle" id="openBtn" onclick="toggleMenu()" style="display: none;"><i data-lucide="menu"></i></button>
+                <div class="search-bar">
+                    <i data-lucide="search" size="18"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por aluno ou conteúdo..." oninput="filtrarSugestoes()">
+                </div>
+            </div>
+
+            <div class="logo-central">
+                <span class="logo-text">AAPM</span>
+                <img src="fotoss.png" alt="Logo SENAI" style="height: 45px;" onerror="this.style.display='none'">
+                <span class="logo-text">SENAI</span>
+            </div>
+
+            <div class="user-actions">
+                <button class="btn-toggle"><i data-lucide="bell"></i></button>
+                <div class="user-avatar" onclick="window.location.href='perfiladmin.html'" title="Meu Perfil">
+                    <i data-lucide="user" size="24"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-body">
+            <div class="page-header">
+                <div>
+                    <h1 style="font-size: 28px; font-weight: 800; margin-bottom: 5px;">Caixa de Sugestões</h1>
+                    <p style="color: var(--text-sub);">Acompanhe os feedbacks e ideias enviadas pelos alunos.</p>
+                </div>
+                <select id="statusFilter" class="filter-select" onchange="filtrarSugestoes()">
+                    <option value="todos">Todos os Status</option>
+                    <option value="pendente">Pendentes</option>
+                    <option value="lido">Lidos</option>
+                    <option value="respondido">Respondidos</option>
+                </select>
+            </div>
+
+            <div class="sugestoes-grid" id="grid-sugestoes">
+                <p style="color: var(--text-sub);">Carregando sugestões...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE VISUALIZAÇÃO E RESPOSTA -->
+    <div class="modal-overlay" id="modal-sugestao">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <span style="font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase;">Detalhes da Sugestão</span>
+                    <h3 class="modal-title" id="modal-aluno-nome">Nome do Aluno</h3>
+                </div>
+                <button class="btn-toggle" onclick="fecharModal()"><i data-lucide="x"></i></button>
+            </div>
+
+            <p style="font-size: 12px; color: var(--text-sub);" id="modal-aluno-info">Matrícula | Email</p>
+
+            <div class="form-group">
+                <label>Mensagem do Aluno</label>
+                <div class="box-sugestao-completa" id="modal-mensagem-texto"></div>
+            </div>
+
+            <form id="sugestao-form" onsubmit="salvarResposta(event)">
+                <input type="hidden" id="sugestao-id">
+
+                <div class="form-group">
+                    <label>Status da Sugestão</label>
+                    <select id="sugestao-status">
+                        <option value="pendente">Pendente</option>
+                        <option value="lido">Lido</option>
+                        <option value="respondido">Respondido</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Resposta/Anotação Interna (Opcional)</label>
+                    <textarea id="sugestao-resposta" rows="3" placeholder="Escreva um retorno para o aluno..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="button" class="btn-toggle" onclick="fecharModal()" style="border: 1px solid #e2e8f0; padding: 12px 20px; border-radius: 12px;">Cancelar</button>
+                    <button type="submit" class="btn-save">Atualizar Sugestão</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3002/api/sugestoes';
+        let sugestoesLocais = [];
+
+        function atualizarIcones() {
+            if (window.lucide && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
+            }
+        }
+
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const openBtn = document.getElementById('openBtn');
+            sidebar.classList.toggle('closed');
+            openBtn.style.display = sidebar.classList.contains('closed') ? 'flex' : 'none';
+        }
+
+        function fazerLogout() {
+            if (confirm("Deseja realmente sair do Painel Administrativo?")) {
+                localStorage.clear();
+                window.location.href = 'login_admin.html';
+            }
+        }
+
+        function tratarSessaoExpirada(msg) {
+            alert(msg || "Sessão expirada. Faça login novamente.");
+            localStorage.clear();
+            window.location.href = 'login_admin.html';
+        }
+
+        async function carregarSugestoes() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(API_URL, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    tratarSessaoExpirada("A sua sessão expirou. Faça login novamente como Administrador.");
+                    return;
+                }
+
+                sugestoesLocais = await res.json();
+                renderizarSugestoes(sugestoesLocais);
+            } catch (err) {
+                console.error("Erro ao carregar sugestões:", err);
+                document.getElementById('grid-sugestoes').innerHTML = `<p style="color: red;">Erro ao conectar com o servidor.</p>`;
+            }
+        }
+
+        function renderizarSugestoes(lista) {
+            const grid = document.getElementById('grid-sugestoes');
+            grid.innerHTML = '';
+
+            if (!Array.isArray(lista) || lista.length === 0) {
+                grid.innerHTML = `<p style="color: var(--text-sub);">Nenhuma sugestão encontrada.</p>`;
+                return;
+            }
+
+            lista.forEach(item => {
+                const status = (item.status || 'pendente').toLowerCase();
+                let badgeClass = 'badge-pendente';
+                let statusTexto = 'Pendente';
+
+                if (status === 'lido') {
+                    badgeClass = 'badge-lido';
+                    statusTexto = 'Lido';
+                } else if (status === 'respondido') {
+                    badgeClass = 'badge-respondido';
+                    statusTexto = 'Respondido';
+                }
+
+                const dataEnvio = item.data_envio 
+                    ? new Date(item.data_envio).toLocaleDateString('pt-BR') 
+                    : '-';
+
+                const nomeAluno = item.aluno || item.nome || 'Aluno Anônimo';
+                const matricula = item.matricula || 'N/A';
+
+                const card = document.createElement('div');
+                card.className = 'sugestao-card';
+                card.innerHTML = `
+                    <div>
+                        <div class="card-top">
+                            <span class="aluno-nome">${nomeAluno}</span>
+                            <span class="badge-status ${badgeClass}">${statusTexto}</span>
+                        </div>
+                        <p class="aluno-detalhes">Matrícula: ${matricula}</p>
+                        <p class="sugestao-texto">${item.mensagem || item.sugestao}</p>
+                    </div>
+
+                    <div class="sugestao-footer">
+                        <span class="sugestao-data"><i data-lucide="clock" size="14"></i> ${dataEnvio}</span>
+                        <button class="btn-ler" onclick="abrirModal(${item.id})">
+                            <i data-lucide="eye" size="14"></i> Ler
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            atualizarIcones();
+        }
+
+        function filtrarSugestoes() {
+            const busca = document.getElementById('searchInput').value.toLowerCase();
+            const statusFiltro = document.getElementById('statusFilter').value.toLowerCase();
+
+            const filtrados = sugestoesLocais.filter(item => {
+                const nome = (item.aluno || item.nome || '').toLowerCase();
+                const texto = (item.mensagem || item.sugestao || '').toLowerCase();
+                const matricula = String(item.matricula || '').toLowerCase();
+
+                const atendeBusca = nome.includes(busca) || texto.includes(busca) || matricula.includes(busca);
+                const itemStatus = (item.status || 'pendente').toLowerCase();
+                const atendeStatus = statusFiltro === 'todos' || itemStatus === statusFiltro;
+
+                return atendeBusca && atendeStatus;
+            });
+
+            renderizarSugestoes(filtrados);
+        }
+
+        function abrirModal(id) {
+            const item = sugestoesLocais.find(s => s.id === id);
+            if (!item) return;
+
+            document.getElementById('sugestao-id').value = item.id;
+            document.getElementById('modal-aluno-nome').innerText = item.aluno || item.nome || 'Aluno Anônimo';
+            document.getElementById('modal-aluno-info').innerText = `Matrícula: ${item.matricula || '-'} | Email: ${item.email || '-'}`;
+            document.getElementById('modal-mensagem-texto').innerText = item.mensagem || item.sugestao;
+            document.getElementById('sugestao-status').value = (item.status || 'pendente').toLowerCase();
+            document.getElementById('sugestao-resposta').value = item.resposta || '';
+
+            document.getElementById('modal-sugestao').classList.add('active');
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-sugestao').classList.remove('active');
+        }
+
+        async function salvarResposta(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('token');
+            const id = document.getElementById('sugestao-id').value;
+
+            const dados = {
+                status: document.getElementById('sugestao-status').value,
+                resposta: document.getElementById('sugestao-resposta').value.trim()
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(dados)
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    tratarSessaoExpirada("Sessão expirada ao tentar atualizar sugestão.");
+                    return;
+                }
+
+                if (res.ok) {
+                    fecharModal();
+                    carregarSugestoes();
+                } else {
+                    alert("Erro ao atualizar a sugestão.");
+                }
+            } catch (err) {
+                console.error("Erro ao salvar sugestão:", err);
+                alert("Falha de comunicação com o servidor.");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarSugestoes();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status da Análise - AAPM SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f12b2c;
+            --primary-hover: #d91f20;
+            --senai-blue: #1C335C;
+            --bg-page: #f8faff;
+            --text-dark: #120e2e;
+            --text-sub: #64748b;
+            --border-color: #cbd5e1;
+            --radius-lg: 28px;
+            --radius-md: 16px;
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .logo-text { color: var(--primary); font-weight: 800; font-size: 28px; }
+
+        .card-status {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: var(--shadow);
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-box.pendente { background: #fef3c7; color: #d97706; }
+        .icon-box.aprovado { background: #dcfce7; color: #16a34a; }
+
+        .status-title { font-size: 26px; font-weight: 800; color: var(--senai-blue); }
+        .status-description { font-size: 15px; color: var(--text-sub); line-height: 1.6; }
+
+        .info-grid {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-md);
+            padding: 20px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .info-item .label { font-weight: 700; color: var(--text-sub); }
+        .info-item .value { font-weight: 800; color: var(--text-dark); }
+
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 800;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-action:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .redirect-timer {
+            font-size: 13px;
+            font-weight: 700;
+            color: #16a34a;
+            margin-top: -10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-logo">
+        <span class="logo-text">AAPM</span>
+        <img src="fotoss.png" alt="Logo SENAI" style="height: 40px;" onerror="this.style.display='none'">
+        <span class="logo-text">SENAI</span>
+    </div>
+
+    <div class="card-status" id="cardContainer">
+        <div class="icon-box pendente" id="iconContainer">
+            <i data-lucide="clock" size="40"></i>
+        </div>
+
+        <h2 class="status-title" id="statusTitle">Comprovante em Análise</h2>
+        <p class="status-description" id="statusDesc">
+            Seu cadastro foi realizado com sucesso! O seu comprovante de pagamento está sendo analisado pela administração da AAPM.
+        </p>
+
+        <!-- DADOS DO ALUNO LOGADO -->
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="label">Aluno:</span>
+                <span class="value" id="valNome">Carregando...</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Matrícula:</span>
+                <span class="value" id="valMatricula">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">E-mail:</span>
+                <span class="value" id="valEmail">-</span>
+            </div>
+            <div class="info-item">
+                <span class="label">Turma:</span>
+                <span class="value" id="valTurma">-</span>
+            </div>
+        </div>
+
+        <p class="redirect-timer" id="timerText" style="display: none;">Redirecionando em <span id="countNum">3</span> segundos...</p>
+
+        <button class="btn-action" id="btnMainAction" onclick="fazerSair()">
+            <i data-lucide="log-out" size="18"></i> Sair
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuarioStr = localStorage.getItem('usuarioLogado');
+            if (!usuarioStr) {
+                window.location.href = 'logincadastro.html';
+                return;
+            }
+
+            const usuario = JSON.parse(usuarioStr);
+            
+            // Preenche as informações do aluno na tela
+            document.getElementById('valNome').innerText = usuario.nome || usuario.nome_completo || 'Aluno';
+            document.getElementById('valMatricula').innerText = usuario.matricula || 'N/A';
+            document.getElementById('valEmail').innerText = usuario.email || '-';
+            document.getElementById('valTurma').innerText = usuario.turma || '-';
+
+            const status = (usuario.status || '').toUpperCase();
+            const eAprovado = status === 'APROVADO' || usuario.aprovado === true;
+            const urlParams = new URLSearchParams(window.location.search);
+            const notificar = urlParams.get('notificar') === 'true';
+
+            // SE FOI APROVADO E É A PRIMEIRA VEZ APÓS LOGIN
+            if (eAprovado && notificar) {
+                const iconBox = document.getElementById('iconContainer');
+                iconBox.className = 'icon-box aprovado';
+                iconBox.innerHTML = '<i data-lucide="check-circle-2" size="40"></i>';
+
+                document.getElementById('statusTitle').innerText = 'Comprovante Aprovado!';
+                document.getElementById('statusDesc').innerText = 'Parabéns! Sua contribuição foi confirmada pelo administrador. Seja bem-vindo à AAPM SENAI!';
+                
+                const timerText = document.getElementById('timerText');
+                timerText.style.display = 'block';
+
+                const btnAction = document.getElementById('btnMainAction');
+                btnAction.innerHTML = '<i data-lucide="sparkles" size="18"></i> Ir para a Tela Inicial';
+                btnAction.onclick = () => { window.location.href = 'landingpage.html'; };
+
+                // Contagem regressiva de 3s antes do redirecionamento automático
+                let segundos = 3;
+                const interval = setInterval(() => {
+                    segundos--;
+                    document.getElementById('countNum').innerText = segundos;
+                    if (segundos <= 0) {
+                        clearInterval(interval);
+                        window.location.href = 'landingpage.html';
+                    }
+                }, 1000);
+            }
+
+            if (window.lucide) lucide.createIcons();
+        });
+
+        function fazerSair() {
+            localStorage.clear();
+            window.location.href = 'logincadastro.html';
+        }
+    </script>
+</body>
+</html>

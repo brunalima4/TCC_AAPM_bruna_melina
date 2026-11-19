@@ -1,216 +1,613 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script src="admin_sessao.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil Admin | AAPM SENAI</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #f11815;
-            --primary-dark: #b31210;
-            --bg: #f8faff;
-            --card: #ffffff;
-            --text: #1a1a1a;
-            --text-light: #64748b;
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --primary-light: #fff1f1;
+            --success: #10b981;
+            --success-dark: #059669;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --radius-card: 20px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
-            background: linear-gradient(180deg, #fff1f1 0%, var(--bg) 100%);
-            min-height: 100vh;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 450px;
-            margin-top: 20px;
-        }
-
-        /* --- BARRA SUPERIOR --- */
-        .top-nav {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 40px;
-        }
-
-        .btn-back {
-            background: white;
-            color: var(--text);
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: 0.3s;
-        }
-
-        .btn-back:hover {
-            background: var(--primary);
-            color: white;
-            transform: translateX(-5px);
-        }
-
-        .page-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text);
-            text-transform: uppercase;
-        }
-
-        /* --- CARD DO PERFIL ADMIN --- */
-        .profile-card {
-            background: var(--card);
-            padding: 35px 25px;
-            border-radius: 35px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.04);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .input-group {
-            margin-bottom: 22px;
+            overflow: hidden;
             position: relative;
         }
 
-        .input-group label {
-            font-size: 11px;
-            font-weight: 800;
-            color: var(--text-light);
-            text-transform: uppercase;
-            margin-left: 12px;
-            margin-bottom: 6px;
-            display: block;
+        /* Sidebar & Overlay */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        aside {
+            position: fixed; top: 0; left: 0; width: 290px; height: 100vh;
+            background: #ffffff; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 28px 20px; overflow-y: auto; z-index: 999;
+            transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 15px 0 35px rgba(0,0,0,0.08);
+        }
+        aside.open { transform: translateX(0); }
+
+        .sidebar-header { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 20px; }
+        .btn-close-menu { width: 32px; height: 32px; border: none; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); }
+        .btn-close-menu:hover { background: #f1f5f9; color: var(--text-dark); }
+
+        .badge-admin-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 24px; cursor: pointer; border: none; width: 100%; text-align: left;
+            box-shadow: 0 8px 20px rgba(241,43,44,0.25);
         }
 
-        .input-field {
-            width: 100%;
-            padding: 16px 16px 16px 52px;
-            background: #f1f5f9;
-            border: 2px solid transparent;
-            border-radius: 18px;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text);
-            transition: 0.3s;
+        .menu-category { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin: 20px 0 10px 8px; }
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px;
+            font-weight: 700; font-size: 14px; color: #475569; cursor: pointer; transition: 0.2s;
+        }
+        .menu-item:hover { background: #f1f5f9; color: var(--primary); transform: translateX(4px); }
+        .menu-item.active-page { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+
+        .btn-sair {
+            background: #fff1f1; color: var(--primary); border: none; padding: 14px 18px;
+            border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 24px; transition: 0.2s;
+        }
+        .btn-sair:hover { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25); }
+
+        .wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+
+        /* Cabeçalho */
+        header {
+            height: 90px; background: #ffffff;
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 48px; position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: flex-start; }
+
+        .btn-toggle-menu {
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+            width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+        }
+        .btn-toggle-menu:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .search-container { position: relative; width: 280px; }
+        .search-bar {
+            display: flex; align-items: center; gap: 12px; background: #f1f5f9;
+            padding: 12px 20px; border-radius: 20px; width: 100%; border: 1px solid transparent; transition: 0.2s;
+        }
+        .search-bar:focus-within { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1); }
+        .search-bar input { border: none; background: transparent; outline: none; font-size: 14px; font-weight: 700; width: 100%; color: var(--text-dark); }
+
+        .search-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0; width: 320px; background: #fff;
+            border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+            padding: 10px; display: none; flex-direction: column; gap: 8px; z-index: 200;
+        }
+        .search-dropdown.active { display: flex; }
+        .search-dropdown-item {
+            display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
+            border-radius: 12px; background: #fff; border: 1px solid var(--border-color); cursor: pointer; transition: 0.2s;
+        }
+        .search-dropdown-item:hover { background: var(--primary-light); border-color: var(--primary); }
+        .search-dropdown-item .item-left { display: flex; align-items: center; gap: 12px; }
+        .search-dropdown-item .item-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; }
+        .search-dropdown-item span { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+        .brand-center {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center; gap: 0px; font-size: 24px; font-weight: 800;
+            letter-spacing: -0.5px; cursor: pointer; user-select: none;
+        }
+        .brand-center .aapm-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-right: -12px; }
+        .brand-center .senai-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-left: -12px; }
+        .brand-center img { height: 68px; width: auto; object-fit: contain; display: block; }
+
+        .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex: 1; }
+
+        .profile-btn {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--primary);
+            color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(241, 43, 44, 0.3); transition: transform 0.2s;
+        }
+        .profile-btn:hover { transform: scale(1.05); }
+
+        .nav-categories-bar {
+            background: #ffffff; border-bottom: 1px solid var(--border-color);
+            padding: 0 40px; display: flex; align-items: center; justify-content: center; gap: 32px;
+            overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0;
+        }
+        .nav-categories-bar::-webkit-scrollbar { display: none; }
+
+        .nav-cat-item {
+            position: relative; padding: 14px 0; font-size: 13.5px; font-weight: 700;
+            color: #64748b; cursor: pointer; transition: opacity 0.2s ease; user-select: none;
+        }
+        .nav-cat-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 2px; background: var(--primary); opacity: 0; transition: opacity 0.2s ease;
+        }
+        .nav-cat-item:hover { color: var(--text-dark); }
+        .nav-cat-item.active { color: var(--primary); }
+        .nav-cat-item.active::after { opacity: 1; }
+
+        /* CONTEÚDO DO PERFIL ADMIN */
+        .content-body { flex: 1; padding: 36px 40px; max-width: 620px; margin: 0 auto; width: 100%; }
+        .profile-card { background: #ffffff; padding: 32px; border-radius: var(--radius-card); border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+
+        .header-profile { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .badge-admin { background: #ffebeb; color: var(--primary); padding: 6px 14px; border-radius: 10px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+
+        .btn-toggle-edit { background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-toggle-edit:hover { background: #e2e8f0; }
+
+        .avatar-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
+        .avatar-wrapper { position: relative; width: 110px; height: 110px; }
+        .avatar-img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary); background: #f1f5f9; }
+        .btn-edit-photo { position: absolute; bottom: 2px; right: 2px; background: var(--primary); color: white; border: 2px solid white; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        .input-group { margin-bottom: 18px; position: relative; }
+        .input-group label { font-size: 11px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; margin-left: 8px; margin-bottom: 6px; display: block; }
+        
+        .input-field { 
+            width: 100%; 
+            padding: 14px 14px 14px 48px; 
+            background: #ffffff; 
+            border: 1px solid var(--border-color); 
+            border-radius: 14px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            color: var(--text-dark); 
+            outline: none; 
         }
 
         .input-field:focus {
-            outline: none;
             border-color: var(--primary);
-            background: white;
+            box-shadow: 0 0 0 3px rgba(241, 43, 44, 0.1);
         }
 
-        .input-icon {
-            position: absolute;
-            left: 18px;
-            top: 36px;
-            color: var(--primary);
+        .input-field[readonly] { 
+            background: #f1f5f9 !important; 
+            color: var(--text-sub) !important; 
+            border-color: transparent !important; 
+            cursor: not-allowed !important; 
+            pointer-events: none;
         }
 
-        .badge-admin {
-            display: inline-block;
-            background: #ffebeb;
-            color: var(--primary);
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            margin-left: 12px;
+        .input-field.editable {
+            background: #ffffff !important;
+            color: var(--text-dark) !important;
+            border-color: var(--primary) !important;
+            cursor: text !important;
+            pointer-events: auto !important;
         }
 
-        /* --- BOTÃO --- */
-        .btn-save {
-            width: 100%;
-            padding: 18px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: 0.3s;
-            text-align: center;
-        }
+        .input-icon { position: absolute; left: 16px; top: 34px; color: var(--primary); pointer-events: none; }
 
-        .btn-save:hover {
-            transform: translateY(-3px);
-            background: var(--primary-dark);
-            box-shadow: 0 10px 20px rgba(241, 24, 21, 0.2);
-        }
+        .actions-container { display: none; gap: 10px; margin-top: 24px; }
+        .btn-save { flex: 2; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .btn-save:hover { background: var(--primary-dark); }
+        .btn-cancel { flex: 1; padding: 14px; background: #f1f5f9; color: var(--text-sub); border: 1px solid var(--border-color); border-radius: 12px; font-weight: 700; cursor: pointer; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
+        @media (max-width: 768px) {
+            .content-body { padding: 24px 20px; }
+            header { padding: 0 20px; }
+            .search-container { width: 170px; }
+            .form-row { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <nav class="top-nav">
-            <button class="btn-back" onclick="window.history.back()">
-                <i data-lucide="arrow-left" size="24"></i>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebarMenu">
+        <div>
+            <div class="sidebar-header">
+                <button class="btn-close-menu" onclick="toggleSidebar()" aria-label="Fechar Menu">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+
+            <button class="badge-admin-btn" data-target="admin.html">
+                <i data-lucide="shield-check" size="20"></i> Painel Administrativo
             </button>
-            <h1 class="page-title">Perfil Admin</h1>
-            <div style="width: 45px;"></div>
+
+            <div class="menu-category">Gestão AAPM</div>
+            <ul class="menu-list">
+                <li class="menu-item" data-target="admin.html"><i data-lucide="layout-dashboard" size="18"></i> Painel Geral</li>
+                <li class="menu-item" data-target="comprovantes.html"><i data-lucide="file-check" size="18"></i> Comprovantes</li>
+                <li class="menu-item" data-target="contribuintes.html"><i data-lucide="users" size="18"></i> Contribuintes</li>
+                <li class="menu-item" data-target="eventos_admin.html"><i data-lucide="calendar" size="18"></i> Eventos</li>
+                <li class="menu-item" data-target="beneficios_admin.html"><i data-lucide="award" size="18"></i> Benefícios</li>
+                <li class="menu-item" data-target="oficinas_admin.html"><i data-lucide="layers" size="18"></i> Oficinas</li>
+                <li class="menu-item" data-target="avisos_admin.html"><i data-lucide="megaphone" size="18"></i> Avisos</li>
+            </ul>
+
+            <div class="menu-category">Minha Conta</div>
+            <ul class="menu-list">
+                <li class="menu-item active-page" data-target="perfil_admin.html"><i data-lucide="user" size="18"></i> Meu Perfil</li>
+                <li class="menu-item" data-target="chat_admin.html"><i data-lucide="message-square" size="18"></i> Atendimento / Chat</li>
+            </ul>
+        </div>
+
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18"></i> Sair da Conta</button>
+    </aside>
+
+    <div class="wrapper">
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()" title="Menu de Opções"><i data-lucide="menu" size="24"></i></button>
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i data-lucide="search" size="18" style="color: var(--text-sub);"></i>
+                        <input type="text" id="inputBuscaPainel" placeholder="Pesquisar" oninput="filtrarPainel()" autocomplete="off">
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown"></div>
+                </div>
+            </div>
+
+            <div class="brand-center" data-target="admin.html">
+                <span class="aapm-text">AAPM</span>
+                <img src="img/fotoss.png" alt="Logotipo AAPM SENAI" width="160" height="68" onerror="this.src='fotoss.png'; this.onerror=null;">
+                <span class="senai-text">SENAI</span>
+            </div>
+
+            <div class="header-right">
+                <button class="profile-btn" data-target="perfil_admin.html" title="Meu Perfil Admin"><i data-lucide="user" size="22"></i></button>
+            </div>
+        </header>
+
+        <nav class="nav-categories-bar">
+            <div class="nav-cat-item" data-target="admin.html">Painel</div>
+            <div class="nav-cat-item" data-target="comprovantes.html">Comprovantes</div>
+            <div class="nav-cat-item" data-target="eventos_admin.html">Eventos</div>
+            <div class="nav-cat-item" data-target="beneficios_admin.html">Benefícios</div>
+            <div class="nav-cat-item" data-target="oficinas_admin.html">Oficinas</div>
+            <div class="nav-cat-item" data-target="avisos_admin.html">Avisos</div>
         </nav>
 
-        <div class="profile-card">
-            <span class="badge-admin">ACESSO ADMINISTRATIVO</span>
-            
-            <form id="adminPerfilForm">
+        <div class="content-body">
+            <div class="profile-card">
+                <div class="header-profile">
+                    <span class="badge-admin"><i data-lucide="shield-check" size="14"></i> ACESSO ADMINISTRATIVO</span>
+                    <button type="button" class="btn-toggle-edit" id="btnModificar" onclick="ativarEdicao()">
+                        <i data-lucide="edit-3" size="16"></i> Modificar Dados
+                    </button>
+                </div>
                 
-                <div class="input-group">
-                    <label>Nome do Administrador</label>
-                    <i data-lucide="shield-check" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="Nome completo do admin">
+                <div class="avatar-container">
+                    <div class="avatar-wrapper">
+                        <img id="fotoPreview" src="https://via.placeholder.com/150/ffebeb/f12b2c?text=Admin" onerror="this.onerror=null; this.src='https://via.placeholder.com/150/ffebeb/f12b2c?text=Admin';" class="avatar-img" alt="Foto de Perfil Admin">
+                        <button type="button" class="btn-edit-photo" id="btnCamera" style="display: none;" onclick="document.getElementById('inputFoto').click()">
+                            <i data-lucide="camera" size="18"></i>
+                        </button>
+                    </div>
+                    <input type="file" id="inputFoto" accept="image/*" style="display: none;" onchange="previewImagem(event)">
                 </div>
 
-                <div class="input-group">
-                    <label>NIF (Número de Identificação)</label>
-                    <i data-lucide="id-card" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="00000000">
-                </div>
+                <form id="adminPerfilForm" onsubmit="salvarPerfil(event)">
+                    <div class="input-group">
+                        <label>Nome do Administrador</label>
+                        <i data-lucide="user-check" class="input-icon" size="18"></i>
+                        <input type="text" id="nome" class="input-field" readonly required>
+                    </div>
 
-                <div class="input-group">
-                    <label>Cargo / Função</label>
-                    <i data-lucide="briefcase" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="Ex: Diretor, Secretário, Gestor">
-                </div>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>NIF / Código ID</label>
+                            <i data-lucide="id-card" class="input-icon" size="18"></i>
+                            <input type="text" id="nif" class="input-field" readonly>
+                        </div>
 
-                <div class="input-group">
-                    <label>E-mail Corporativo</label>
-                    <i data-lucide="mail" class="input-icon" size="20"></i>
-                    <input type="email" class="input-field" placeholder="admin@senai.br">
-                </div>
+                        <div class="input-group">
+                            <label>Cargo / Função</label>
+                            <i data-lucide="briefcase" class="input-icon" size="18"></i>
+                            <input type="text" id="cargo" class="input-field" readonly>
+                        </div>
+                    </div>
 
-                <div class="input-group">
-                    <label>Telefone de Contato</label>
-                    <i data-lucide="phone" class="input-icon" size="20"></i>
-                    <input type="text" class="input-field" placeholder="(00) 00000-0000">
-                </div>
+                    <div class="input-group">
+                        <label>E-mail Corporativo</label>
+                        <i data-lucide="mail" class="input-icon" size="18"></i>
+                        <input type="email" id="email" class="input-field" readonly required>
+                    </div>
 
-                <button type="submit" class="btn-save">
-                    SALVAR ALTERAÇÕES
-                </button>
+                    <div class="input-group">
+                        <label>Telefone de Contato</label>
+                        <i data-lucide="phone" class="input-icon" size="18"></i>
+                        <input type="text" id="telefone" class="input-field" placeholder="Não informado" readonly>
+                    </div>
 
-            </form>
+                    <div class="actions-container" id="actionsContainer">
+                        <button type="button" class="btn-cancel" onclick="cancelarEdicao()">Cancelar</button>
+                        <button type="submit" class="btn-save" id="btnSalvar">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-        lucide.createIcons();
+        const BASE_API_URL = 'http://localhost:3002';
+        const API_PERFIL_ADMIN_URL = `${BASE_API_URL}/api/perfil-admin`;
+        const AVATAR_PADRAO = 'https://via.placeholder.com/150/ffebeb/f12b2c?text=Admin';
+
+        const modulosBuscaAdmin = [
+            { titulo: 'Painel Administrativo', destino: 'admin.html', icone: 'layout-dashboard' },
+            { titulo: 'Aprovar Comprovantes', destino: 'comprovantes.html', icone: 'file-check' },
+            { titulo: 'Contribuintes Aprovados', destino: 'contribuintes.html', icone: 'users' },
+            { titulo: 'Gerenciar Eventos', destino: 'eventos_admin.html', icone: 'calendar' },
+            { titulo: 'Gerenciar Benefícios', destino: 'beneficios_admin.html', icone: 'award' },
+            { titulo: 'Gerenciar Oficinas', destino: 'oficinas_admin.html', icone: 'layers' },
+            { titulo: 'Gerenciar Avisos', destino: 'avisos_admin.html', icone: 'megaphone' }
+        ];
+
+        let arquivoFotoSelecionado = null;
+        let dadosAdminOriginais = {};
+        let carregandoPagina = false;
+
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function ir(pagina) {
+            if (!pagina || carregandoPagina) return;
+            carregandoPagina = true;
+            window.location.href = pagina;
+        }
+
+        function fazerLogout() {
+            localStorage.clear();
+            window.location.href = 'login_admin.html';
+        }
+
+        function filtrarPainel() {
+            const termo = document.getElementById('inputBuscaPainel').value.trim().toLowerCase();
+            const dropdown = document.getElementById('searchDropdown');
+
+            if (!termo) {
+                dropdown.classList.remove('active');
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            const resultados = modulosBuscaAdmin.filter(m => m.titulo.toLowerCase().includes(termo));
+            if (resultados.length === 0) {
+                dropdown.innerHTML = `<div style="padding: 12px; font-size: 13px; color: var(--text-sub); text-align: center; font-weight: 600;">Nenhum resultado encontrado.</div>`;
+            } else {
+                dropdown.innerHTML = resultados.map(m => `
+                    <div class="search-dropdown-item" onclick="ir('${m.destino}')">
+                        <div class="item-left">
+                            <div class="item-icon"><i data-lucide="${m.icone}" size="18"></i></div>
+                            <span>${m.titulo}</span>
+                        </div>
+                        <i data-lucide="chevron-right" size="16" style="color: var(--text-sub);"></i>
+                    </div>
+                `).join('');
+            }
+            dropdown.classList.add('active');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        document.addEventListener('click', (e) => {
+            const searchContainer = document.querySelector('.search-container');
+            if (searchContainer && !searchContainer.contains(e.target)) {
+                document.getElementById('searchDropdown').classList.remove('active');
+            }
+        });
+
+        function resolverUrlFoto(fotoPerfil) {
+            if (!fotoPerfil || String(fotoPerfil).trim() === '' || fotoPerfil === 'null' || fotoPerfil === 'undefined') {
+                return AVATAR_PADRAO;
+            }
+            const valor = String(fotoPerfil).trim().replace(/\\/g, '/');
+            if (valor.startsWith('data:') || valor.startsWith('http://') || valor.startsWith('https://')) {
+                return valor;
+            }
+            const caminhoLimpo = valor.replace(/^\/?uploads\//i, '').replace(/^\//, '');
+            return `${BASE_API_URL}/uploads/${caminhoLimpo}?v=${Date.now()}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+
+            document.querySelectorAll('[data-target]').forEach(el => {
+                el.addEventListener('click', () => ir(el.getAttribute('data-target')));
+            });
+
+            const cacheInicial = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+            if (cacheInicial && Object.keys(cacheInicial).length > 0) {
+                dadosAdminOriginais = cacheInicial;
+                preencherCampos(cacheInicial);
+            }
+
+            carregarPerfilAdmin();
+        });
+
+        async function carregarPerfilAdmin() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = 'login_admin.html';
+                return;
+            }
+
+            try {
+                const resposta = await fetch(API_PERFIL_ADMIN_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+
+                if (resposta.status === 401 || resposta.status === 403) {
+                    localStorage.clear();
+                    window.location.href = 'login_admin.html';
+                    return;
+                }
+
+                if (resposta.ok) {
+                    const dados = await resposta.json();
+                    if (dados.sucesso && dados.usuario) {
+                        dadosAdminOriginais = dados.usuario;
+                        localStorage.setItem('usuarioLogado', JSON.stringify(dados.usuario));
+                        localStorage.setItem('nomeUsuario', dados.usuario.nome_completo || dados.usuario.nome || '');
+                        preencherCampos(dados.usuario);
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.warn('Erro ao buscar perfil admin:', error);
+            }
+
+            const salvoLocal = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+            dadosAdminOriginais = salvoLocal;
+            preencherCampos(salvoLocal);
+        }
+
+        function preencherCampos(u) {
+            document.getElementById('nome').value = u.nome_completo || u.nome || u.login || '';
+            document.getElementById('nif').value = u.nif || u.matricula || u.cpf || (u.id ? `ADM-${u.id}` : '');
+            document.getElementById('cargo').value = u.cargo || u.curso || 'Gestor AAPM SENAI';
+            document.getElementById('email').value = u.email || u.login || '';
+            document.getElementById('telefone').value = u.telefone || '';
+            document.getElementById('fotoPreview').src = resolverUrlFoto(u.foto_perfil);
+        }
+
+        function encerrarModoEdicaoVisual() {
+            const campos = ['nome', 'nif', 'cargo', 'email', 'telefone'];
+            campos.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.setAttribute('readonly', 'readonly');
+                    el.readOnly = true;
+                    el.classList.remove('editable');
+                }
+            });
+
+            arquivoFotoSelecionado = null;
+            document.getElementById('inputFoto').value = '';
+            document.getElementById('actionsContainer').style.display = 'none';
+            document.getElementById('btnCamera').style.display = 'none';
+            document.getElementById('btnModificar').style.display = 'flex';
+        }
+
+        function ativarEdicao() {
+            const campos = ['nome', 'nif', 'cargo', 'email', 'telefone'];
+            campos.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.removeAttribute('readonly');
+                    el.readOnly = false;
+                    el.classList.add('editable');
+                }
+            });
+
+            document.getElementById('actionsContainer').style.display = 'flex';
+            document.getElementById('btnCamera').style.display = 'flex';
+            document.getElementById('btnModificar').style.display = 'none';
+
+            setTimeout(() => {
+                document.getElementById('nome').focus();
+            }, 50);
+        }
+
+        function cancelarEdicao() {
+            preencherCampos(dadosAdminOriginais);
+            encerrarModoEdicaoVisual();
+        }
+
+        function previewImagem(event) {
+            const file = event.target.files[0];
+            if (file) {
+                arquivoFotoSelecionado = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('fotoPreview').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function salvarPerfil(event) {
+            event.preventDefault();
+
+            const btnSalvar = document.getElementById('btnSalvar');
+            btnSalvar.disabled = true;
+            btnSalvar.innerText = "Salvando...";
+
+            const token = localStorage.getItem('token');
+            const formData = new FormData();
+
+            formData.append('nome_completo', document.getElementById('nome').value.trim());
+            formData.append('nome', document.getElementById('nome').value.trim());
+            formData.append('nif', document.getElementById('nif').value.trim());
+            formData.append('matricula', document.getElementById('nif').value.trim());
+            formData.append('cargo', document.getElementById('cargo').value.trim());
+            formData.append('curso', document.getElementById('cargo').value.trim());
+            formData.append('email', document.getElementById('email').value.trim());
+            formData.append('telefone', document.getElementById('telefone').value.trim());
+
+            if (arquivoFotoSelecionado) {
+                formData.append('foto', arquivoFotoSelecionado);
+            }
+
+            try {
+                const resposta = await fetch(API_PERFIL_ADMIN_URL, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const resultado = await resposta.json();
+
+                if (resposta.ok && resultado.sucesso && resultado.usuario) {
+                    dadosAdminOriginais = resultado.usuario;
+                    localStorage.setItem('usuarioLogado', JSON.stringify(resultado.usuario));
+                    localStorage.setItem('nomeUsuario', resultado.usuario.nome_completo || resultado.usuario.nome || '');
+
+                    preencherCampos(resultado.usuario);
+                    encerrarModoEdicaoVisual();
+                    alert('Informações e foto do Administrador atualizadas com sucesso!');
+                } else {
+                    alert(resultado.mensagem || 'Erro ao salvar informações.');
+                }
+            } catch (error) {
+                alert('Erro de conexão ao salvar os dados.');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerText = "Salvar Alterações";
+            }
+        }
     </script>
 </body>
 </html>

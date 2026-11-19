@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat com a AAPM - Portal do Aluno</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --primary-light: #fff1f1;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --radius-card: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body { background-color: var(--bg-body); color: var(--text-dark); height: 100vh; display: flex; overflow: hidden; position: relative; }
+
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        aside {
+            position: fixed; top: 0; left: 0; width: 290px; height: 100vh; background: #ffffff;
+            border-right: 1px solid var(--border-color); display: flex; flex-direction: column;
+            justify-content: space-between; padding: 28px 20px; overflow-y: auto; z-index: 999;
+            transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 15px 0 35px rgba(0,0,0,0.08);
+        }
+
+        aside.open { transform: translateX(0); }
+
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--text-sub); margin-bottom: 20px; }
+        .btn-close-menu { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); }
+        .btn-close-menu:hover { background: #f1f5f9; color: var(--text-dark); }
+
+        .badge-aluno-btn { background: linear-gradient(135deg, var(--primary) 0%, #c81e1f 100%); color: white; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; cursor: pointer; }
+        .menu-category { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin: 20px 0 10px 8px; }
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; font-weight: 700; font-size: 14px; color: #475569; cursor: pointer; transition: all 0.2s ease; }
+        .menu-item:hover { background: #f1f5f9; color: var(--primary); transform: translateX(4px); }
+        .menu-item.active-page { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+
+        .btn-sair { background: #fff1f1; color: var(--primary); border: none; padding: 14px 18px; border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 24px; }
+
+        .wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+
+        header { height: 76px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 40px; position: sticky; top: 0; z-index: 100; }
+        .header-left { display: flex; align-items: center; gap: 16px; flex: 1; }
+        .btn-toggle-menu { background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark); width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        .brand-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 800; color: var(--primary); cursor: pointer; }
+        .brand-center img { height: 40px; width: auto; object-fit: contain; }
+
+        .header-right { display: flex; align-items: center; justify-content: flex-end; flex: 1; }
+        .profile-btn { width: 44px; height: 44px; border-radius: 14px; background: linear-gradient(135deg, var(--primary) 0%, #c81e1f 100%); color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+        .nav-categories-bar { background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 0 40px; display: flex; align-items: center; justify-content: center; gap: 32px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0; }
+        .nav-categories-bar::-webkit-scrollbar { display: none; }
+
+        .nav-cat-item { position: relative; padding: 12px 0; font-size: 12.5px; font-weight: 600; color: #64748b; cursor: pointer; transition: all 0.2s ease; user-select: none; }
+        .nav-cat-item::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: var(--primary); opacity: 0; transition: opacity 0.2s ease; }
+        .nav-cat-item:hover { color: var(--text-dark); }
+        .nav-cat-item.active { color: var(--primary); font-weight: 700; }
+        .nav-cat-item.active::after { opacity: 1; }
+
+        .chat-wrapper { flex: 1; display: flex; flex-direction: column; padding: 32px 40px; max-width: 900px; width: 100%; margin: 0 auto; height: calc(100vh - 128px); }
+        .chat-header { margin-bottom: 16px; }
+        .chat-title { font-size: 24px; font-weight: 800; color: var(--text-dark); }
+        .chat-subtitle { font-size: 14px; color: var(--text-sub); }
+
+        .chat-messages { flex: 1; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-card); padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        
+        .msg-bubble { max-width: 75%; padding: 12px 18px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
+        .msg-aluno { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .msg-admin { align-self: flex-start; background: #f1f5f9; color: var(--text-dark); border-bottom-left-radius: 4px; }
+
+        .msg-info-aluno { font-size: 12px; font-weight: 800; margin-bottom: 6px; color: #ffffff; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; }
+        .msg-info-admin { font-size: 12px; font-weight: 800; margin-bottom: 6px; color: #f12b2c; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(241,43,44,0.15); padding-bottom: 4px; }
+        .msg-time { font-size: 11px; margin-top: 4px; opacity: 0.8; text-align: right; }
+
+        .chat-input-area { display: flex; gap: 12px; margin-top: 16px; }
+        .chat-input { flex: 1; background: #ffffff; border: 1px solid var(--border-color); border-radius: 14px; padding: 14px 18px; font-size: 14px; outline: none; font-weight: 600; color: var(--text-dark); }
+        .chat-input:focus { border-color: var(--primary); }
+        .btn-send { background: var(--primary); color: white; border: none; border-radius: 14px; padding: 0 24px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-send:hover { background: var(--primary-dark); }
+        .btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebarMenu">
+        <div>
+            <div class="sidebar-header">
+                <span>NAVEGAÇÃO</span>
+                <div class="btn-close-menu" onclick="toggleSidebar()"><i data-lucide="x" size="20"></i></div>
+            </div>
+
+            <div class="badge-aluno-btn" data-target="landingpage.html"><i data-lucide="user-check" size="20"></i> Portal do Aluno</div>
+
+            <div class="menu-category">Informações e Vantagens</div>
+            <ul class="menu-list">
+                <li class="menu-item" data-target="historia_aluno.html"><i data-lucide="book-open" size="18"></i> História da AAPM</li>
+                <li class="menu-item" data-target="eventos.html"><i data-lucide="calendar" size="18"></i> Eventos</li>
+                <li class="menu-item" data-target="beneficios.html"><i data-lucide="award" size="18"></i> Benefícios</li>
+                <li class="menu-item" data-target="oficinas.html"><i data-lucide="layers" size="18"></i> Oficinas</li>
+                <li class="menu-item" data-target="avisos.html"><i data-lucide="megaphone" size="18"></i> Avisos</li>
+            </ul>
+
+            <div class="menu-category">Minha Conta</div>
+            <ul class="menu-list">
+                <li class="menu-item" data-target="perfil.html"><i data-lucide="user" size="18"></i> Meu Perfil</li>
+                <li class="menu-item active-page" data-target="chat_aluno.html"><i data-lucide="message-square" size="18"></i> Contato / Chat</li>
+            </ul>
+        </div>
+
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18"></i> Sair da Conta</button>
+    </aside>
+
+    <div class="wrapper">
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()"><i data-lucide="menu" size="22"></i></button>
+            </div>
+
+            <div class="brand-center" data-target="landingpage.html">
+                <span>AAPM</span>
+                <img src="fotoss.png" alt="AAPM SENAI" onerror="this.style.display='none'">
+                <span>SENAI</span>
+            </div>
+
+            <div class="header-right">
+                <button class="profile-btn" data-target="perfil.html"><i data-lucide="user" size="20"></i></button>
+            </div>
+        </header>
+
+        <nav class="nav-categories-bar">
+            <div class="nav-cat-item" data-target="landingpage.html">Início</div>
+            <div class="nav-cat-item" data-target="historia_aluno.html">História da AAPM</div>
+            <div class="nav-cat-item" data-target="eventos.html">Eventos</div>
+            <div class="nav-cat-item" data-target="beneficios.html">Benefícios</div>
+            <div class="nav-cat-item" data-target="oficinas.html">Oficinas</div>
+            <div class="nav-cat-item" data-target="avisos.html">Avisos</div>
+            <div class="nav-cat-item active" data-target="chat_aluno.html">Contato / Chat</div>
+            <div class="nav-cat-item" data-target="perfil.html">Meu Perfil</div>
+        </nav>
+
+        <div class="chat-wrapper">
+            <div class="chat-header">
+                <h1 class="chat-title">Falar com a AAPM</h1>
+                <p class="chat-subtitle">Tire suas dúvidas ou envie sugestões diretamente para a equipe administrativa.</p>
+            </div>
+
+            <div class="chat-messages" id="chatBox"></div>
+
+            <form class="chat-input-area" onsubmit="enviarMensagem(event)">
+                <input type="text" id="msgInput" class="chat-input" placeholder="Digite sua mensagem aqui..." required autocomplete="off">
+                <button type="submit" class="btn-send" id="btnSend"><i data-lucide="send" size="18"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3002/api';
+        let ultimoTotalMensagens = -1;
+
+        function obterUsuarioAtual() {
+            const chaves = ['usuarioLogado', 'usuario', 'aluno'];
+            for (let k of chaves) {
+                try {
+                    const u = JSON.parse(localStorage.getItem(k));
+                    if (u && (u.email || u.emailAluno)) {
+                        return {
+                            id: u.id || u.id_aluno || localStorage.getItem('aluno_id') || null,
+                            nome: u.nome_completo || u.nome || u.nomeAluno || localStorage.getItem('nomeUsuario') || 'Aluno',
+                            email: (u.email || u.emailAluno || '').trim().toLowerCase()
+                        };
+                    }
+                } catch (e) {}
+            }
+            return { id: null, nome: '', email: '' };
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (window.lucide) lucide.createIcons();
+
+            const usuario = obterUsuarioAtual();
+            if (!usuario.email) {
+                alert('Sessão expirada. Faça login novamente.');
+                window.location.href = 'logincadastro.html';
+                return;
+            }
+
+            document.querySelectorAll('[data-target]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const destino = el.getAttribute('data-target');
+                    if (destino) window.location.href = destino;
+                });
+            });
+
+            await carregarMensagens(false);
+            setInterval(() => carregarMensagens(true), 2500);
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function fazerLogout() {
+            localStorage.clear();
+            window.location.href = 'logincadastro.html';
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        async function carregarMensagens(silencioso = false) {
+            const chatBox = document.getElementById('chatBox');
+            const usuarioLogado = obterUsuarioAtual();
+            if (!usuarioLogado.email) return;
+
+            try {
+                const res = await fetch(`${API_URL}/chat/mensagens?email=${encodeURIComponent(usuarioLogado.email)}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.sucesso) return;
+
+                const msgs = data.mensagens || [];
+                if (silencioso && msgs.length === ultimoTotalMensagens) return;
+                ultimoTotalMensagens = msgs.length;
+
+                chatBox.innerHTML = '';
+
+                if (msgs.length === 0) {
+                    chatBox.innerHTML = `
+                        <div style="margin: auto; text-align: center; color: var(--text-sub); font-size: 14px; font-weight: 600;">
+                            Olá, <strong>${escapeHtml(usuarioLogado.nome)}</strong>!<br>
+                            Envie uma mensagem abaixo para iniciar seu atendimento com a AAPM.
+                        </div>
+                    `;
+                    return;
+                }
+
+                msgs.forEach(m => {
+                    const bubble = document.createElement('div');
+                    const isAluno = (m.remetente === 'aluno');
+                    bubble.className = `msg-bubble ${isAluno ? 'msg-aluno' : 'msg-admin'}`;
+
+                    let autorHeader = '';
+                    if (isAluno) {
+                        const nome = m.aluno_nome || usuarioLogado.nome;
+                        const email = m.aluno_email || usuarioLogado.email;
+                        autorHeader = `<div class="msg-info-aluno"><i data-lucide="user" size="14"></i> <span>${escapeHtml(nome)}</span> <span style="font-weight: 600; opacity: 0.85; font-size: 11px;">(${escapeHtml(email)})</span></div>`;
+                    } else {
+                        autorHeader = `<div class="msg-info-admin"><i data-lucide="shield" size="14"></i> <span>Administração AAPM</span></div>`;
+                    }
+
+                    bubble.innerHTML = `
+                        ${autorHeader}
+                        <div>${escapeHtml(m.mensagem)}</div>
+                        <div class="msg-time">${escapeHtml(m.hora || '')}</div>
+                    `;
+                    chatBox.appendChild(bubble);
+                });
+
+                if (window.lucide) lucide.createIcons();
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                if (!silencioso) {
+                    chatBox.innerHTML = '<p style="text-align:center; color:var(--primary); font-weight:700; margin:auto;">Erro ao conectar com o servidor.</p>';
+                }
+            }
+        }
+
+        async function enviarMensagem(e) {
+            e.preventDefault();
+            const input = document.getElementById('msgInput');
+            const btn = document.getElementById('btnSend');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            const usuario = obterUsuarioAtual();
+            if (!usuario.email) {
+                alert('Erro: e-mail do aluno não identificado. Faça login novamente.');
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/chat/salvar-mensagem`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        aluno_id: usuario.id,
+                        aluno_email: usuario.email,
+                        aluno_nome: usuario.nome,
+                        remetente: 'aluno',
+                        mensagem: texto
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.sucesso) {
+                    input.value = '';
+                    ultimoTotalMensagens = -1;
+                    await carregarMensagens(false);
+                } else {
+                    alert(data.mensagem || 'Não foi possível enviar a mensagem.');
+                }
+            } catch (err) {
+                alert('Erro ao conectar com o servidor.');
+            } finally {
+                btn.disabled = false;
+                input.focus();
+            }
+        }
+    </script>
+</body>
+</html>

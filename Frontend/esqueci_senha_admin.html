@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha Admin</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: #f5f0e1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .mensagem-status {
+            display: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .erro {
+            background-color: #d9383a;
+            color: #ffffff;
+        }
+
+        .sucesso {
+            background-color: #2e7d32;
+            color: #ffffff;
+        }
+
+        .login-card {
+            background-color: #ee2b23;
+            padding: 40px 35px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            color: #ffffff;
+            font-size: 30px;
+            margin-bottom: 25px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            color: #ffffff;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            color: #333333;
+        }
+
+        .form-group input::placeholder {
+            color: #8c9099;
+        }
+
+        .btn-black {
+            width: 100%;
+            padding: 14px;
+            background-color: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-black:hover {
+            opacity: 0.9;
+        }
+
+        .links-uteis {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .links-uteis a {
+            color: #ffffff;
+            text-decoration: underline;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .links-uteis a:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mensagem-status" class="mensagem-status"></div>
+
+    <div class="login-card">
+        <h2>NOVA SENHA ADMIN</h2>
+
+        <form id="form-esqueci-admin" onsubmit="redefinirSenhaAdmin(event)">
+            <div class="form-group">
+                <label for="login">Login</label>
+                <input type="text" id="login" placeholder="Digite seu login de admin" required>
+            </div>
+
+            <div class="form-group">
+                <label for="nova_senha">Nova Senha</label>
+                <input type="password" id="nova_senha" placeholder="Mínimo 6 caracteres" required>
+            </div>
+
+            <button type="submit" class="btn-black">ALTERAR SENHA</button>
+
+            <div class="links-uteis">
+                <a href="login_admin.html">Voltar para o Login</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        async function redefinirSenhaAdmin(event) {
+            event.preventDefault();
+
+            const loginInput = document.getElementById("login").value.trim();
+            const novaSenhaInput = document.getElementById("nova_senha").value.trim();
+            const caixaStatus = document.getElementById("mensagem-status");
+
+            caixaStatus.style.display = "none";
+            caixaStatus.className = "mensagem-status";
+
+            try {
+                const resposta = await fetch("http://localhost:3002/esqueci-senha-admin", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ login: loginInput, nova_senha: novaSenhaInput })
+                });
+
+                const dados = await resposta.json();
+
+                if (resposta.ok) {
+                    caixaStatus.innerText = dados.resposta;
+                    caixaStatus.classList.add("sucesso");
+                    caixaStatus.style.display = "block";
+
+                    setTimeout(() => {
+                        window.location.href = "login_admin.html";
+                    }, 2000);
+                } else {
+                    caixaStatus.innerText = dados.resposta || "Erro ao redefinir senha.";
+                    caixaStatus.classList.add("erro");
+                    caixaStatus.style.display = "block";
+                }
+            } catch (erro) {
+                console.error("Erro na requisição:", erro);
+                caixaStatus.innerText = "Erro ao conectar com o servidor.";
+                caixaStatus.classList.add("erro");
+                caixaStatus.style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>

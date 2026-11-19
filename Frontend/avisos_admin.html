@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script src="admin_sessao.js"></script>
+    <script>
+        if (localStorage.getItem('tipoUsuario') !== 'admin') {
+            alert('Acesso restrito para administradores.');
+            window.location.href = 'login_admin.html';
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Avisos - Painel Admin SENAI</title>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --primary-light: #fff1f1;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --radius-card: 24px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- OVERLAY E SIDEBAR DRAWER PADRONIZADOS --- */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        aside {
+            position: fixed; top: 0; left: 0; width: 290px; height: 100vh;
+            background: #ffffff; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 28px 20px; overflow-y: auto; z-index: 999;
+            transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 15px 0 35px rgba(0,0,0,0.08);
+        }
+        aside.open { transform: translateX(0); }
+
+        .sidebar-header {
+            display: flex; align-items: center; justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .btn-close-menu {
+            width: 32px; height: 32px; border: none; background: transparent;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-sub);
+        }
+        .btn-close-menu:hover { background: #f1f5f9; color: var(--text-dark); }
+
+        .badge-admin-btn {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 24px; cursor: pointer;
+            user-select: none; border: none; width: 100%; text-align: left; text-decoration: none;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25); transition: transform 0.2s ease;
+        }
+        .badge-admin-btn:hover { transform: translateY(-1px); }
+
+        .menu-category {
+            font-size: 11px; font-weight: 800; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1.2px; margin: 20px 0 10px 8px;
+        }
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px;
+            font-weight: 700; font-size: 14px; color: #475569; cursor: pointer;
+            text-decoration: none; transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .menu-item:hover { background: #fff1f1; color: var(--primary); transform: translateX(4px); }
+        .menu-item.active-page { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+
+        .btn-sair {
+            background: #fff1f1; color: var(--primary); border: none; padding: 14px 18px;
+            border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 24px; transition: 0.2s;
+        }
+        .btn-sair:hover { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25); }
+
+        /* --- WRAPPER E CABEÇALHO SUPERIOR PADRONIZADOS --- */
+        .wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+
+        header {
+            height: 90px; background: #ffffff;
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 48px; position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: flex-start; }
+
+        .btn-toggle-menu {
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+            width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background 0.2s ease; flex-shrink: 0;
+        }
+        .btn-toggle-menu:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .search-container { position: relative; width: 280px; }
+        .search-bar {
+            display: flex; align-items: center; gap: 12px; background: #f1f5f9;
+            padding: 12px 20px; border-radius: 20px; width: 100%; border: 1px solid transparent;
+            transition: border-color 0.2s ease, background 0.2s ease;
+        }
+        .search-bar:focus-within { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1); }
+        .search-bar input { border: none; background: transparent; outline: none; font-size: 14px; font-weight: 700; width: 100%; color: var(--text-dark); }
+
+        .search-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0; width: 320px; background: #fff;
+            border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+            padding: 10px; display: none; flex-direction: column; gap: 8px; z-index: 200;
+        }
+        .search-dropdown.active { display: flex; }
+        .search-dropdown-item {
+            display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
+            border-radius: 12px; background: #fff; border: 1px solid var(--border-color); cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .search-dropdown-item:hover { background: var(--primary-light); border-color: var(--primary); transform: translateY(-1px); }
+        .search-dropdown-item .item-left { display: flex; align-items: center; gap: 12px; }
+        .search-dropdown-item .item-icon {
+            width: 36px; height: 36px; border-radius: 10px; background: var(--primary-light);
+            color: var(--primary); display: flex; align-items: center; justify-content: center;
+        }
+        .search-dropdown-item span { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+        .brand-center {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center; gap: 0px; font-size: 24px; font-weight: 800;
+            letter-spacing: -0.5px; cursor: pointer; user-select: none; text-decoration: none;
+        }
+        .brand-center .aapm-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-right: -12px; }
+        .brand-center .senai-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-left: -12px; }
+        .brand-center img { height: 68px; width: auto; object-fit: contain; display: block; }
+
+        .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex: 1; }
+
+        .profile-btn {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--primary);
+            color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(241, 43, 44, 0.3); transition: transform 0.2s;
+        }
+        .profile-btn:hover { transform: scale(1.05); }
+
+        /* --- BARRA DE CATEGORIAS HORIZONTAL --- */
+        .nav-categories-bar {
+            background: #ffffff; border-bottom: 1px solid var(--border-color);
+            padding: 0 40px; display: flex; align-items: center; justify-content: center; gap: 28px;
+            overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0;
+        }
+        .nav-categories-bar::-webkit-scrollbar { display: none; }
+
+        .nav-cat-item {
+            position: relative; padding: 14px 0; font-size: 13.5px; font-weight: 700;
+            color: #64748b; cursor: pointer; transition: color 0.2s ease; user-select: none; text-decoration: none;
+        }
+        .nav-cat-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 2px; background: var(--primary); opacity: 0; transition: opacity 0.2s ease;
+        }
+        .nav-cat-item:hover { color: var(--text-dark); }
+        .nav-cat-item.active { color: var(--primary); }
+        .nav-cat-item.active::after { opacity: 1; }
+
+        /* --- CONTEÚDO PRINCIPAL DE AVISOS --- */
+        .content-body { padding: 36px 24px; max-width: 960px; margin: 0 auto; width: 100%; }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-header h1 { font-size: 28px; font-weight: 800; color: var(--text-dark); margin-bottom: 5px; }
+        .page-header p { color: var(--text-sub); font-size: 14.5px; font-weight: 500; }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: var(--radius-card);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 36px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-title {
+            font-size: 19px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .input-group { margin-bottom: 18px; }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            outline: none;
+            font-size: 14px;
+            font-weight: 600;
+            background: #ffffff;
+            color: var(--text-dark);
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); }
+        .input-group textarea { resize: vertical; line-height: 1.5; }
+
+        .form-row-dates {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 13px 26px;
+            border-radius: 14px;
+            font-size: 14.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
+        .btn-primary:disabled { background-color: #cbd5e1; box-shadow: none; transform: none; cursor: not-allowed; }
+
+        .admin-item {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 22px 24px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .admin-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+        }
+
+        .btn-delete {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            padding: 10px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-delete:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #f1f5f9;
+            color: var(--text-sub);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 700;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 0 20px; }
+            .search-container { width: 180px; }
+            .content-body { padding: 24px 16px; }
+            .form-row-dates { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR DRAWER EXPANSÍVEL PADRONIZADA -->
+    <aside id="sidebarMenu">
+        <div>
+            <div class="sidebar-header">
+                <button class="btn-close-menu" onclick="toggleSidebar()" aria-label="Fechar Menu">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+
+            <a href="admin.html" class="badge-admin-btn">
+                <i data-lucide="shield-check" size="20"></i> Painel Admin
+            </a>
+
+            <div class="menu-category">GESTÃO</div>
+            <ul class="menu-list">
+                <li><a href="page.html" class="menu-item"><i data-lucide="book-open" size="18"></i> História da AAPM</a></li>
+                <li><a href="eventos_admin.html" class="menu-item"><i data-lucide="calendar" size="18"></i> Eventos</a></li>
+                <li><a href="beneficios_admin.html" class="menu-item"><i data-lucide="award" size="18"></i> Benefícios</a></li>
+                <li><a href="oficinas_admin.html" class="menu-item"><i data-lucide="layers" size="18"></i> Oficinas</a></li>
+                <li><a href="avisos_admin.html" class="menu-item active-page"><i data-lucide="megaphone" size="18"></i> Avisos</a></li>
+                <li><a href="comprovante_admin.html" class="menu-item"><i data-lucide="file-check" size="18"></i> Confirmação Comprovante</a></li>
+                <li><a href="contribuintes.html" class="menu-item"><i data-lucide="users" size="18"></i> Lista de Contribuintes</a></li>
+            </ul>
+
+            <div class="menu-category">MINHA CONTA</div>
+            <ul class="menu-list">
+                <li><a href="perfiladmin.html" class="menu-item"><i data-lucide="user" size="18"></i> Meu Perfil</a></li>
+                <li><a href="sugestoes_admin.html" class="menu-item"><i data-lucide="lightbulb" size="18"></i> Sugestões</a></li>
+                <li><a href="contato_chat.html" class="menu-item"><i data-lucide="message-square" size="18"></i> Contato / Chat</a></li>
+            </ul>
+        </div>
+
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18"></i> Sair do Painel</button>
+    </aside>
+
+    <div class="wrapper">
+        <!-- CABEÇALHO SUPERIOR PADRONIZADO -->
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()" title="Menu de Opções">
+                    <i data-lucide="menu" size="24"></i>
+                </button>
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i data-lucide="search" size="18" style="color: var(--text-sub);"></i>
+                        <input type="text" id="inputBuscaPainel" placeholder="Pesquisar..." oninput="filtrarPainel()" autocomplete="off">
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown"></div>
+                </div>
+            </div>
+
+            <a href="admin.html" class="brand-center">
+                <span class="aapm-text">AAPM</span>
+                <img src="img/fotoss.png" alt="Logotipo AAPM SENAI" width="160" height="68" onerror="this.src='fotoss.png'; this.onerror=null;">
+                <span class="senai-text">SENAI</span>
+            </a>
+
+            <div class="header-right">
+                <button class="profile-btn" onclick="window.location.href='perfiladmin.html'" title="Meu Perfil">
+                    <i data-lucide="user" size="22"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- BARRA DE CATEGORIAS HORIZONTAL -->
+        <nav class="nav-categories-bar">
+            <a href="admin.html" class="nav-cat-item">Início</a>
+            <a href="page.html" class="nav-cat-item">História da AAPM</a>
+            <a href="eventos_admin.html" class="nav-cat-item">Eventos</a>
+            <a href="beneficios_admin.html" class="nav-cat-item">Benefícios</a>
+            <a href="oficinas_admin.html" class="nav-cat-item">Oficinas</a>
+            <a href="avisos_admin.html" class="nav-cat-item active">Avisos</a>
+            <a href="comprovante_admin.html" class="nav-cat-item">Comprovantes</a>
+            <a href="contribuintes.html" class="nav-cat-item">Contribuintes</a>
+        </nav>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="content-body">
+            <div class="page-header">
+                <h1>Gerenciar Avisos</h1>
+                <p>Publique comunicados e informativos importantes no mural dos alunos.</p>
+            </div>
+
+            <div class="form-card">
+                <h2 class="form-title">Novo Aviso</h2>
+                <form id="avisoForm" onsubmit="salvarAviso(event)">
+                    <div class="input-group">
+                        <label>Título do Aviso</label>
+                        <input type="text" id="titulo" placeholder="Ex: Manutenção no Laboratório" required>
+                    </div>
+
+                    <div class="form-row-dates">
+                        <div class="input-group">
+                            <label>Data de Publicação</label>
+                            <input type="date" id="data-aviso" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Horário</label>
+                            <input type="time" id="hora-aviso" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Conteúdo</label>
+                        <textarea id="conteudo" rows="4" placeholder="Escreva a mensagem completa..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btnSubmit">
+                        <i data-lucide="send" size="17"></i> Publicar Aviso
+                    </button>
+                </form>
+            </div>
+
+            <h2 class="form-title">Avisos Publicados</h2>
+            <div id="adminNoticeList"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3002/api/avisos';
+        const CHAVE_LOCAL = 'aapm_avisos_dados';
+
+        const modulosBusca = [
+            { titulo: 'História da AAPM', destino: 'page.html', icone: 'book-open' },
+            { titulo: 'Eventos', destino: 'eventos_admin.html', icone: 'calendar' },
+            { titulo: 'Benefícios', destino: 'beneficios_admin.html', icone: 'award' },
+            { titulo: 'Oficinas', destino: 'oficinas_admin.html', icone: 'layers' },
+            { titulo: 'Avisos', destino: 'avisos_admin.html', icone: 'megaphone' },
+            { titulo: 'Confirmação Comprovante', destino: 'comprovante_admin.html', icone: 'file-check' },
+            { titulo: 'Lista de Contribuintes', destino: 'contribuintes.html', icone: 'users' }
+        ];
+
+        function atualizarIcones() {
+            if (window.lucide && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
+            }
+        }
+
+        function obterToken() {
+            return localStorage.getItem('token') || 
+                   localStorage.getItem('tokenAdmin') || 
+                   localStorage.getItem('tokenUsuario');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function fazerLogout() {
+            if (confirm("Deseja realmente sair do Painel Administrativo?")) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('tipoUsuario');
+                localStorage.removeItem('nomeUsuario');
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = "login_admin.html";
+            }
+        }
+
+        function preencherDataHoraAtual() {
+            const agora = new Date();
+            const ano = agora.getFullYear();
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const hora = String(agora.getHours()).padStart(2, '0');
+            const minuto = String(agora.getMinutes()).padStart(2, '0');
+
+            document.getElementById('data-aviso').value = `${ano}-${mes}-${dia}`;
+            document.getElementById('hora-aviso').value = `${hora}:${minuto}`;
+        }
+
+        async function carregarAvisosAdmin() {
+            const container = document.getElementById('adminNoticeList');
+            let avisos = [];
+
+            try {
+                const res = await fetch(API_URL);
+                if (res.ok) {
+                    avisos = await res.json();
+                }
+            } catch (err) {
+                console.warn("API indisponível, lendo do localStorage:", err);
+            }
+
+            if (!avisos || avisos.length === 0) {
+                avisos = JSON.parse(localStorage.getItem(CHAVE_LOCAL)) || [];
+            } else {
+                localStorage.setItem(CHAVE_LOCAL, JSON.stringify(avisos));
+            }
+
+            if (!Array.isArray(avisos) || avisos.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-sub); font-weight: 600;">Nenhum aviso publicado até o momento.</p>';
+                return;
+            }
+
+            container.innerHTML = avisos.map((aviso, idx) => {
+                const id = aviso.id || aviso._id;
+                let dataFormatada = aviso.data || aviso.created_at || '';
+                
+                if (dataFormatada && !dataFormatada.includes('/')) {
+                    const d = new Date(dataFormatada);
+                    if (!isNaN(d)) dataFormatada = d.toLocaleDateString('pt-BR');
+                }
+
+                if (!dataFormatada) dataFormatada = new Date().toLocaleDateString('pt-BR');
+
+                const titulo = aviso.titulo || 'Sem Título';
+                const conteudo = aviso.conteudo || aviso.descricao || '';
+
+                return `
+                    <div class="admin-item">
+                        <div>
+                            <h4 style="font-weight: 800; font-size: 16.5px; color: var(--text-dark);">${titulo}</h4>
+                            <p style="color: var(--text-sub); font-size: 14px; line-height: 1.5; margin-top: 6px; white-space: pre-wrap;">${conteudo}</p>
+                            <div class="date-badge">
+                                <i data-lucide="clock" size="14" style="color: var(--primary);"></i>
+                                <span>${dataFormatada}</span>
+                            </div>
+                        </div>
+                        <button class="btn-delete" onclick="deletarAviso('${id}', ${idx})" title="Excluir aviso">
+                            <i data-lucide="trash-2" size="18"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            atualizarIcones();
+        }
+
+        async function salvarAviso(e) {
+            e.preventDefault();
+            const titulo = document.getElementById('titulo').value.trim();
+            const conteudo = document.getElementById('conteudo').value.trim();
+            const dataInput = document.getElementById('data-aviso').value;
+            const horaInput = document.getElementById('hora-aviso').value;
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            if (!titulo || !conteudo || !dataInput || !horaInput) return;
+
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = 'Publicando...';
+
+            const partsData = dataInput.split('-');
+            const dataFormatada = `${partsData[2]}/${partsData[1]}/${partsData[0]} às ${horaInput}`;
+
+            const novoAviso = { titulo, conteudo, data: dataFormatada };
+
+            const avisosLocais = JSON.parse(localStorage.getItem(CHAVE_LOCAL)) || [];
+            avisosLocais.unshift(novoAviso);
+            localStorage.setItem(CHAVE_LOCAL, JSON.stringify(avisosLocais));
+
+            const token = obterToken();
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ titulo, conteudo, data: dataFormatada })
+                });
+            } catch (err) {
+                console.warn('API indisponível, mantido registro exclusivo no localStorage.');
+            }
+
+            alert('Aviso publicado com sucesso!');
+            
+            document.getElementById('avisoForm').reset();
+            preencherDataHoraAtual();
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = '<i data-lucide="send" size="17"></i> Publicar Aviso';
+            atualizarIcones();
+            carregarAvisosAdmin();
+        }
+
+        async function deletarAviso(id, index) {
+            if (!confirm("Deseja realmente excluir este aviso?")) return;
+
+            let avisosLocais = JSON.parse(localStorage.getItem(CHAVE_LOCAL)) || [];
+            avisosLocais.splice(index, 1);
+            localStorage.setItem(CHAVE_LOCAL, JSON.stringify(avisosLocais));
+
+            if (id && id !== 'undefined') {
+                const token = obterToken();
+                try {
+                    await fetch(`${API_URL}/${id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                } catch (err) {
+                    console.warn("Servidor offline ao tentar excluir via API:", err);
+                }
+            }
+
+            carregarAvisosAdmin();
+        }
+
+        function filtrarPainel() {
+            const termo = document.getElementById('inputBuscaPainel').value.toLowerCase().trim();
+            const dropdown = document.getElementById('searchDropdown');
+
+            dropdown.innerHTML = '';
+
+            if (!termo) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            const resultados = modulosBusca.filter(m => m.titulo.toLowerCase().includes(termo));
+
+            if (resultados.length > 0) {
+                resultados.forEach(res => {
+                    const item = document.createElement('div');
+                    item.className = 'search-dropdown-item';
+                    item.innerHTML = `
+                        <div class="item-left">
+                            <div class="item-icon"><i data-lucide="${res.icone}" size="18"></i></div>
+                            <span>${res.titulo}</span>
+                        </div>
+                        <i data-lucide="arrow-right" size="16" style="color: #94a3b8;"></i>
+                    `;
+                    item.addEventListener('click', () => {
+                        window.location.href = res.destino;
+                    });
+                    dropdown.appendChild(item);
+                });
+                dropdown.classList.add('active');
+                atualizarIcones();
+            } else {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarIcones();
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    document.getElementById('searchDropdown').classList.remove('active');
+                }
+            });
+
+            preencherDataHoraAtual();
+            carregarAvisosAdmin();
+        });
+    </script>
+</body>
+</html>

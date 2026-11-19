@@ -3,287 +3,867 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard AAPM | SENAI</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Eventos - Portal do Aluno AAPM</title>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #f11815;
-            --primary-dark: #b31210;
-            --sidebar-bg: #ffffff;
-            --text-main: #1a1a1a;
-            --text-secondary: #64748b;
-            --glass: rgba(255, 255, 255, 0.8);
-            --shadow: 0 10px 40px rgba(0,0,0,0.04);
-            --radius: 24px;
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --primary-light: #fff1f1;
+            --success: #10b981;
+            --success-dark: #059669;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --radius-card: 20px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
-            display: flex;
+            background-color: var(--bg-body);
+            color: var(--text-dark);
             height: 100vh;
-            background: radial-gradient(circle at top right, #fff5f5, #f8faff);
-            color: var(--text-main);
+            display: flex;
             overflow: hidden;
-        }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 280px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            padding: 40px 20px;
-        }
-
-        .logo h2 { color: var(--primary); font-weight: 800; letter-spacing: -1px; margin-bottom: 40px; }
-
-        .nav-links { list-style: none; flex: 1; }
-        .nav-links a {
-            display: flex;
-            align-items: center;
-            padding: 16px 20px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            border-radius: 16px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-        .nav-links a:hover, .nav-links a.active {
-            background: #fff1f1;
-            color: var(--primary);
-        }
-
-        .nav-icon { margin-right: 15px; width: 20px; height: 20px; }
-
-        /* --- CONTEÚDO PRINCIPAL --- */
-        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
-
-        .top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 50px;
-        }
-
-        .search-wrapper {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0,0,0,0.05);
-            padding: 12px 25px;
-            border-radius: 50px;
-            width: 400px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-        }
-
-        .search-wrapper input { border: none; background: transparent; outline: none; width: 100%; margin-left: 10px; }
-
-        /* --- GRID DE EVENTOS --- */
-        .eventos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 30px;
-        }
-
-        .evento-card {
-            background: var(--sidebar-bg);
-            border-radius: var(--radius);
-            padding: 30px;
-            box-shadow: var(--shadow);
-            transition: 0.4s ease;
             position: relative;
         }
 
-        .evento-card:hover { transform: translateY(-10px); box-shadow: 0 30px 60px rgba(241, 24, 21, 0.1); }
+        /* Sidebar & Overlay */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
 
-        .evento-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .evento-icon-box {
-            width: 50px; height: 50px; background: #fff5f5;
-            border-radius: 14px; display: flex; align-items: center;
-            justify-content: center; color: var(--primary);
+        aside {
+            position: fixed; top: 0; left: 0; width: 290px; height: 100vh;
+            background: #ffffff; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 28px 20px; overflow-y: auto; z-index: 999;
+            transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 15px 0 35px rgba(0,0,0,0.08);
+        }
+        aside.open { transform: translateX(0); }
+
+        .sidebar-header { display: flex; align-items: center; justify-content: flex-end; margin-bottom: 20px; }
+        .btn-close-menu { width: 32px; height: 32px; border: none; background: transparent; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); }
+        .btn-close-menu:hover { background: #f1f5f9; color: var(--text-dark); }
+
+        .badge-aluno-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 24px; cursor: pointer; border: none; width: 100%; text-align: left;
+            box-shadow: 0 8px 20px rgba(241,43,44,0.25);
         }
 
-        .info-item { display: flex; align-items: center; margin-bottom: 12px; color: var(--text-secondary); font-size: 14px; }
-        .info-icon { width: 32px; height: 32px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: var(--primary); }
+        .menu-category { font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin: 20px 0 10px 8px; }
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
 
-        .btn-edit-float {
-            position: absolute; top: 20px; right: 20px; background: var(--primary);
-            color: white; border: none; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; opacity: 0; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center;
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px;
+            font-weight: 700; font-size: 14px; color: #475569; cursor: pointer; transition: 0.2s;
         }
-        .evento-card:hover .btn-edit-float { opacity: 1; }
+        .menu-item:hover { background: #f1f5f9; color: var(--primary); transform: translateX(4px); }
+        .menu-item.active-page { background: var(--primary-light); color: var(--primary); font-weight: 800; }
 
-        /* --- MODAL --- */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
-            display: none; align-items: center; justify-content: center; z-index: 1000;
+        .btn-sair {
+            background: #fff1f1; color: var(--primary); border: none; padding: 14px 18px;
+            border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 24px; transition: 0.2s;
         }
-        .modal-overlay.active { display: flex; }
-        .modal-card { background: white; width: 95%; max-width: 500px; border-radius: 32px; padding: 40px; }
+        .btn-sair:hover { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25); }
+
+        .wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+
+        /* Cabeçalho */
+        header {
+            height: 90px; background: #ffffff;
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 48px; position: sticky; top: 0; z-index: 100; flex-shrink: 0;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: flex-start; }
+
+        .btn-toggle-menu {
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+            width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+        }
+        .btn-toggle-menu:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+        .search-container { position: relative; width: 280px; }
+        .search-bar {
+            display: flex; align-items: center; gap: 12px; background: #f1f5f9;
+            padding: 12px 20px; border-radius: 20px; width: 100%; border: 1px solid transparent; transition: 0.2s;
+        }
+        .search-bar:focus-within { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1); }
+        .search-bar input { border: none; background: transparent; outline: none; font-size: 14px; font-weight: 700; width: 100%; color: var(--text-dark); }
+
+        .search-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0; width: 320px; background: #fff;
+            border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+            padding: 10px; display: none; flex-direction: column; gap: 8px; z-index: 200;
+        }
+        .search-dropdown.active { display: flex; }
+        .search-dropdown-item {
+            display: flex; align-items: center; justify-content: space-between; padding: 10px 14px;
+            border-radius: 12px; background: #fff; border: 1px solid var(--border-color); cursor: pointer; transition: 0.2s;
+        }
+        .search-dropdown-item:hover { background: var(--primary-light); border-color: var(--primary); }
+        .search-dropdown-item .item-left { display: flex; align-items: center; gap: 12px; }
+        .search-dropdown-item .item-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; }
+        .search-dropdown-item span { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+
+        .brand-center {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center; gap: 0px; font-size: 24px; font-weight: 800;
+            letter-spacing: -0.5px; cursor: pointer; user-select: none;
+        }
+        .brand-center .aapm-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-right: -12px; }
+        .brand-center .senai-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-left: -12px; }
+        .brand-center img { height: 68px; width: auto; object-fit: contain; display: block; }
+
+        .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex: 1; }
+
+        .profile-btn {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--primary);
+            color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(241, 43, 44, 0.3); transition: transform 0.2s;
+        }
+        .profile-btn:hover { transform: scale(1.05); }
+
+        /* --- NOTIFICAÇÕES (ÍCONE DE SINO + PAINEL SUSPENSO) --- */
+        .notif-container { position: relative; }
+        .notif-btn {
+            position: relative; width: 48px; height: 48px; border-radius: 14px;
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease;
+        }
+        .notif-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: var(--primary); }
+        .notif-badge {
+            position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px; padding: 0 6px;
+            border-radius: 999px; background: var(--primary); color: #fff; font-size: 11px; font-weight: 800;
+            display: none; align-items: center; justify-content: center; border: 2px solid #fff;
+            box-shadow: 0 2px 6px rgba(241, 43, 44, 0.35);
+        }
+        .notif-badge.visible { display: flex; }
+
+        .notif-dropdown {
+            position: absolute; top: calc(100% + 12px); right: 0; width: 390px; max-width: calc(100vw - 32px);
+            background: #fff; border: 1px solid var(--border-color); border-radius: 20px;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.16); display: none; flex-direction: column;
+            overflow: hidden; z-index: 250;
+        }
+        .notif-dropdown.active { display: flex; animation: fadeSlideDown 0.2s ease; }
+        @keyframes fadeSlideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .notif-header {
+            padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between; background: #f8fafc;
+        }
+        .notif-header h3 { font-size: 15px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 8px; }
+        .btn-ler-todas { background: none; border: none; color: var(--primary); font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: 0.2s; }
+        .btn-ler-todas:hover { background: var(--primary-light); }
+
+        .notif-list { max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; }
+        .notif-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s ease; position: relative; }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item.unread { background: #fff8f8; }
+        .notif-item.unread::before { content: ''; position: absolute; left: 8px; top: 24px; width: 7px; height: 7px; border-radius: 50%; background: var(--primary); }
+
+        .notif-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .notif-icon.oficina { background: #ecfdf5; color: #059669; }
+        .notif-icon.evento { background: #eff6ff; color: #2563eb; }
+        .notif-icon.beneficio { background: #fffbeb; color: #d97706; }
+        .notif-icon.aviso { background: #faf5ff; color: #9333ea; }
+
+        .notif-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .notif-title { font-size: 13.5px; font-weight: 800; color: var(--text-dark); }
+        .notif-desc { font-size: 12.5px; font-weight: 600; color: #475569; line-height: 1.45; }
+        .notif-time { font-size: 11px; font-weight: 700; color: #94a3b8; margin-top: 2px; }
+
+        .notif-empty { padding: 36px 20px; text-align: center; color: var(--text-sub); font-size: 13.5px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+        .nav-categories-bar {
+            background: #ffffff; border-bottom: 1px solid var(--border-color);
+            padding: 0 40px; display: flex; align-items: center; justify-content: center; gap: 32px;
+            overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0;
+        }
+        .nav-categories-bar::-webkit-scrollbar { display: none; }
+
+        .nav-cat-item {
+            position: relative; padding: 14px 0; font-size: 13.5px; font-weight: 700;
+            color: #64748b; cursor: pointer; transition: opacity 0.2s ease; user-select: none;
+        }
+        .nav-cat-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 2px; background: var(--primary); opacity: 0; transition: opacity 0.2s ease;
+        }
+        .nav-cat-item:hover { color: var(--text-dark); }
+        .nav-cat-item.active { color: var(--primary); }
+        .nav-cat-item.active::after { opacity: 1; }
+
+        /* Conteúdo Principal */
+        .content-area { flex: 1; padding: 36px 40px; max-width: 1200px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+
+        .page-header { border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+        .page-title { font-size: 26px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 10px; }
+        .page-subtitle { color: var(--text-sub); font-size: 14px; font-weight: 600; margin-top: 4px; }
+
+        /* Grid */
+        .eventos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 24px; }
+
+        /* CARD DE EVENTO (PADRÃO IGUAL AO DE OFICINAS) */
+        .card-evento {
+            background: #ffffff; border: 2px solid var(--border-color); border-radius: var(--radius-card);
+            padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px;
+            position: relative; overflow: hidden;
+            transition: transform 0.25s ease, border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        .card-evento:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.08); border-color: #cbd5e1; }
+
+        /* ESTADO INSCRITO PERMANENTE */
+        .card-evento.inscrito {
+            border: 2px solid var(--success) !important;
+            background: linear-gradient(145deg, #e6fcf5 0%, #ffffff 100%) !important;
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.22) !important;
+        }
+
+        .card-top-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
         
-        .form-group { margin-bottom: 15px; }
-        label { font-size: 11px; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; display: block; }
-        .form-input { width: 100%; padding: 14px; background: #f8fafc; border: 2px solid transparent; border-radius: 14px; font-size: 15px; }
-        .form-input:focus { border-color: var(--primary); outline: none; background: white; transition: 0.3s; }
+        .badge-data {
+            background: var(--primary-light); border: 1px solid rgba(241, 43, 44, 0.2);
+            border-radius: 14px; padding: 8px 14px; text-align: center; min-width: 64px;
+            transition: background 0.3s ease, border-color 0.3s ease;
+        }
+        .badge-data .dia { font-size: 22px; font-weight: 800; color: var(--primary); line-height: 1; }
+        .badge-data .mes { font-size: 10px; font-weight: 800; color: var(--primary-dark); text-transform: uppercase; margin-top: 2px; }
 
-        .btn-save { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .card-evento.inscrito .badge-data {
+            background: var(--success) !important; border-color: var(--success-dark) !important;
+        }
+        .card-evento.inscrito .badge-data .dia,
+        .card-evento.inscrito .badge-data .mes { color: #ffffff !important; }
+
+        .banner-inscrita {
+            display: none; background: var(--success); color: #ffffff;
+            font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+            align-items: center; gap: 6px;
+        }
+        .card-evento.inscrito .banner-inscrita { display: inline-flex; }
+
+        .card-content { display: flex; flex-direction: column; gap: 8px; }
+        .evento-titulo { font-size: 18px; font-weight: 800; color: var(--text-dark); line-height: 1.3; }
+
+        .evento-previa {
+            font-size: 13.5px; color: var(--text-sub); line-height: 1.5; font-weight: 500;
+            display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+
+        .card-meta { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .meta-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-sub); font-weight: 600; }
+
+        /* Botões do Card */
+        .card-acoes-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+        .btn-inscrever {
+            background: var(--primary); color: #ffffff; border: none;
+            padding: 12px; border-radius: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer;
+            transition: all 0.25s ease; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+            box-shadow: 0 4px 12px rgba(241, 43, 44, 0.2);
+        }
+        .btn-inscrever:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        .card-evento.inscrito .btn-inscrever {
+            background: var(--success) !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+            cursor: default;
+            transform: none;
+        }
+
+        .btn-detalhes {
+            background: #f1f5f9; color: var(--text-dark); border: 1px solid var(--border-color);
+            padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;
+        }
+        .btn-detalhes:hover { background: #e2e8f0; }
+
+        .btn-cancelar-inscricao {
+            display: none; background: #fef2f2; color: var(--primary); border: 1px solid #fca5a5;
+            padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer;
+            align-items: center; justify-content: center; gap: 6px; transition: 0.2s;
+        }
+        .btn-cancelar-inscricao:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .card-evento.inscrito .btn-cancelar-inscricao { display: flex; }
+
+        /* MODAL DE INFORMAÇÕES DETALHADAS */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+            z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+
+        .modal-container {
+            background: #ffffff; border-radius: 24px; width: 100%; max-width: 550px;
+            padding: 28px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; gap: 20px; max-height: 90vh; overflow-y: auto;
+        }
+        .modal-overlay.active .modal-container { transform: scale(1); }
+
+        .modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; }
+        .modal-titulo { font-size: 20px; font-weight: 800; color: var(--text-dark); line-height: 1.3; }
+        .btn-fechar-modal { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); transition: 0.2s; }
+        .btn-fechar-modal:hover { background: #e2e8f0; color: var(--text-dark); }
+
+        .modal-body { display: flex; flex-direction: column; gap: 16px; }
+        .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px solid var(--border-color); }
+        .modal-info-box { display: flex; flex-direction: column; gap: 4px; }
+        .modal-info-rotulo { font-size: 11px; font-weight: 800; color: var(--text-sub); text-transform: uppercase; }
+        .modal-info-valor { font-size: 13.5px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 6px; }
+
+        .modal-descricao-completa { font-size: 14px; color: #334155; line-height: 1.6; font-weight: 500; background: #ffffff; padding: 12px; border-radius: 12px; border: 1px dashed var(--border-color); }
+
+        @media (max-width: 768px) {
+            .eventos-grid { grid-template-columns: 1fr; }
+            .content-area { padding: 24px 20px; }
+            header { padding: 0 20px; }
+            .modal-info-grid { grid-template-columns: 1fr; }
+            .search-container { width: 170px; }
+        }
     </style>
 </head>
 <body>
 
-    <aside class="sidebar">
-        <div class="logo">
-            <h2>AAPM <span>SENAI</span></h2>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebarMenu">
+        <div>
+            <div class="sidebar-header">
+                <button class="btn-close-menu" onclick="toggleSidebar()" aria-label="Fechar Menu">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+
+            <button class="badge-aluno-btn" data-target="landingpage.html">
+                <i data-lucide="user-check" size="20"></i> Portal do Aluno
+            </button>
+
+            <ul class="menu-list">
+                <li class="menu-item" data-target="historia_aluno.html"><i data-lucide="book-open" size="18"></i> História da AAPM</li>
+                <li class="menu-item active-page" data-target="eventos.html"><i data-lucide="calendar" size="18"></i> Eventos</li>
+                <li class="menu-item" data-target="beneficios.html"><i data-lucide="award" size="18"></i> Benefícios</li>
+                <li class="menu-item" data-target="oficinas.html"><i data-lucide="layers" size="18"></i> Oficinas</li>
+                <li class="menu-item" data-target="avisos.html"><i data-lucide="megaphone" size="18"></i> Avisos</li>
+            </ul>
+
+            <div class="menu-category">Minha Conta</div>
+            <ul class="menu-list">
+                <li class="menu-item" data-target="perfil.html"><i data-lucide="user" size="18"></i> Meu Perfil</li>
+                <li class="menu-item" data-target="chat_aluno.html"><i data-lucide="message-square" size="18"></i> Contato / Chat</li>
+            </ul>
         </div>
-        <nav class="nav-links">
-            <a href="landingpage.html"><i data-lucide="home" class="nav-icon"></i> Tela Inicial</a>
-            <a href="perfil.html"><i data-lucide="user" class="nav-icon"></i> Meu Perfil</a>
-            <a href="sugestoes.html"><i data-lucide="lightbulb" class="nav-icon"></i> Sugestões</a>
-            <a href="contato.html"><i data-lucide="phone" class="nav-icon"></i> Contato</a>
-            <a href="admin.html" class="active"><i data-lucide="shield-check" class="nav-icon"></i> Administrador</a>
-        </nav>
+
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18"></i> Sair da Conta</button>
     </aside>
 
-    <main class="main-content">
-        <header class="top-bar">
-            <div class="search-wrapper">
-                <i data-lucide="search" size="18" color="#64748b"></i>
-                <input type="text" placeholder="Procurar evento..." oninput="filtrarEventos(this.value)">
+    <div class="wrapper">
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()" title="Menu de Opções"><i data-lucide="menu" size="24"></i></button>
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i data-lucide="search" size="18" style="color: var(--text-sub);"></i>
+                        <input type="text" id="inputBuscaPainel" placeholder="Pesquisar" oninput="filtrarPainel()" autocomplete="off">
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown"></div>
+                </div>
             </div>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <div style="text-align: right">
-                    <p style="font-weight: 700; font-size: 14px;">Administrador</p>
-                    <p style="color: var(--text-secondary); font-size: 12px;">Gestão</p>
+
+            <div class="brand-center" data-target="landingpage.html">
+                <span class="aapm-text">AAPM</span>
+                <img src="img/fotoss.png" alt="Logotipo AAPM SENAI" width="160" height="68" onerror="this.src='fotoss.png'; this.onerror=null;">
+                <span class="senai-text">SENAI</span>
+            </div>
+
+            <div class="header-right">
+                <div class="notif-container" id="notifContainer">
+                    <button class="notif-btn" onclick="toggleNotificacoes(event)" aria-label="Notificações" title="Notificações">
+                        <i data-lucide="bell" size="22"></i>
+                        <span class="notif-badge" id="notifBadge">0</span>
+                    </button>
+
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h3><i data-lucide="bell-ring" size="16" style="color: var(--primary);"></i> Notificações</h3>
+                            <button class="btn-ler-todas" onclick="marcarTodasLidas()">Marcar todas como lidas</button>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">
+                                <i data-lucide="loader-2" size="24"></i>
+                                <span>Carregando notificações...</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div style="width: 45px; height: 45px; background: #eee; border-radius: 12px; overflow: hidden;">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Admin" alt="avatar">
-                </div>
+
+                <button class="profile-btn" data-target="perfil.html" title="Meu Perfil"><i data-lucide="user" size="22"></i></button>
             </div>
         </header>
 
-        <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 40px;">Gerenciar Eventos</h1>
-        
-        <div class="eventos-grid" id="eventosGrid"></div>
-    </main>
+        <nav class="nav-categories-bar">
+            <div class="nav-cat-item" data-target="landingpage.html">Início</div>
+            <div class="nav-cat-item" data-target="historia_aluno.html">História da AAPM</div>
+            <div class="nav-cat-item active" data-target="eventos.html">Eventos</div>
+            <div class="nav-cat-item" data-target="beneficios.html">Benefícios</div>
+            <div class="nav-cat-item" data-target="oficinas.html">Oficinas</div>
+            <div class="nav-cat-item" data-target="avisos.html">Avisos</div>
+        </nav>
 
-    <div class="modal-overlay" id="modalEdicao">
-        <div class="modal-card">
-            <h2 style="margin-bottom: 25px; font-weight: 800;">Atualizar Informações</h2>
-            <form id="formUpdate">
-                <input type="hidden" id="editId">
-                <div class="form-group">
-                    <label>Título do Evento</label>
-                    <input type="text" id="editTitulo" class="form-input" required>
+        <div class="content-area">
+            <div class="page-header">
+                <h1 class="page-title"><i data-lucide="calendar-check" size="26" style="color: var(--primary);"></i> Eventos Disponíveis</h1>
+                <p class="page-subtitle">Inscreva-se nos eventos, consulte os detalhes e gerencie as suas confirmações.</p>
+            </div>
+
+            <div class="eventos-grid" id="gridEventos"></div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INFORMAÇÕES DETALHADAS -->
+    <div class="modal-overlay" id="modalDetalhes" onclick="fecharModalDetalhes(event)">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-titulo" id="modalTitulo">Título do Evento</h2>
                 </div>
-                <div style="display: flex; gap: 15px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Data</label>
-                        <input type="date" id="editData" class="form-input" required>
+                <button class="btn-fechar-modal" onclick="fecharModalDetalhes()"><i data-lucide="x" size="20"></i></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-info-grid">
+                    <div class="modal-info-box">
+                        <span class="modal-info-rotulo">Data</span>
+                        <span class="modal-info-valor" id="modalData"><i data-lucide="calendar" size="15" style="color: var(--primary);"></i> --</span>
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Horário</label>
-                        <input type="text" id="editHora" class="form-input" required>
+                    <div class="modal-info-box">
+                        <span class="modal-info-rotulo">Horário</span>
+                        <span class="modal-info-valor" id="modalHorario"><i data-lucide="clock" size="15" style="color: var(--primary);"></i> --</span>
+                    </div>
+                    <div class="modal-info-box">
+                        <span class="modal-info-rotulo">Local</span>
+                        <span class="modal-info-valor" id="modalLocal"><i data-lucide="map-pin" size="15" style="color: var(--primary);"></i> --</span>
+                    </div>
+                    <div class="modal-info-box">
+                        <span class="modal-info-rotulo">Organização</span>
+                        <span class="modal-info-valor" id="modalOrganizador"><i data-lucide="users" size="15" style="color: var(--primary);"></i> AAPM SENAI</span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>Local</label>
-                    <input type="text" id="editLocal" class="form-input" required>
+
+                <div>
+                    <h4 style="font-size: 13px; font-weight: 800; color: var(--text-dark); margin-bottom: 8px;">Detalhes do Evento</h4>
+                    <div class="modal-descricao-completa" id="modalDescricao">Carregando detalhes do evento...</div>
                 </div>
-                <button type="submit" class="btn-save">Salvar Alterações</button>
-                <button type="button" onclick="fecharModal()" style="width:100%; background:none; border:none; margin-top:10px; cursor:pointer; color:var(--text-secondary); font-weight: 600;">Cancelar</button>
-            </form>
+            </div>
         </div>
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3002/eventos';
-        let eventos = [];
+        const BASE_API_URL = 'http://localhost:3002';
+        const API_URL = `${BASE_API_URL}/api/eventos`;
+
+        const modulosBusca = [
+            { titulo: 'História da AAPM', destino: 'historia_aluno.html', icone: 'book-open' },
+            { titulo: 'Eventos', destino: 'eventos.html', icone: 'calendar' },
+            { titulo: 'Benefícios', destino: 'beneficios.html', icone: 'award' },
+            { titulo: 'Oficinas', destino: 'oficinas.html', icone: 'graduation-cap' },
+            { titulo: 'Avisos', destino: 'avisos.html', icone: 'megaphone' },
+            { titulo: 'Falar com a AAPM', destino: 'chat_aluno.html', icone: 'message-square' }
+        ];
+
+        let listaEventosGlobal = [];
+        let minhasInscricoesIds = [];
+
+        // --- SISTEMA DE NOTIFICAÇÕES ---
+        function toggleNotificacoes(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notifDropdown');
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                carregarNotificacoes();
+            }
+        }
+
+        function formatarTempoNotificacao(dataIso) {
+            if (!dataIso) return 'Agora';
+            const data = new Date(dataIso);
+            const agora = new Date();
+            const diffMin = Math.floor((agora - data) / 60000);
+
+            if (diffMin < 1) return 'Agora mesmo';
+            if (diffMin < 60) return `Há ${diffMin} min`;
+            const diffHoras = Math.floor(diffMin / 60);
+            if (diffHoras < 24) return `Há ${diffHoras}h`;
+            return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function obterIconeNotificacao(tipo) {
+            switch (tipo) {
+                case 'oficina': return { classe: 'oficina', icone: 'graduation-cap' };
+                case 'evento': return { classe: 'evento', icone: 'calendar' };
+                case 'beneficio': return { classe: 'beneficio', icone: 'award' };
+                default: return { classe: 'aviso', icone: 'megaphone' };
+            }
+        }
+
+        async function carregarNotificacoes() {
+            const token = localStorage.getItem('token');
+            const badge = document.getElementById('notifBadge');
+            const listaEl = document.getElementById('notifList');
+
+            if (!token) {
+                listaEl.innerHTML = `<div class="notif-empty"><i data-lucide="bell-off" size="24"></i><span>Faça login para ver suas notificações.</span></div>`;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            try {
+                const resp = await fetch(`${BASE_API_URL}/api/notificacoes`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await resp.json();
+
+                if (!dados.sucesso) return;
+
+                if (dados.naoLidas > 0) {
+                    badge.textContent = dados.naoLidas > 9 ? '9+' : dados.naoLidas;
+                    badge.classList.add('visible');
+                } else {
+                    badge.classList.remove('visible');
+                }
+
+                if (!dados.notificacoes || dados.notificacoes.length === 0) {
+                    listaEl.innerHTML = `
+                        <div class="notif-empty">
+                            <i data-lucide="bell-off" size="26" style="color:#cbd5e1;"></i>
+                            <span>Nenhuma notificação por enquanto.</span>
+                        </div>
+                    `;
+                } else {
+                    listaEl.innerHTML = dados.notificacoes.map(n => {
+                        const infoIcone = obterIconeNotificacao(n.tipo);
+                        const naoLidaClass = n.lida === 0 ? 'unread' : '';
+                        return `
+                            <div class="notif-item ${naoLidaClass}" onclick="abrirNotificacao(${n.id}, '${n.link}')">
+                                <div class="notif-icon ${infoIcone.classe}">
+                                    <i data-lucide="${infoIcone.icone}" size="18"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title">${n.titulo}</div>
+                                    <div class="notif-desc">${n.mensagem}</div>
+                                    <div class="notif-time">${formatarTempoNotificacao(n.data_criacao)}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                if (window.lucide) lucide.createIcons();
+            } catch (erro) {
+                console.error("Erro ao carregar notificações:", erro);
+            }
+        }
+
+        async function abrirNotificacao(id, link) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    await fetch(`${BASE_API_URL}/api/notificacoes/${id}/ler`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch (e) {}
+            }
+            window.location.href = link || 'landingpage.html';
+        }
+
+        async function marcarTodasLidas() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                await fetch(`${BASE_API_URL}/api/notificacoes/ler-todas`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                carregarNotificacoes();
+            } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+
+            let paginaAtual = window.location.pathname.split('/').pop() || 'eventos.html';
+
+            document.querySelectorAll('.nav-cat-item').forEach(el => {
+                if (el.getAttribute('data-target') === paginaAtual) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+
+            document.querySelectorAll('.menu-item').forEach(el => {
+                if (el.getAttribute('data-target') === paginaAtual) el.classList.add('active-page');
+                else el.classList.remove('active-page');
+            });
+
+            document.querySelectorAll('[data-target]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const destino = el.getAttribute('data-target');
+                    if (destino) window.location.href = destino;
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    document.getElementById('searchDropdown').classList.remove('active');
+                }
+                if (!e.target.closest('#notifContainer')) {
+                    document.getElementById('notifDropdown').classList.remove('active');
+                }
+            });
+
+            carregarEventos();
+            carregarNotificacoes();
+            setInterval(carregarNotificacoes, 30000);
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
 
         async function carregarEventos() {
+            const grid = document.getElementById('gridEventos');
+            const token = localStorage.getItem('token');
+
             try {
                 const res = await fetch(API_URL);
-                eventos = await res.json();
-                renderizar(eventos);
+                if (!res.ok) throw new Error('Falha na API');
+                listaEventosGlobal = await res.json();
+
+                if (token) {
+                    const resInsc = await fetch(`${API_URL}/minhas-inscricoes`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (resInsc.ok) {
+                        const dadosInsc = await resInsc.json();
+                        minhasInscricoesIds = (dadosInsc.eventosInscritos || []).map(id => Number(id));
+                    }
+                } else {
+                    minhasInscricoesIds = [];
+                }
+
+                renderizarEventos(listaEventosGlobal);
             } catch (err) {
-                console.error("Erro ao carregar do banco banco_projeto.sql:", err);
-                // Dados temporários caso o servidor esteja offline
-                eventos = [{ id: 1, titulo: "Servidor Offline", data: "2024-01-01", horario: "00:00", local: "Verifique o Node.js" }];
-                renderizar(eventos);
+                console.error("Erro ao carregar eventos:", err);
+                grid.innerHTML = `<p style="color: var(--text-sub); font-weight: 600;">Não foi possível carregar os eventos do servidor.</p>`;
             }
         }
 
-        function renderizar(lista) {
-            const grid = document.getElementById('eventosGrid');
-            grid.innerHTML = lista.map(ev => `
-                <div class="evento-card">
-                    <button class="btn-edit-float" onclick="abrirModal(${ev.id})"><i data-lucide="pencil" size="18"></i></button>
-                    <div class="evento-header">
-                        <div class="evento-icon-box"><i data-lucide="calendar"></i></div>
-                        <h3 class="evento-titulo">${ev.titulo}</h3>
+        function renderizarEventos(lista) {
+            const grid = document.getElementById('gridEventos');
+            grid.innerHTML = '';
+
+            if (!Array.isArray(lista) || lista.length === 0) {
+                grid.innerHTML = `<p style="color: var(--text-sub); font-weight: 600;">Nenhum evento disponível no momento. Aguarde a divulgação da AAPM.</p>`;
+                return;
+            }
+
+            lista.forEach((e) => {
+                const idEvento = Number(e.id);
+                const estaInscrito = minhasInscricoesIds.includes(idEvento);
+
+                const card = document.createElement('div');
+                card.className = `card-evento ${estaInscrito ? 'inscrito' : ''}`;
+                card.id = `card_${idEvento}`;
+
+                const dataStr = e.data ? e.data.split('T')[0] : '';
+                const dataObj = dataStr ? new Date(dataStr + 'T12:00:00') : new Date();
+                const dia = dataObj.getDate().toString().padStart(2, '0');
+                const mes = dataObj.toLocaleString('pt-BR', { month: 'short' }).replace('.', '');
+
+                const previaTexto = e.descricao
+                    ? (e.descricao.length > 90 ? e.descricao.substring(0, 90) + '...' : e.descricao)
+                    : `Evento institucional realizado em ${e.local || 'Campus SENAI'}.`;
+
+                card.innerHTML = `
+                    <div class="card-top-row">
+                        <div class="badge-data">
+                            <div class="dia">${dia}</div>
+                            <div class="mes">${mes}</div>
+                        </div>
+                        <span class="banner-inscrita"><i data-lucide="check-circle-2" size="14"></i> Inscrito</span>
                     </div>
-                    <div class="info-item"><div class="info-icon"><i data-lucide="calendar" size="14"></i></div><span>${new Date(ev.data).toLocaleDateString('pt-BR')}</span></div>
-                    <div class="info-item"><div class="info-icon"><i data-lucide="clock" size="14"></i></div><span>${ev.horario || ev.hora}</span></div>
-                    <div class="info-item"><div class="info-icon"><i data-lucide="map-pin" size="14"></i></div><span>${ev.local}</span></div>
-                </div>
-            `).join('');
-            lucide.createIcons();
+
+                    <div class="card-content">
+                        <h3 class="evento-titulo">${e.titulo}</h3>
+                        <p class="evento-previa">${previaTexto}</p>
+                    </div>
+
+                    <div>
+                        <div class="card-meta">
+                            <div class="meta-item"><i data-lucide="map-pin" size="15" style="color: var(--primary);"></i> ${e.local || 'Campus SENAI'}</div>
+                            <div class="meta-item"><i data-lucide="clock" size="15" style="color: var(--primary);"></i> ${e.horario || e.hora || 'A definir'}</div>
+                        </div>
+
+                        <div class="card-acoes-grid">
+                            <button class="btn-inscrever" onclick="inscreverEvento(${idEvento})">
+                                <i data-lucide="${estaInscrito ? 'check-circle' : 'ticket'}" size="16"></i>
+                                <span class="txt-btn">${estaInscrito ? '✓ Você está Inscrito' : 'Garantir Vaga'}</span>
+                            </button>
+
+                            <button class="btn-detalhes" onclick="abrirModalDetalhes(${idEvento})">
+                                <i data-lucide="info" size="15"></i> Ver Informações
+                            </button>
+
+                            <button class="btn-cancelar-inscricao" onclick="cancelarInscricao(${idEvento}, '${e.titulo.replace(/'/g, "\\'")}')">
+                                <i data-lucide="x-circle" size="15"></i> Cancelar Minha Inscrição
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            if (window.lucide) lucide.createIcons();
         }
 
-        function abrirModal(id) {
-            const ev = eventos.find(e => e.id === id);
-            if(!ev) return;
-            document.getElementById('editId').value = ev.id;
-            document.getElementById('editTitulo').value = ev.titulo;
-            document.getElementById('editData').value = ev.data.split('T')[0];
-            document.getElementById('editHora').value = ev.horario || ev.hora;
-            document.getElementById('editLocal').value = ev.local;
-            document.getElementById('modalEdicao').classList.add('active');
-        }
+        async function inscreverEvento(id) {
+            if (minhasInscricoesIds.includes(Number(id))) return;
 
-        function fecharModal() { document.getElementById('modalEdicao').classList.remove('active'); }
-
-        // SALVAMENTO AUTOMÁTICO E ATUALIZAÇÃO DA INTERFACE
-        document.getElementById('formUpdate').onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('editId').value;
-            const dados = {
-                titulo: document.getElementById('editTitulo').value,
-                data: document.getElementById('editData').value,
-                horario: document.getElementById('editHora').value,
-                local: document.getElementById('editLocal').value
-            };
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Você precisa estar logado como aluno para se inscrever neste evento.');
+                window.location.href = 'logincadastro.html';
+                return;
+            }
 
             try {
-                const res = await fetch(`${API_URL}/${id}`, {
-                    method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(dados)
+                const res = await fetch(`${API_URL}/${id}/inscrever`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
+                const dados = await res.json();
 
-                if(res.ok) {
-                    // Atualiza o banco banco_projeto.sql e recarrega a lista local
-                    await carregarEventos(); 
-                    fecharModal();
+                if (res.ok && dados.sucesso) {
+                    minhasInscricoesIds.push(Number(id));
+                    await carregarEventos();
                 } else {
-                    alert("Erro ao salvar informações.");
+                    alert(dados.mensagem || 'Não foi possível confirmar sua inscrição.');
                 }
             } catch (err) {
-                alert("Erro ao conectar com o servidor.");
+                console.error("Erro ao inscrever no evento:", err);
+                alert("Erro de conexão ao tentar realizar inscrição.");
             }
-        };
-
-        function filtrarEventos(val) {
-            const filtrados = eventos.filter(ev => ev.titulo.toLowerCase().includes(val.toLowerCase()));
-            renderizar(filtrados);
         }
 
-        window.onload = carregarEventos;
+        async function cancelarInscricao(id, titulo) {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            if (!confirm(`Deseja realmente cancelar a sua inscrição no evento "${titulo}"?`)) return;
+
+            try {
+                const res = await fetch(`${API_URL}/${id}/desinscrever`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await res.json();
+
+                if (res.ok && dados.sucesso) {
+                    await carregarEventos();
+                } else {
+                    alert(dados.mensagem || 'Não foi possível cancelar a inscrição.');
+                }
+            } catch (err) {
+                console.error("Erro ao cancelar inscrição:", err);
+                alert("Erro de conexão ao cancelar inscrição.");
+            }
+        }
+
+        function abrirModalDetalhes(id) {
+            const evento = listaEventosGlobal.find(e => Number(e.id) === Number(id));
+            if (!evento) return;
+
+            const dataStr = evento.data ? evento.data.split('T')[0] : '';
+            const dataObj = dataStr ? new Date(dataStr + 'T12:00:00') : new Date();
+            const dataFormatada = dataObj.toLocaleDateString('pt-BR');
+
+            document.getElementById('modalTitulo').textContent = evento.titulo;
+            document.getElementById('modalData').innerHTML = `<i data-lucide="calendar" size="15" style="color: var(--primary);"></i> ${dataFormatada}`;
+            document.getElementById('modalHorario').innerHTML = `<i data-lucide="clock" size="15" style="color: var(--primary);"></i> ${evento.horario || evento.hora || 'A definir'}`;
+            document.getElementById('modalLocal').innerHTML = `<i data-lucide="map-pin" size="15" style="color: var(--primary);"></i> ${evento.local || 'Campus SENAI'}`;
+            document.getElementById('modalOrganizador').innerHTML = `<i data-lucide="users" size="15" style="color: var(--primary);"></i> AAPM SENAI`;
+            document.getElementById('modalDescricao').textContent = evento.descricao || `Evento institucional confirmado para o dia ${dataFormatada} às ${evento.horario || 'horário a definir'}, no local: ${evento.local}.`;
+
+            document.getElementById('modalDetalhes').classList.add('active');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function fecharModalDetalhes(e) {
+            if (!e || e.target.classList.contains('modal-overlay') || e.target.closest('.btn-fechar-modal')) {
+                document.getElementById('modalDetalhes').classList.remove('active');
+            }
+        }
+
+        function filtrarPainel() {
+            const termo = document.getElementById('inputBuscaPainel').value.toLowerCase().trim();
+            const dropdown = document.getElementById('searchDropdown');
+
+            dropdown.innerHTML = '';
+
+            if (!termo) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            const resultados = modulosBusca.filter(m => m.titulo.toLowerCase().includes(termo));
+
+            if (resultados.length > 0) {
+                resultados.forEach(res => {
+                    const item = document.createElement('div');
+                    item.className = 'search-dropdown-item';
+                    item.innerHTML = `
+                        <div class="item-left">
+                            <div class="item-icon"><i data-lucide="${res.icone}" size="18"></i></div>
+                            <span>${res.titulo}</span>
+                        </div>
+                        <i data-lucide="arrow-right" size="16" style="color: #94a3b8;"></i>
+                    `;
+                    item.addEventListener('click', () => {
+                        window.location.href = res.destino;
+                    });
+                    dropdown.appendChild(item);
+                });
+                dropdown.classList.add('active');
+                if (window.lucide) lucide.createIcons();
+            } else {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        function fazerLogout() {
+            localStorage.clear();
+            window.location.href = 'logincadastro.html';
+        }
     </script>
 </body>
 </html>

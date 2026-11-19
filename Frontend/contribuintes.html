@@ -1,132 +1,225 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+        if (localStorage.getItem('tipoUsuario') !== 'admin') {
+            alert('Acesso restrito para administradores.');
+            window.location.href = 'login_admin.html';
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Contribuintes - AAPM SENAI</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Lista de Contribuintes - Painel Admin SENAI</title>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary: #f11815;
-            --primary-dark: #b31210;
-            --bg-body: #f8faff;
-            --card-bg: #ffffff;
-            --text-main: #1a1a1a;
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --primary-light: #fff1f1;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
             --text-sub: #64748b;
-            --radius: 24px;
+            --border-color: #e2e8f0;
+            --radius-card: 24px;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
 
         body {
             background-color: var(--bg-body);
-            color: var(--text-main);
-            min-height: 100vh;
+            color: var(--text-dark);
+            height: 100vh;
             display: flex;
-            flex-direction: column;
+            overflow: hidden;
+            position: relative;
         }
 
-        /* --- HEADER --- */
-        .top-header {
-            height: 90px;
-            background-color: #ffffff;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+        /* --- OVERLAY E SIDEBAR DRAWER PADRONIZADOS --- */
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(6px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        aside {
+            position: fixed; top: 0; left: 0; width: 290px; height: 100vh;
+            background: #ffffff; border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 28px 20px; overflow-y: auto; z-index: 999;
+            transform: translateX(-100%); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 15px 0 35px rgba(0,0,0,0.08);
+        }
+        aside.open { transform: translateX(0); }
+
+        .sidebar-header {
+            display: flex; align-items: center; justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .btn-close-menu {
+            width: 32px; height: 32px; border: none; background: transparent;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--text-sub);
+        }
+        .btn-close-menu:hover { background: #f1f5f9; color: var(--text-dark); }
+
+        .badge-admin-btn {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white; padding: 14px 20px; border-radius: 16px; font-weight: 800; font-size: 14px;
+            display: flex; align-items: center; gap: 12px; margin-bottom: 24px; cursor: pointer;
+            user-select: none; border: none; width: 100%; text-align: left; text-decoration: none;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25); transition: transform 0.2s ease;
+        }
+        .badge-admin-btn:hover { transform: translateY(-1px); }
+
+        .menu-category {
+            font-size: 11px; font-weight: 800; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1.2px; margin: 20px 0 10px 8px;
+        }
+        .menu-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px;
+            font-weight: 700; font-size: 14px; color: #475569; cursor: pointer;
+            text-decoration: none; transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .menu-item:hover { background: #fff1f1; color: var(--primary); transform: translateX(4px); }
+        .menu-item.active-page { background: var(--primary-light); color: var(--primary); font-weight: 800; }
+
+        .btn-sair {
+            background: #fff1f1; color: var(--primary); border: none; padding: 14px 18px;
+            border-radius: 14px; font-weight: 800; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; gap: 10px; width: 100%; margin-top: 24px; transition: 0.2s;
+        }
+        .btn-sair:hover { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25); }
+
+        /* --- WRAPPER E CABEÇALHO SUPERIOR PADRONIZADOS --- */
+        .wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; }
+
+        header {
+            height: 90px; background: #ffffff;
+            border-bottom: 1px solid var(--border-color); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 48px; position: sticky; top: 0; z-index: 100; flex-shrink: 0;
         }
 
-        .logo-central {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        .header-left { display: flex; align-items: center; gap: 16px; flex: 1; justify-content: flex-start; }
 
-        .logo-text { 
-            color: var(--primary); 
-            font-weight: 800; 
-            font-size: 28px; 
-            letter-spacing: -1px;
+        .btn-toggle-menu {
+            background: #ffffff; border: 1px solid var(--border-color); color: var(--text-dark);
+            width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: background 0.2s ease; flex-shrink: 0;
         }
+        .btn-toggle-menu:hover { background: #f8fafc; border-color: #cbd5e1; }
 
-        .admin-label {
-            font-weight: 700;
-            color: var(--text-sub);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .search-bar {
+            display: flex; align-items: center; gap: 12px; background: #f1f5f9;
+            padding: 12px 20px; border-radius: 20px; width: 280px; border: 1px solid transparent;
+            transition: border-color 0.2s ease, background 0.2s ease;
         }
+        .search-bar:focus-within { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1); }
+        .search-bar input { border: none; background: transparent; outline: none; font-size: 14px; font-weight: 700; width: 100%; color: var(--text-dark); }
 
-        /* --- CONTAINER --- */
-        .container {
-            padding: 40px;
-            max-width: 1300px;
-            margin: 0 auto;
-            width: 100%;
+        .brand-center {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            display: flex; align-items: center; justify-content: center; gap: 0px; font-size: 24px; font-weight: 800;
+            letter-spacing: -0.5px; cursor: pointer; user-select: none; text-decoration: none;
         }
+        .brand-center .aapm-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-right: -12px; }
+        .brand-center .senai-text { color: var(--primary); font-weight: 800; font-size: 24px; line-height: 1; margin-left: -12px; }
+        .brand-center img { height: 68px; width: auto; object-fit: contain; display: block; }
+
+        .header-right { display: flex; align-items: center; justify-content: flex-end; gap: 14px; flex: 1; }
+
+        .profile-btn {
+            width: 48px; height: 48px; border-radius: 50%; background: var(--primary);
+            color: white; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(241, 43, 44, 0.3); transition: transform 0.2s;
+        }
+        .profile-btn:hover { transform: scale(1.05); }
+
+        /* --- BARRA DE CATEGORIAS HORIZONTAL --- */
+        .nav-categories-bar {
+            background: #ffffff; border-bottom: 1px solid var(--border-color);
+            padding: 0 40px; display: flex; align-items: center; justify-content: center; gap: 28px;
+            overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 0;
+        }
+        .nav-categories-bar::-webkit-scrollbar { display: none; }
+
+        .nav-cat-item {
+            position: relative; padding: 14px 0; font-size: 13.5px; font-weight: 700;
+            color: #64748b; cursor: pointer; transition: color 0.2s ease; user-select: none; text-decoration: none;
+        }
+        .nav-cat-item::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 2px; background: var(--primary); opacity: 0; transition: opacity 0.2s ease;
+        }
+        .nav-cat-item:hover { color: var(--text-dark); }
+        .nav-cat-item.active { color: var(--primary); }
+        .nav-cat-item.active::after { opacity: 1; }
+
+        /* --- CONTEÚDO PRINCIPAL DE CONTRIBUINTES --- */
+        .content-body { padding: 36px 24px; max-width: 1220px; margin: 0 auto; width: 100%; }
 
         .table-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 35px;
+            background: #ffffff;
+            border-radius: var(--radius-card);
+            padding: 32px;
             box-shadow: var(--shadow);
-            border: 1px solid rgba(0,0,0,0.03);
+            border: 1px solid var(--border-color);
         }
 
         .header-table {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        h2 {
-            font-size: 24px;
+        .header-table h2 {
+            font-size: 26px;
             font-weight: 800;
-            color: var(--text-main);
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .btn-voltar {
-            background: white;
-            color: var(--text-main);
-            padding: 10px 20px;
+            background: #f8fafc;
+            color: var(--text-dark);
+            padding: 11px 20px;
             border-radius: 14px;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid #eee;
-            transition: 0.3s;
+            border: 1px solid var(--border-color);
+            transition: 0.2s ease;
         }
-
         .btn-voltar:hover {
-            background: #f1f5f9;
-            transform: translateX(-5px);
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateX(-3px);
         }
 
-        /* --- SEARCH --- */
+        /* --- BUSCA INTERNA --- */
         .search-wrapper {
             position: relative;
-            margin-bottom: 25px;
-            max-width: 400px;
+            margin-bottom: 24px;
+            max-width: 420px;
         }
 
-        .search-wrapper i {
+        .search-wrapper i, .search-wrapper svg {
             position: absolute;
-            left: 15px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-sub);
@@ -134,161 +227,316 @@
 
         .search-table {
             width: 100%;
-            padding: 14px 14px 14px 45px;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
+            padding: 13px 16px 13px 44px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
             outline: none;
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             font-size: 14px;
-            font-weight: 500;
-            transition: 0.3s;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: 0.2s;
         }
 
         .search-table:focus {
-            background-color: white;
+            background-color: #ffffff;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(241, 24, 21, 0.1);
+            box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1);
         }
 
-        /* --- TABLE --- */
-        .table-responsive {
-            overflow-x: auto;
-        }
+        /* --- TABELA --- */
+        .table-responsive { overflow-x: auto; }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 780px;
         }
 
         th {
             text-align: left;
-            padding: 15px;
+            padding: 15px 18px;
             color: var(--text-sub);
-            font-weight: 700;
+            font-weight: 800;
             border-bottom: 2px solid #f1f5f9;
             text-transform: uppercase;
             font-size: 12px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
         }
 
         td {
-            padding: 20px 15px;
+            padding: 18px;
             border-bottom: 1px solid #f1f5f9;
-            color: var(--text-main);
+            color: var(--text-dark);
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         tr:last-child td { border-bottom: none; }
-
-        tr:hover td { background-color: #fffafa; }
+        tbody tr:hover td { background-color: #fafbfc; }
 
         /* --- STATUS PINS --- */
         .pin {
             padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 11px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 800;
             display: inline-flex;
             align-items: center;
             gap: 5px;
         }
 
-        .pin-verde { background: #ecfdf5; color: #059669; }
-        .pin-amarelo { background: #fffbeb; color: #d97706; }
-        .pin-vermelho { background: #fef2f2; color: #dc2626; }
+        .pin-verde, .aprovado { background: #dcfce7; color: #15803d; }
+        .pin-amarelo { background: #fef3c7; color: #d97706; }
+        .pin-vermelho { background: #fee2e2; color: #b91c1c; }
 
+        @media (max-width: 768px) {
+            header { padding: 0 20px; }
+            .search-bar { width: 180px; }
+            .content-body { padding: 24px 16px; }
+            .table-card { padding: 20px; }
+        }
     </style>
 </head>
 <body>
 
-    <header class="top-header">
-        <div class="logo-central">
-            <span class="logo-text">AAPM</span>
-            <img src="fotoss.png" alt="Logo" style="height: 45px;">
-            <span class="logo-text">SENAI</span>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- SIDEBAR DRAWER EXPANSÍVEL PADRONIZADA -->
+    <aside id="sidebarMenu">
+        <div>
+            <div class="sidebar-header">
+                <button class="btn-close-menu" onclick="toggleSidebar()" aria-label="Fechar Menu">
+                    <i data-lucide="x" size="20"></i>
+                </button>
+            </div>
+
+            <a href="admin.html" class="badge-admin-btn">
+                <i data-lucide="shield-check" size="20"></i> Painel Admin
+            </a>
+
+            <div class="menu-category">GESTÃO</div>
+            <ul class="menu-list">
+                <li><a href="page.html" class="menu-item"><i data-lucide="book-open" size="18"></i> História da AAPM</a></li>
+                <li><a href="eventos_admin.html" class="menu-item"><i data-lucide="calendar" size="18"></i> Eventos</a></li>
+                <li><a href="beneficios_admin.html" class="menu-item"><i data-lucide="award" size="18"></i> Benefícios</a></li>
+                <li><a href="oficinas_admin.html" class="menu-item"><i data-lucide="layers" size="18"></i> Oficinas</a></li>
+                <li><a href="avisos_admin.html" class="menu-item"><i data-lucide="megaphone" size="18"></i> Avisos</a></li>
+                <li><a href="comprovante_admin.html" class="menu-item"><i data-lucide="file-check" size="18"></i> Confirmação Comprovante</a></li>
+                <li><a href="contribuintes.html" class="menu-item active-page"><i data-lucide="users" size="18"></i> Lista de Contribuintes</a></li>
+            </ul>
+
+            <div class="menu-category">MINHA CONTA</div>
+            <ul class="menu-list">
+                <li><a href="perfiladmin.html" class="menu-item"><i data-lucide="user" size="18"></i> Meu Perfil</a></li>
+                <li><a href="sugestoes_admin.html" class="menu-item"><i data-lucide="lightbulb" size="18"></i> Sugestões</a></li>
+                <li><a href="contato_chat.html" class="menu-item"><i data-lucide="message-square" size="18"></i> Contato / Chat</a></li>
+            </ul>
         </div>
-        <div class="admin-label">Painel Administrativo</div>
-    </header>
 
-    <div class="container">
-        <div class="table-card">
-            <div class="header-table">
-                <h2>Lista de Contribuintes</h2>
-                <a href="admin.html" class="btn-voltar">
-                    <i data-lucide="arrow-left" size="18"></i>
-                    Voltar ao Painel
-                </a>
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18"></i> Sair do Painel</button>
+    </aside>
+
+    <div class="wrapper">
+        <!-- CABEÇALHO SUPERIOR PADRONIZADO -->
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()" title="Menu de Opções">
+                    <i data-lucide="menu" size="24"></i>
+                </button>
+                <div class="search-bar">
+                    <i data-lucide="search" size="18" style="color: var(--text-sub);"></i>
+                    <input type="text" placeholder="Pesquisar..." oninput="filtrarTabela(this.value)" autocomplete="off">
+                </div>
             </div>
 
-            <div class="search-wrapper">
-                <i data-lucide="search" size="18"></i>
-                <input type="text" class="search-table" placeholder="Filtrar por nome, CPF ou turma...">
-            </div>
+            <a href="admin.html" class="brand-center">
+                <span class="aapm-text">AAPM</span>
+                <img src="img/fotoss.png" alt="Logotipo AAPM SENAI" width="160" height="68" onerror="this.src='fotoss.png'; this.onerror=null;">
+                <span class="senai-text">SENAI</span>
+            </a>
 
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nome Completo</th>
-                            <th>Nascimento</th>
-                            <th>CPF</th>
-                            <th>Turma</th>
-                            <th>Armário</th>
-                            <th>Associação</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpoTabela">
-                        <tr>
-                            <td><strong>Bruna de Oliveira Lima</strong></td>
-                            <td>20/01/2009</td>
-                            <td>123.456.789-10</td>
-                            <td>DEV A</td>
-                            <td>042</td>
-                            <td>21/04/2026</td>
-                            <td><span class="pin pin-verde">há 2 dias</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Melina Pecorari Pontes</strong></td>
-                            <td>27/09/2008</td>
-                            <td>456.789.123-20</td>
-                            <td>DEV A</td>
-                            <td>115</td>
-                            <td>09/04/2026</td>
-                            <td><span class="pin pin-amarelo">há 2 semanas</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>João Miguel Oliveira Campos</strong></td>
-                            <td>12/07/2008</td>
-                            <td>789.123.456-30</td>
-                            <td>DEV A</td>
-                            <td>201</td>
-                            <td>01/03/2026</td>
-                            <td><span class="pin pin-vermelho">há 3 semanas+</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="header-right">
+                <button class="profile-btn" onclick="window.location.href='perfiladmin.html'" title="Meu Perfil">
+                    <i data-lucide="user" size="22"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- BARRA DE CATEGORIAS HORIZONTAL -->
+        <nav class="nav-categories-bar">
+            <a href="admin.html" class="nav-cat-item">Início</a>
+            <a href="page.html" class="nav-cat-item">História da AAPM</a>
+            <a href="eventos_admin.html" class="nav-cat-item">Eventos</a>
+            <a href="beneficios_admin.html" class="nav-cat-item">Benefícios</a>
+            <a href="oficinas_admin.html" class="nav-cat-item">Oficinas</a>
+            <a href="avisos_admin.html" class="nav-cat-item">Avisos</a>
+            <a href="comprovante_admin.html" class="nav-cat-item">Comprovantes</a>
+            <a href="contribuintes.html" class="nav-cat-item active">Contribuintes</a>
+        </nav>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="content-body">
+            <div class="table-card">
+                <div class="header-table">
+                    <h2><i data-lucide="users" style="color: var(--primary);"></i> Lista de Contribuintes Aprovados</h2>
+                    <a href="comprovante_admin.html" class="btn-voltar">
+                        <i data-lucide="arrow-left" size="18"></i>
+                        Voltar aos Comprovantes
+                    </a>
+                </div>
+
+                <div class="search-wrapper">
+                    <i data-lucide="search" size="18"></i>
+                    <input type="text" id="searchTableInput" class="search-table" placeholder="Filtrar por nome ou matrícula..." oninput="filtrarTabela(this.value)">
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome Completo</th>
+                                <th>Nascimento</th>
+                                <th>Matrícula</th>
+                                <th>Associação</th>
+                                <th>Aprovado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabela">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-sub);">Carregando contribuintes...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Inicializa os ícones Lucide
-        lucide.createIcons();
+        function atualizarIcones() {
+            if (window.lucide && typeof lucide.createIcons === 'function') {
+                lucide.createIcons();
+            }
+        }
 
-        // Filtro da tabela
-        document.querySelector('.search-table').addEventListener('input', function() {
-            let busca = this.value.toLowerCase();
-            let linhas = document.querySelectorAll('#corpoTabela tr');
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
 
+        function fazerLogout() {
+            if (confirm("Deseja realmente sair do Painel Administrativo?")) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('tipoUsuario');
+                localStorage.removeItem('nomeUsuario');
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = 'login_admin.html';
+            }
+        }
+
+        function calcularTempoPassado(dataStr) {
+            if (!dataStr) return { texto: 'recente', classe: 'pin-verde' };
+            
+            const dataCadastro = new Date(dataStr);
+            const agora = new Date();
+            const diffDias = Math.floor((agora - dataCadastro) / (1000 * 60 * 60 * 24));
+
+            if (diffDias < 7) {
+                return { texto: diffDias <= 0 ? 'hoje' : `há ${diffDias} dia(s)`, classe: 'pin-verde' };
+            } else if (diffDias < 21) {
+                const semanas = Math.floor(diffDias / 7);
+                return { texto: `há ${semanas} semana(s)`, classe: 'pin-amarelo' };
+            } else {
+                return { texto: 'há 3 semanas+', classe: 'pin-vermelho' };
+            }
+        }
+
+        async function carregarContribuintesAprovados() {
+            try {
+                let token = null;
+                try {
+                    token = localStorage.getItem('token');
+                } catch (e) {
+                    console.warn("Acesso ao localStorage indisponível:", e);
+                }
+
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const resposta = await fetch('http://localhost:3002/api/contribuintes-aprovados', {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                const resultado = await resposta.json();
+                const corpoTabela = document.getElementById('corpoTabela');
+                const lista = Array.isArray(resultado) ? resultado : (resultado.dados || []);
+
+                if (lista.length === 0) {
+                    corpoTabela.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-sub);">
+                                Nenhum contribuinte aprovado encontrado.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                corpoTabela.innerHTML = lista.map(item => {
+                    let tempo = { texto: 'Aprovado', classe: 'pin-verde' };
+                    if (typeof calcularTempoPassado === 'function' && (item.data_cadastro || item.created_at)) {
+                        tempo = calcularTempoPassado(item.data_cadastro || item.created_at);
+                    }
+
+                    const dataNasc = (item.nascimento || item.data_nascimento) 
+                        ? new Date(item.nascimento || item.data_nascimento).toLocaleDateString('pt-BR') 
+                        : '-';
+
+                    const nomeAluno = item.nome || item.nome_completo || 'Não informado';
+
+                    return `
+                        <tr>
+                            <td><strong>${nomeAluno}</strong></td>
+                            <td>${dataNasc}</td>
+                            <td>${item.matricula || '-'}</td>
+                            <td>${item.associacao || 'Associado'}</td>
+                            <td><span class="pin ${tempo.classe || 'pin-verde'}"><i data-lucide="check-circle-2" size="13"></i> ${tempo.texto || 'Aprovado'}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+
+                atualizarIcones();
+
+            } catch (erro) {
+                console.error('Erro ao carregar lista de contribuintes:', erro);
+                document.getElementById('corpoTabela').innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--primary);">
+                            Erro ao conectar com o servidor.
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        function filtrarTabela(valor) {
+            const busca = valor.toLowerCase();
+            const inputInterno = document.getElementById('searchTableInput');
+            if (inputInterno && inputInterno.value !== valor) {
+                inputInterno.value = valor;
+            }
+
+            const linhas = document.querySelectorAll('#corpoTabela tr');
             linhas.forEach(linha => {
-                let texto = linha.innerText.toLowerCase();
+                const texto = linha.innerText.toLowerCase();
                 linha.style.display = texto.includes(busca) ? '' : 'none';
             });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarIcones();
+            carregarContribuintesAprovados();
         });
     </script>
-
 </body>
 </html>

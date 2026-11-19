@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script>
+    if (localStorage.getItem('tipoUsuario') !== 'admin') {
+        alert('Acesso restrito para administradores.');
+        window.location.href = 'logincadastro.html?modo=admin';
+    }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Chat Admin - AAPM SENAI</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f12b2c;
+            --primary-dark: #d91f20;
+            --bg-body: #f8fafc;
+            --text-dark: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --radius-card: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-dark); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        header { height: 70px; background: #ffffff; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex-shrink: 0; }
+        .btn-back { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-sub); font-weight: 700; background: #f1f5f9; padding: 8px 16px; border-radius: 12px; font-size: 13px; transition: 0.2s; }
+        .btn-back:hover { background: #e2e8f0; color: var(--text-dark); }
+
+        /* ESTRUTURA ESTILO WHATSAPP WEB */
+        .whatsapp-container { flex: 1; display: flex; height: calc(100vh - 70px); width: 100%; overflow: hidden; }
+
+        /* COLUNA DA ESQUERDA - LISTA DE ALUNOS CONTRIBUINTES */
+        .sidebar-chats { width: 360px; background: #ffffff; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar-header { padding: 16px 18px; border-bottom: 1px solid var(--border-color); background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+        .sidebar-title { font-size: 15px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; justify-content: space-between; }
+        .badge-total { background: #e2e8f0; color: var(--text-dark); font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 800; }
+
+        .search-box { position: relative; display: flex; align-items: center; }
+        .search-box input { width: 100%; padding: 10px 14px 10px 36px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 13px; outline: none; background: #ffffff; font-weight: 600; }
+        .search-box input:focus { border-color: var(--primary); }
+        .search-box i { position: absolute; left: 11px; color: var(--text-sub); }
+
+        .conversations-list { flex: 1; overflow-y: auto; }
+
+        .chat-item { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s; }
+        .chat-item:hover { background: #f8fafc; }
+        .chat-item.active { background: #fff1f1; border-left: 4px solid var(--primary); }
+
+        .chat-avatar { width: 44px; height: 44px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; }
+        .chat-info { flex: 1; min-width: 0; }
+        .chat-name-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        .chat-name { font-size: 14px; font-weight: 800; color: var(--text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chat-badge-unread { background: var(--primary); color: #ffffff; font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 999px; flex-shrink: 0; }
+        .chat-sub-course { font-size: 11px; color: #0284c7; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+        .chat-last-msg { font-size: 12px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; }
+
+        /* COLUNA DA DIREITA - JANELA DA CONVERSA SELECIONADA */
+        .chat-window { flex: 1; display: flex; flex-direction: column; background: #f8fafc; min-width: 0; }
+        
+        .chat-window-header { height: 66px; background: #ffffff; border-bottom: 1px solid var(--border-color); padding: 0 24px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+        .chat-window-header .user-title { font-size: 15px; font-weight: 800; color: var(--text-dark); }
+        .chat-window-header .user-sub { font-size: 12px; color: var(--text-sub); font-weight: 600; }
+
+        .messages-area { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .msg-bubble { max-width: 65%; padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.45; word-wrap: break-word; }
+        .msg-aluno { align-self: flex-start; background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+        .msg-admin { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+
+        .msg-info-aluno { font-size: 11px; font-weight: 800; margin-bottom: 4px; color: #0284c7; display: flex; align-items: center; gap: 4px; }
+        .msg-info-admin { font-size: 11px; font-weight: 800; margin-bottom: 4px; color: #ffffff; display: flex; align-items: center; gap: 4px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; }
+        .msg-time { font-size: 10px; margin-top: 5px; opacity: 0.75; text-align: right; }
+
+        .input-area { background: #ffffff; border-top: 1px solid var(--border-color); padding: 16px 24px; display: flex; gap: 12px; flex-shrink: 0; }
+        .chat-input { flex: 1; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; font-size: 14px; outline: none; font-weight: 600; }
+        .chat-input:focus { border-color: var(--primary); background: #ffffff; }
+        .btn-send { background: var(--primary); color: white; border: none; border-radius: 12px; padding: 0 22px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-send:hover { background: var(--primary-dark); }
+        .btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .no-chat-selected { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); text-align: center; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="admin.html" class="btn-back"><i data-lucide="arrow-left" size="18"></i> Voltar ao Painel Admin</a>
+        <div style="font-weight: 800; font-size: 18px; color: var(--primary);">Atendimento Central AAPM</div>
+    </header>
+
+    <div class="whatsapp-container">
+        <!-- COLUNA DA ESQUERDA -->
+        <div class="sidebar-chats">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <span>Alunos Contribuintes</span>
+                    <span class="badge-total" id="totalContribuintes">0</span>
+                </div>
+                <div class="search-box">
+                    <i data-lucide="search" size="15"></i>
+                    <input type="text" id="buscaAlunoInput" placeholder="Buscar aluno por nome ou e-mail..." oninput="filtrarListaAlunos()">
+                </div>
+            </div>
+            <div class="conversations-list" id="conversationsList"></div>
+        </div>
+
+        <!-- COLUNA DA DIREITA -->
+        <div class="chat-window" id="chatWindow">
+            <div class="no-chat-selected" id="noChatMsg">
+                <i data-lucide="message-square" size="48" style="margin-bottom: 12px; color: #94a3b8;"></i>
+                <p style="font-weight: 700; font-size: 15px;">Selecione um aluno contribuinte à esquerda</p>
+                <p style="font-size: 13px; margin-top: 4px;">Você pode iniciar uma conversa ou visualizar todo o histórico salvo.</p>
+            </div>
+
+            <div id="activeChatContent" style="display: none; height: 100%; flex-direction: column;">
+                <div class="chat-window-header">
+                    <div class="chat-avatar" id="headerAvatar">A</div>
+                    <div>
+                        <div class="user-title" id="headerName">Nome do Aluno</div>
+                        <div class="user-sub" id="headerEmail">email@aluno.com</div>
+                    </div>
+                </div>
+
+                <div class="messages-area" id="messagesArea"></div>
+
+                <form class="input-area" onsubmit="enviarRespostaAdmin(event)">
+                    <input type="text" id="adminInput" class="chat-input" placeholder="Digite sua mensagem para o aluno..." required autocomplete="off">
+                    <button type="submit" class="btn-send" id="btnSendAdmin"><i data-lucide="send" size="16"></i> Enviar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3002/api';
+        let listaContribuintes = [];
+        let alunoSelecionado = null;
+        let ultimoTotalMensagens = -1;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            carregarContribuintes();
+
+            setInterval(() => {
+                carregarContribuintes(true);
+                if (alunoSelecionado) {
+                    carregarMensagensDoAluno(alunoSelecionado.email, true);
+                }
+            }, 3000);
+        });
+
+        async function carregarContribuintes(silencioso = false) {
+            try {
+                const res = await fetch(`${API_URL}/chat/contribuintes`);
+                const data = await res.json();
+
+                if (res.ok && data.sucesso) {
+                    listaContribuintes = data.contribuintes || [];
+                    document.getElementById('totalContribuintes').innerText = listaContribuintes.length;
+                    filtrarListaAlunos();
+                } else if (!silencioso) {
+                    document.getElementById('conversationsList').innerHTML =
+                        '<p style="padding: 20px; color: var(--text-sub); font-size: 13px;">Erro ao carregar alunos.</p>';
+                }
+            } catch (err) {
+                if (!silencioso) {
+                    document.getElementById('conversationsList').innerHTML =
+                        '<p style="padding: 20px; color: var(--primary); font-size: 13px; font-weight: 700;">Servidor offline. Inicie o backend na porta 3002.</p>';
+                }
+            }
+        }
+
+        function filtrarListaAlunos() {
+            const termo = (document.getElementById('buscaAlunoInput').value || '').trim().toLowerCase();
+            const filtrados = listaContribuintes.filter(a =>
+                (a.nome || '').toLowerCase().includes(termo) ||
+                (a.email || '').toLowerCase().includes(termo) ||
+                (a.curso || '').toLowerCase().includes(termo)
+            );
+            renderizarListaAlunos(filtrados);
+        }
+
+        function renderizarListaAlunos(alunos) {
+            const listContainer = document.getElementById('conversationsList');
+            listContainer.innerHTML = '';
+
+            if (alunos.length === 0) {
+                listContainer.innerHTML =
+                    '<p style="padding: 20px; color: var(--text-sub); font-size: 13px; font-weight: 600;">Nenhum aluno contribuinte encontrado.</p>';
+                return;
+            }
+
+            alunos.forEach(aluno => {
+                const isSelected = alunoSelecionado && alunoSelecionado.email.toLowerCase() === aluno.email.toLowerCase();
+                const item = document.createElement('div');
+                item.className = `chat-item ${isSelected ? 'active' : ''}`;
+                item.onclick = () => selecionarAluno(aluno);
+
+                const nomeExibicao = aluno.nome || 'Aluno sem nome';
+                const inicial = nomeExibicao.charAt(0).toUpperCase();
+                const infoCurso = [aluno.curso, aluno.turma].filter(Boolean).join(' • ') || 'Contribuinte AAPM';
+                const previewMsg = aluno.ultima_mensagem
+                    ? aluno.ultima_mensagem
+                    : 'Clique para iniciar uma conversa...';
+                const badgeNaoLidas = Number(aluno.nao_lidas) > 0
+                    ? `<span class="chat-badge-unread">${aluno.nao_lidas}</span>`
+                    : '';
+
+                item.innerHTML = `
+                    <div class="chat-avatar">${inicial}</div>
+                    <div class="chat-info">
+                        <div class="chat-name-row">
+                            <div class="chat-name">${escapeHtml(nomeExibicao)}</div>
+                            ${badgeNaoLidas}
+                        </div>
+                        <div class="chat-sub-course">${escapeHtml(infoCurso)}</div>
+                        <div class="chat-last-msg">${escapeHtml(previewMsg)}</div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function selecionarAluno(aluno) {
+            alunoSelecionado = aluno;
+            ultimoTotalMensagens = -1;
+
+            document.getElementById('noChatMsg').style.display = 'none';
+            document.getElementById('activeChatContent').style.display = 'flex';
+
+            const nomeExibicao = aluno.nome || 'Aluno';
+            const detalhes = [aluno.email, aluno.curso, aluno.turma].filter(Boolean).join(' • ');
+
+            document.getElementById('headerName').innerText = nomeExibicao;
+            document.getElementById('headerEmail').innerText = detalhes;
+            document.getElementById('headerAvatar').innerText = nomeExibicao.charAt(0).toUpperCase();
+
+            filtrarListaAlunos();
+            carregarMensagensDoAluno(aluno.email, false);
+        }
+
+        async function carregarMensagensDoAluno(email, silencioso = false) {
+            try {
+                const res = await fetch(`${API_URL}/chat/mensagens?email=${encodeURIComponent(email)}&lidoPor=admin`);
+                const data = await res.json();
+
+                if (!res.ok || !data.sucesso) return;
+
+                const mensagens = data.mensagens || [];
+                if (silencioso && mensagens.length === ultimoTotalMensagens) return;
+                ultimoTotalMensagens = mensagens.length;
+
+                const area = document.getElementById('messagesArea');
+                area.innerHTML = '';
+
+                if (mensagens.length === 0) {
+                    area.innerHTML = `
+                        <div style="margin: auto; text-align: center; color: var(--text-sub); font-size: 13px; font-weight: 600;">
+                            Nenhuma mensagem anterior com ${escapeHtml(alunoSelecionado.nome || 'este aluno')}.<br>
+                            Envie a primeira mensagem abaixo!
+                        </div>
+                    `;
+                    return;
+                }
+
+                mensagens.forEach(m => {
+                    const bubble = document.createElement('div');
+                    const isAluno = (m.remetente === 'aluno');
+                    bubble.className = `msg-bubble ${isAluno ? 'msg-aluno' : 'msg-admin'}`;
+
+                    const autor = isAluno
+                        ? `<div class="msg-info-aluno"><i data-lucide="user" size="12"></i> ${escapeHtml(m.aluno_nome || alunoSelecionado.nome || 'Aluno')}</div>`
+                        : `<div class="msg-info-admin"><i data-lucide="shield" size="12"></i> Administração AAPM</div>`;
+
+                    bubble.innerHTML = `
+                        ${autor}
+                        <div>${escapeHtml(m.mensagem)}</div>
+                        <div class="msg-time">${escapeHtml(m.hora || '')}</div>
+                    `;
+                    area.appendChild(bubble);
+                });
+
+                if (window.lucide) lucide.createIcons();
+                area.scrollTop = area.scrollHeight;
+            } catch (err) {
+                console.error('Erro ao carregar mensagens:', err);
+            }
+        }
+
+        async function enviarRespostaAdmin(e) {
+            e.preventDefault();
+            const input = document.getElementById('adminInput');
+            const btn = document.getElementById('btnSendAdmin');
+            const texto = input.value.trim();
+
+            if (!texto || !alunoSelecionado) return;
+
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/chat/salvar-mensagem`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        aluno_id: alunoSelecionado.id,
+                        aluno_email: alunoSelecionado.email,
+                        aluno_nome: alunoSelecionado.nome,
+                        remetente: 'admin',
+                        mensagem: texto
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.sucesso) {
+                    input.value = '';
+                    ultimoTotalMensagens = -1;
+                    await carregarMensagensDoAluno(alunoSelecionado.email, false);
+                    await carregarContribuintes(true);
+                } else {
+                    alert(data.mensagem || 'Não foi possível enviar a mensagem.');
+                }
+            } catch (err) {
+                alert('Erro de conexão ao enviar mensagem.');
+            } finally {
+                btn.disabled = false;
+                input.focus();
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>

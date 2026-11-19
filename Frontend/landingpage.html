@@ -3,347 +3,626 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Página Inicial - AAPM SENAI</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="description" content="Portal do Aluno AAPM SENAI - Acesse rapidamente informações, notícias, eventos, benefícios e oficinas.">
+    <title>AAPM SENAI - Portal do Aluno</title>
+
+    <link rel="preload" as="image" href="img/anuncio1.png" type="image/png" fetchpriority="high">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" media="print" onload="this.media='all'">
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+
     <style>
-        :root {
-            --primary: #f11815;
-            --primary-dark: #b31210;
-            --bg-body: #f8faff;
-            --sidebar-bg: #ffffff;
-            --text-main: #1a1a1a;
-            --text-sub: #64748b;
-            --radius: 24px;
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
+        :root{--primary:#f12b2c;--primary-dark:#d91f20;--primary-light:#fff1f1;--bg-body:#f8fafc;--text-dark:#0f172a;--text-sub:#64748b;--border-color:#e2e8f0}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif}
+        body{background-color:var(--bg-body);color:var(--text-dark);height:100vh;display:flex;overflow:hidden;position:relative}
+        .sidebar-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(15,23,42,0.4);backdrop-filter:blur(6px);z-index:998;opacity:0;visibility:hidden;transition:opacity 0.3s ease}
+        .sidebar-overlay.active{opacity:1;visibility:visible}
+        aside{position:fixed;top:0;left:0;width:290px;height:100vh;background:#fff;border-right:1px solid var(--border-color);display:flex;flex-direction:column;justify-content:space-between;padding:28px 20px;overflow-y:auto;z-index:999;transform:translateX(-100%);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);box-shadow:15px 0 35px rgba(0,0,0,0.08)}
+        aside.open{transform:translateX(0)}
+        .sidebar-header{display:flex;align-items:center;justify-content:flex-end;font-size:12px;font-weight:800;color:var(--text-sub);letter-spacing:1px;margin-bottom:20px}
+        .btn-close-menu{width:32px;height:32px;border:none;background:transparent;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-sub)}
+        .btn-close-menu:hover{background:#f1f5f9;color:var(--text-dark)}
+        .badge-aluno-btn{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;padding:14px 20px;border-radius:16px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:12px;margin-bottom:24px;box-shadow:0 8px 20px rgba(241,43,44,0.25);cursor:pointer;user-select:none;border:none;width:100%;text-align:left}
+        .menu-category{font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:1.2px;margin:20px 0 10px 8px}
+        .menu-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+        .menu-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;font-weight:700;font-size:14px;color:#475569;cursor:pointer;transition:transform 0.2s ease,background 0.2s ease}
+        .menu-item:hover{background:#f1f5f9;color:var(--primary);transform:translateX(4px)}
+        .menu-item.active-page{background:var(--primary-light);color:var(--primary);font-weight:800}
+        .btn-sair{background:#fff1f1;color:var(--primary);border:none;padding:14px 18px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;margin-top:24px;transition:background 0.2s ease,color 0.2s ease}
+        .btn-sair:hover{background:var(--primary);color:#fff;box-shadow:0 8px 20px rgba(241,43,44,0.25)}
+        .wrapper{flex:1;display:flex;flex-direction:column;overflow-y:auto;width:100%}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
+        /* Cabeçalho */
+        header{height:90px;background:#fff;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;padding:0 48px;position:sticky;top:0;z-index:100;flex-shrink:0}
+        .header-left{display:flex;align-items:center;gap:16px;flex:1;justify-content:flex-start}
+        .btn-toggle-menu{background:#fff;border:1px solid var(--border-color);color:var(--text-dark);width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s ease;flex-shrink:0}
+        .btn-toggle-menu:hover{background:#f8fafc;border-color:#cbd5e1}
+        
+        .search-container{position:relative;width:280px}
+        .search-bar{display:flex;align-items:center;gap:12px;background:#f1f5f9;padding:12px 20px;border-radius:20px;width:100%;border:1px solid transparent;transition:border-color 0.2s ease, background 0.2s ease}
+        .search-bar:focus-within{background:#fff;border-color:var(--primary);box-shadow:0 0 0 4px rgba(241,43,44,0.1)}
+        .search-bar input{border:none;background:transparent;outline:none;font-size:14px;font-weight:700;width:100%;color:var(--text-dark)}
 
-        body {
-            display: flex;
-            height: 100vh;
-            background-color: var(--bg-body);
-            overflow: hidden;
-        }
+        .search-dropdown{position:absolute;top:calc(100% + 8px);left:0;width:320px;background:#fff;border:1px solid var(--border-color);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,0.12);padding:10px;display:none;flex-direction:column;gap:8px;z-index:200}
+        .search-dropdown.active{display:flex}
+        .search-dropdown-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid var(--border-color);cursor:pointer;transition:background 0.2s ease, transform 0.2s ease}
+        .search-dropdown-item:hover{background:var(--primary-light);border-color:var(--primary);transform:translateY(-1px)}
+        .search-dropdown-item .item-left{display:flex;align-items:center;gap:12px}
+        .search-dropdown-item .item-icon{width:36px;height:36px;border-radius:10px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center}
+        .search-dropdown-item span{font-size:13px;font-weight:700;color:var(--text-dark)}
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 280px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
-            padding: 20px;
-        }
+        .brand-center{position:absolute;left:50%;top:50%;transform:translate(-50%, -50%);display:flex;align-items:center;justify-content:center;gap:0px;font-size:24px;font-weight:800;letter-spacing:-0.5px;cursor:pointer;user-select:none}
+        .brand-center .aapm-text{color:var(--primary);font-weight:800;font-size:24px;line-height:1;margin-right:-12px}
+        .brand-center .senai-text{color:var(--primary);font-weight:800;font-size:24px;line-height:1;margin-left:-12px}
+        .brand-center img{height:68px;width:auto;object-fit:contain;display:block}
+        
+        .header-right{display:flex;align-items:center;justify-content:flex-end;gap:14px;flex:1}
+        .profile-btn{width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(241,43,44,0.3);transition:transform 0.2s ease}
+        .profile-btn:hover{transform:scale(1.05)}
 
-        .sidebar.closed {
-            width: 0;
-            padding: 0;
-            opacity: 0;
-            pointer-events: none;
-        }
+        /* --- NOTIFICAÇÕES (ÍCONE DE SINO + PAINEL SUSPENSO) --- */
+        .notif-container{position:relative}
+        .notif-btn{position:relative;width:48px;height:48px;border-radius:14px;background:#fff;border:1px solid var(--border-color);color:var(--text-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s ease}
+        .notif-btn:hover{background:#f8fafc;border-color:#cbd5e1;color:var(--primary)}
+        .notif-badge{position:absolute;top:-5px;right:-5px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--primary);color:#fff;font-size:11px;font-weight:800;display:none;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(241,43,44,0.35)}
+        .notif-badge.visible{display:flex}
 
-        .menu-header {
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            padding: 0 10px;
-        }
+        .notif-dropdown{position:absolute;top:calc(100% + 12px);right:0;width:390px;max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--border-color);border-radius:20px;box-shadow:0 20px 45px rgba(15,23,42,0.16);display:none;flex-direction:column;overflow:hidden;z-index:250}
+        .notif-dropdown.active{display:flex;animation:fadeSlideDown 0.2s ease}
+        @keyframes fadeSlideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 
-        .nav-links {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .notif-header{padding:16px 20px;border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;background:#f8fafc}
+        .notif-header h3{font-size:15px;font-weight:800;color:var(--text-dark);display:flex;align-items:center;gap:8px}
+        .btn-ler-todas{background:none;border:none;color:var(--primary);font-size:12px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:8px;transition:0.2s}
+        .btn-ler-todas:hover{background:var(--primary-light)}
 
-        .nav-links a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 14px 18px;
-            text-decoration: none;
-            color: var(--text-sub);
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 16px;
-            transition: 0.3s;
-        }
+        .notif-list{max-height:380px;overflow-y:auto;display:flex;flex-direction:column}
+        .notif-item{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background 0.2s ease;position:relative}
+        .notif-item:last-child{border-bottom:none}
+        .notif-item:hover{background:#f8fafc}
+        .notif-item.unread{background:#fff8f8}
+        .notif-item.unread::before{content:'';position:absolute;left:8px;top:24px;width:7px;height:7px;border-radius:50%;background:var(--primary)}
 
-        .nav-links a:hover {
-            background-color: #fff1f1;
-            color: var(--primary);
-        }
+        .notif-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+        .notif-icon.oficina{background:#ecfdf5;color:#059669}
+        .notif-icon.evento{background:#eff6ff;color:#2563eb}
+        .notif-icon.beneficio{background:#fffbeb;color:#d97706}
+        .notif-icon.aviso{background:#faf5ff;color:#9333ea}
 
-        .nav-links a.admin-btn {
-            margin-top: 10px;
-            background-color: #f1f5f9;
-            color: var(--primary);
-            border: 1px dashed var(--primary);
-        }
+        .notif-content{flex:1;display:flex;flex-direction:column;gap:4px}
+        .notif-title{font-size:13.5px;font-weight:800;color:var(--text-dark)}
+        .notif-desc{font-size:12.5px;font-weight:600;color:#475569;line-height:1.45}
+        .notif-time{font-size:11px;font-weight:700;color:#94a3b8;margin-top:2px}
 
-        /* --- BOTÃO MENU --- */
-        .btn-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-sub);
-            padding: 10px;
-            border-radius: 12px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-        }
+        .notif-empty{padding:36px 20px;text-align:center;color:var(--text-sub);font-size:13.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:10px}
 
-        /* --- CONTEÚDO PRINCIPAL --- */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
+        .nav-categories-bar{background:#fff;border-bottom:1px solid var(--border-color);padding:0 40px;display:flex;align-items:center;justify-content:center;gap:32px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;flex-shrink:0}
+        .nav-categories-bar::-webkit-scrollbar{display:none}
+        
+        .nav-cat-item{position:relative;padding:14px 0;font-size:13.5px;font-weight:700;color:#64748b;cursor:pointer;user-select:none;transition:opacity 0.2s ease}
+        .nav-cat-item::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--primary);opacity:0;transition:opacity 0.2s ease}
+        .nav-cat-item:hover{color:var(--text-dark)}
+        .nav-cat-item.active{color:var(--primary)}
+        .nav-cat-item.active::after{opacity:1}
 
-        .top-header {
-            height: 90px;
-            background-color: #ffffff;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 40px;
-            position: relative;
-        }
+        main.content-area{flex:1;padding:24px 40px;display:flex;flex-direction:column;align-items:center;gap:24px;max-width:1280px;width:100%;margin:0 auto}
+        .welcome-header{text-align:center}
+        .welcome-title{font-size:26px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;display:flex;align-items:center;justify-content:center;gap:12px}
+        .welcome-title::before,.welcome-title::after{content:'';display:inline-block;width:30px;height:3px;background-color:#f59e0b;border-radius:2px}
+        .welcome-subtitle{font-size:13.5px;color:#64748b;margin-top:6px;font-weight:700}
+        
+        .ads-carousel{width:100%;max-width:1200px;position:relative;border-radius:24px;overflow:hidden;box-shadow:0 12px 30px -8px rgba(0,0,0,0.12);border:1px solid var(--border-color);background:#fff;aspect-ratio:16/9}
+        .ads-slides-wrapper{display:flex;width:100%;height:100%;transition:transform 0.6s cubic-bezier(0.16,1,0.3,1)}
+        .ad-slide-img{min-width:100%;height:100%;object-fit:cover;object-position:center;display:block;user-select:none;aspect-ratio:16/9}
+        .carousel-btn{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;background:#fff;border:1px solid var(--border-color);color:var(--text-dark);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.2s ease;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+        .carousel-btn:hover{background:#f8fafc;transform:translateY(-50%) scale(1.08)}
+        .carousel-btn.prev{left:20px}
+        .carousel-btn.next{right:20px}
+        .carousel-dots{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10;background:rgba(255,255,255,0.88);padding:6px 14px;border-radius:20px;backdrop-filter:blur(8px);box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+        .dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;cursor:pointer;transition:transform 0.3s ease,background 0.3s ease;border:none}
+        .dot.active{width:22px;border-radius:10px;background:var(--primary)}
+        
+        .cards-container{width:100%;max-width:1200px}
+        .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%}
+        .card-btn{position:relative;background:#fff;border:1px solid var(--border-color);height:90px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.02);transition:transform 0.25s ease,box-shadow 0.25s ease;user-select:none;overflow:hidden;text-align:left}
+        .card-btn::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:4px;border-radius:0 0 16px 16px}
+        .card-btn .card-left-content{display:flex;align-items:center;gap:14px}
+        .card-icon-box{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--primary-light);color:var(--primary)}
+        .card-btn span{font-size:13.5px;font-weight:700;color:#1e293b}
+        .card-arrow{color:#94a3b8;transition:transform 0.2s ease}
+        .card-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,0.06)}
+        .card-btn:hover .card-arrow{transform:translateX(3px);color:#0f172a}
+        
+        .card-historia::after{background:#f12b2c}
+        .card-eventos::after{background:#2563eb}
+        .card-beneficios::after{background:#d97706}
+        .card-oficinas::after{background:#059669}
+        .card-avisos::after{background:#9333ea}
+        .card-chat::after{background:#0891b2}
 
-        /* --- BUSCA ESTILIZADA --- */
-        .search-area {
-            background: #f1f5f9;
-            padding: 12px 20px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 250px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-            z-index: 2;
-        }
-
-        .search-area:focus-within {
-            border-color: var(--primary);
-            background: #ffffff;
-            width: 320px;
-            box-shadow: 0 10px 25px rgba(241, 24, 21, 0.1);
-        }
-
-        .search-area input {
-            border: none;
-            background: transparent;
-            outline: none;
-            width: 100%;
-            font-weight: 600;
-            color: var(--text-main);
-        }
-
-        /* --- LOGO CENTRAL --- */
-        .logo-central {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            z-index: 1;
-        }
-
-        .logo-text { 
-            color: var(--primary); 
-            font-weight: 800; 
-            font-size: 32px;
-            letter-spacing: -1px;
-        }
-
-        .logo-img-circle {
-            height: 55px;
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-img-circle img { height: 100%; width: auto; }
-
-        .header-icons { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            z-index: 2;
-        }
-
-        .user-avatar {
-            width: 45px;
-            height: 45px;
-            background-color: var(--primary);
-            border-radius: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            box-shadow: 0 8px 15px rgba(241, 24, 21, 0.2);
-        }
-
-        /* --- CARDS SECTION --- */
-        .cards-section {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-            padding: 40px;
-        }
-
-        .row { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
-
-        .btn-card {
-            background: linear-gradient(135deg, #f11815 0%, #b31210 100%);
-            color: #ffffff;
-            width: 320px;
-            height: 200px;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 22px;
-            font-weight: 800;
-            text-transform: uppercase;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(179, 18, 16, 0.25);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            text-decoration: none;
-        }
-
-        .btn-card i { opacity: 0.8; transition: 0.3s; }
-
-        .btn-card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 25px 50px rgba(179, 18, 16, 0.4);
-        }
-
-        .btn-card:hover i { transform: scale(1.2); opacity: 1; }
-
-        /* Efeito de brilho */
-        .btn-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
-            transition: 0.6s;
-        }
-        .btn-card:hover::before { left: 100%; }
-
+        @media (max-width:1024px){.cards-grid{grid-template-columns:repeat(2,1fr)}}
+        @media (max-width:600px){.cards-grid{grid-template-columns:1fr}header{padding:0 20px}.nav-categories-bar{padding:0 20px;justify-content:flex-start}main.content-area{padding:16px 20px}.carousel-btn{width:36px;height:36px}.search-container{width:170px}}
     </style>
 </head>
 <body>
 
-    <aside class="sidebar" id="sidebar">
-        <div class="menu-header">
-            <h2 style="font-size: 18px; font-weight: 800; color: var(--text-main);">MENU</h2>
-            <button class="btn-toggle" onclick="toggleMenu()">
-                <i data-lucide="x"></i>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside id="sidebarMenu" aria-label="Menu Principal">
+        <div>
+            <div class="sidebar-header">
+                <button class="btn-close-menu" onclick="toggleSidebar()" aria-label="Fechar Menu">
+                    <i data-lucide="x" size="20" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <button class="badge-aluno-btn" data-target="landingpage.html">
+                <i data-lucide="user-check" size="20" aria-hidden="true"></i> Portal do Aluno
             </button>
+
+            <ul class="menu-list">
+                <li class="menu-item" data-target="historia_aluno.html"><i data-lucide="book-open" size="18" aria-hidden="true"></i> História da AAPM</li>
+                <li class="menu-item" data-target="eventos.html"><i data-lucide="calendar" size="18" aria-hidden="true"></i> Eventos</li>
+                <li class="menu-item" data-target="beneficios.html"><i data-lucide="award" size="18" aria-hidden="true"></i> Benefícios</li>
+                <li class="menu-item" data-target="oficinas.html"><i data-lucide="layers" size="18" aria-hidden="true"></i> Oficinas</li>
+                <li class="menu-item" data-target="avisos.html"><i data-lucide="megaphone" size="18" aria-hidden="true"></i> Avisos</li>
+            </ul>
+
+            <div class="menu-category">Minha Conta</div>
+            <ul class="menu-list">
+                <li class="menu-item" data-target="perfil.html"><i data-lucide="user" size="18" aria-hidden="true"></i> Meu Perfil</li>
+                <li class="menu-item" data-target="chat_aluno.html"><i data-lucide="message-square" size="18" aria-hidden="true"></i> Contato / Chat</li>
+            </ul>
         </div>
-        <nav class="nav-links">            
-            <a href=""><i data-lucide="user"></i> Meu perfil</a>
-            <a href="#"><i data-lucide="lightbulb"></i> Sugestões</a>
-            <a href="#"><i data-lucide="mail"></i> Contato</a>
-            <a href="admin.html" class="admin-btn"><i data-lucide="shield-check"></i> Administrador</a>
-        </nav>
+
+        <button class="btn-sair" onclick="fazerLogout()"><i data-lucide="log-out" size="18" aria-hidden="true"></i> Sair da Conta</button>
     </aside>
 
-    <div class="main-content">
-        <header class="top-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <button class="btn-toggle" id="openBtn" onclick="toggleMenu()" style="display: none;">
-                    <i data-lucide="menu"></i>
+    <div class="wrapper">
+        <header>
+            <div class="header-left">
+                <button class="btn-toggle-menu" onclick="toggleSidebar()" aria-label="Abrir Menu de Navegação">
+                    <i data-lucide="menu" size="24" aria-hidden="true"></i>
                 </button>
-                
-                <div class="search-area">
-                    <i data-lucide="search" size="18" color="#64748b"></i>
-                    <input type="text" placeholder="O que você procura?">
+                <div class="search-container">
+                    <div class="search-bar">
+                        <i data-lucide="search" size="18" style="color: var(--text-sub);" aria-hidden="true"></i>
+                        <input type="text" id="inputBuscaPainel" placeholder="Pesquisar" oninput="filtrarPainel()" aria-label="Pesquisar no painel" autocomplete="off">
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown"></div>
                 </div>
             </div>
 
-            <div class="logo-central">
-                <span class="logo-text">AAPM</span>
-                <div class="logo-img-circle">
-                    <img src="fotoss.png" alt="Logo">
-                </div>
-                <span class="logo-text">SENAI</span>
+            <div class="brand-center" data-target="landingpage.html">
+                <span class="aapm-text">AAPM</span>
+                <img src="img/fotoss.png" alt="Logotipo AAPM SENAI" width="160" height="68" onerror="this.style.display='none'">
+                <span class="senai-text">SENAI</span>
             </div>
 
-            <div class="header-icons">
-                <button class="btn-toggle"><i data-lucide="bell"></i></button>
-                <div class="user-avatar"><i data-lucide="user" size="24"></i></div>
+            <div class="header-right">
+                <!-- BOTÃO DE NOTIFICAÇÕES NO CABEÇALHO -->
+                <div class="notif-container" id="notifContainer">
+                    <button class="notif-btn" onclick="toggleNotificacoes(event)" aria-label="Notificações" title="Notificações">
+                        <i data-lucide="bell" size="22" aria-hidden="true"></i>
+                        <span class="notif-badge" id="notifBadge">0</span>
+                    </button>
+
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h3><i data-lucide="bell-ring" size="16" style="color: var(--primary);"></i> Notificações</h3>
+                            <button class="btn-ler-todas" onclick="marcarTodasLidas()">Marcar todas como lidas</button>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">
+                                <i data-lucide="loader-2" size="24"></i>
+                                <span>Carregando notificações...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="profile-btn" data-target="perfil.html" aria-label="Aceder ao Meu Perfil" title="Meu Perfil">
+                    <i data-lucide="user" size="22" aria-hidden="true"></i>
+                </button>
             </div>
         </header>
 
-        <section class="cards-section">
-            <div class="row">
-                <a href="page.html" class="btn-card">
-                    <i data-lucide="book-open" size="40"></i>
-                    História da AAPM
-                </a>                
-                <a href="eventos.html" class="btn-card">
-                    <i data-lucide="calendar" size="40"></i>
-                    Eventos
-                </a>
-                <a href="#" class="btn-card">
-                    <i data-lucide="award" size="40"></i>
-                    Benefícios
-                </a>
-            </div>
-            <div class="row">
-                <a href="#" class="btn-card">
-                    <i data-lucide="layers" size="40"></i>
-                    Oficinas
-                </a>
-                <a href="#" class="btn-card">
-                    <i data-lucide="megaphone" size="40"></i>
-                    Avisos
-                </a>
-            </div>
-        </section>
+        <nav class="nav-categories-bar" aria-label="Categorias principais">
+            <div class="nav-cat-item" data-target="landingpage.html">Início</div>
+            <div class="nav-cat-item" data-target="historia_aluno.html">História da AAPM</div>
+            <div class="nav-cat-item" data-target="eventos.html">Eventos</div>
+            <div class="nav-cat-item" data-target="beneficios.html">Benefícios</div>
+            <div class="nav-cat-item" data-target="oficinas.html">Oficinas</div>
+            <div class="nav-cat-item" data-target="avisos.html">Avisos</div>
+        </nav>
+
+        <main class="content-area" id="main-content">
+            <section class="welcome-header">
+                <h1 class="welcome-title">Bem-vindo ao Portal AAPM</h1>
+                <p class="welcome-subtitle">Acesse rapidamente as informações, notícias e serviços do SENAI.</p>
+            </section>
+
+            <section class="ads-carousel" id="adsCarousel" aria-label="Carrossel de Anúncios" onmouseenter="pausarAutoSlide()" onmouseleave="iniciarAutoSlide()">
+                <button class="carousel-btn prev" onclick="mudarSlide(-1)" aria-label="Anúncio Anterior">
+                    <i data-lucide="chevron-left" size="22" aria-hidden="true"></i>
+                </button>
+                <button class="carousel-btn next" onclick="mudarSlide(1)" aria-label="Próximo Anúncio">
+                    <i data-lucide="chevron-right" size="22" aria-hidden="true"></i>
+                </button>
+
+                <div class="ads-slides-wrapper" id="slidesWrapper"></div>
+                <div class="carousel-dots" id="carouselDots"></div>
+            </section>
+
+            <section class="cards-container" aria-label="Módulos Rápidos">
+                <div class="cards-grid" id="painelCards">
+                    <button class="card-btn card-historia" data-target="historia_aluno.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="book-open" size="20" aria-hidden="true"></i></div>
+                            <span>História da AAPM</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18" aria-hidden="true"></i>
+                    </button>
+
+                    <button class="card-btn card-eventos" data-target="eventos.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="calendar" size="20" aria-hidden="true"></i></div>
+                            <span>Eventos</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18" aria-hidden="true"></i>
+                    </button>
+
+                    <button class="card-btn card-beneficios" data-target="beneficios.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="user-check" size="20" aria-hidden="true"></i></div>
+                            <span>Benefícios</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18" aria-hidden="true"></i>
+                    </button>
+
+                    <button class="card-btn card-oficinas" data-target="oficinas.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="graduation-cap" size="20" aria-hidden="true"></i></div>
+                            <span>Oficinas</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18" aria-hidden="true"></i>
+                    </button>
+
+                    <button class="card-btn card-avisos" data-target="avisos.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="megaphone" size="20" aria-hidden="true"></i></div>
+                            <span>Avisos</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18" aria-hidden="true"></i>
+                    </button>
+
+                    <button class="card-btn card-chat" data-target="chat_aluno.html">
+                        <div class="card-left-content">
+                            <div class="card-icon-box"><i data-lucide="message-square" size="20" aria-hidden="true"></i></div>
+                            <span>Falar com a AAPM</span>
+                        </div>
+                        <i data-lucide="arrow-right" class="card-arrow" size="18" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
-        lucide.createIcons();
+        const API_URL = 'http://localhost:3002';
+        const CHAVE_ANUNCIOS = 'aapm_anuncios_banners';
+        const ANUNCIOS_PADRAO = [
+            { src: 'img/anuncio1.png', alt: 'III Mostra Cultural Meu Brasil Brasileiro' },
+            { src: 'img/anuncio2.png', alt: 'Venha Conhecer a Biblioteca do SENAI' },
+            { src: 'img/anuncio3.png', alt: 'Biblio 9.14 Recomenda' },
+            { src: 'img/anuncio4.png', alt: 'Biblio 9.14 Incentiva a Criação' }
+        ];
 
-        function toggleMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const openBtn = document.getElementById('openBtn');
-            
-            sidebar.classList.toggle('closed');
-            
-            if (sidebar.classList.contains('closed')) {
-                openBtn.style.display = 'flex';
-            } else {
-                openBtn.style.display = 'none';
+        let anunciosLista = [];
+        let slideIndex = 0;
+        let slideTimer = null;
+
+        function obterAnuncios() {
+            try {
+                const salvos = JSON.parse(localStorage.getItem(CHAVE_ANUNCIOS));
+                if (Array.isArray(salvos) && salvos.length > 0) return salvos;
+            } catch (e) {}
+            return [...ANUNCIOS_PADRAO];
+        }
+
+        function carregarCarrosselAluno() {
+            anunciosLista = obterAnuncios();
+            const wrapper = document.getElementById('slidesWrapper');
+            const dotsContainer = document.getElementById('carouselDots');
+
+            wrapper.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            if (slideIndex >= anunciosLista.length) slideIndex = 0;
+
+            anunciosLista.forEach((ad, idx) => {
+                const img = document.createElement('img');
+                img.src = ad.src;
+                img.alt = ad.alt || `Anúncio ${idx + 1}`;
+                img.className = 'ad-slide-img';
+                img.width = 1150;
+                img.height = 648;
+                if (idx === 0) img.setAttribute('fetchpriority', 'high');
+                else img.loading = 'lazy';
+                wrapper.appendChild(img);
+
+                const dot = document.createElement('button');
+                dot.className = `dot ${idx === slideIndex ? 'active' : ''}`;
+                dot.setAttribute('aria-label', `Ir para Anúncio ${idx + 1}`);
+                dot.onclick = () => irParaSlide(idx);
+                dotsContainer.appendChild(dot);
+            });
+
+            atualizarCarrossel();
+        }
+
+        // --- SISTEMA DE NOTIFICAÇÕES ---
+        function toggleNotificacoes(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notifDropdown');
+            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                carregarNotificacoes();
             }
         }
-    </script>
 
+        function formatarTempoNotificacao(dataIso) {
+            if (!dataIso) return 'Agora';
+            const data = new Date(dataIso);
+            const agora = new Date();
+            const diffMin = Math.floor((agora - data) / 60000);
+
+            if (diffMin < 1) return 'Agora mesmo';
+            if (diffMin < 60) return `Há ${diffMin} min`;
+            const diffHoras = Math.floor(diffMin / 60);
+            if (diffHoras < 24) return `Há ${diffHoras}h`;
+            return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function obterIconeNotificacao(tipo) {
+            switch (tipo) {
+                case 'oficina': return { classe: 'oficina', icone: 'graduation-cap' };
+                case 'evento': return { classe: 'evento', icone: 'calendar' };
+                case 'beneficio': return { classe: 'beneficio', icone: 'award' };
+                default: return { classe: 'aviso', icone: 'megaphone' };
+            }
+        }
+
+        async function carregarNotificacoes() {
+            const token = localStorage.getItem('token');
+            const badge = document.getElementById('notifBadge');
+            const listaEl = document.getElementById('notifList');
+
+            if (!token) {
+                listaEl.innerHTML = `<div class="notif-empty"><i data-lucide="bell-off" size="24"></i><span>Faça login para ver suas notificações.</span></div>`;
+                if (window.lucide) lucide.createIcons();
+                return;
+            }
+
+            try {
+                const resp = await fetch(`${API_URL}/api/notificacoes`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await resp.json();
+
+                if (!dados.sucesso) return;
+
+                if (dados.naoLidas > 0) {
+                    badge.textContent = dados.naoLidas > 9 ? '9+' : dados.naoLidas;
+                    badge.classList.add('visible');
+                } else {
+                    badge.classList.remove('visible');
+                }
+
+                if (!dados.notificacoes || dados.notificacoes.length === 0) {
+                    listaEl.innerHTML = `
+                        <div class="notif-empty">
+                            <i data-lucide="bell-off" size="26" style="color:#cbd5e1;"></i>
+                            <span>Nenhuma notificação por enquanto.</span>
+                        </div>
+                    `;
+                } else {
+                    listaEl.innerHTML = dados.notificacoes.map(n => {
+                        const infoIcone = obterIconeNotificacao(n.tipo);
+                        const naoLidaClass = n.lida === 0 ? 'unread' : '';
+                        return `
+                            <div class="notif-item ${naoLidaClass}" onclick="abrirNotificacao(${n.id}, '${n.link}')">
+                                <div class="notif-icon ${infoIcone.classe}">
+                                    <i data-lucide="${infoIcone.icone}" size="18"></i>
+                                </div>
+                                <div class="notif-content">
+                                    <div class="notif-title">${n.titulo}</div>
+                                    <div class="notif-desc">${n.mensagem}</div>
+                                    <div class="notif-time">${formatarTempoNotificacao(n.data_criacao)}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                if (window.lucide) lucide.createIcons();
+            } catch (erro) {
+                console.error("Erro ao carregar notificações:", erro);
+            }
+        }
+
+        async function abrirNotificacao(id, link) {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    await fetch(`${API_URL}/api/notificacoes/${id}/ler`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                } catch (e) {}
+            }
+            window.location.href = link || 'landingpage.html';
+        }
+
+        async function marcarTodasLidas() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                await fetch(`${API_URL}/api/notificacoes/ler-todas`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                carregarNotificacoes();
+            } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            
+            let paginaAtual = window.location.pathname.split('/').pop() || 'landingpage.html';
+
+            document.querySelectorAll('.nav-cat-item').forEach(el => {
+                if (el.getAttribute('data-target') === paginaAtual) el.classList.add('active');
+                else el.classList.remove('active');
+            });
+
+            document.querySelectorAll('.menu-item').forEach(el => {
+                if (el.getAttribute('data-target') === paginaAtual) el.classList.add('active-page');
+                else el.classList.remove('active-page');
+            });
+
+            document.querySelectorAll('[data-target]').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const destino = el.getAttribute('data-target');
+                    if (destino) window.location.href = destino;
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    document.getElementById('searchDropdown').classList.remove('active');
+                }
+                if (!e.target.closest('#notifContainer')) {
+                    document.getElementById('notifDropdown').classList.remove('active');
+                }
+            });
+
+            carregarCarrosselAluno();
+            iniciarAutoSlide();
+            carregarNotificacoes();
+
+            setInterval(carregarNotificacoes, 30000);
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === CHAVE_ANUNCIOS) {
+                    carregarCarrosselAluno();
+                }
+            });
+        });
+
+        function atualizarCarrossel() {
+            const wrapper = document.getElementById('slidesWrapper');
+            const dots = document.querySelectorAll('.carousel-dots .dot');
+            if (!wrapper || anunciosLista.length === 0) return;
+
+            wrapper.style.transform = `translateX(-${slideIndex * 100}%)`;
+
+            dots.forEach((dot, idx) => {
+                if (idx === slideIndex) dot.classList.add('active');
+                else dot.classList.remove('active');
+            });
+        }
+
+        function mudarSlide(direcao) {
+            if (anunciosLista.length === 0) return;
+            slideIndex = (slideIndex + direcao + anunciosLista.length) % anunciosLista.length;
+            atualizarCarrossel();
+        }
+
+        function irParaSlide(index) {
+            slideIndex = index;
+            atualizarCarrossel();
+        }
+
+        function iniciarAutoSlide() {
+            if (!slideTimer && anunciosLista.length > 1) {
+                slideTimer = setInterval(() => {
+                    mudarSlide(1);
+                }, 5000);
+            }
+        }
+
+        function pausarAutoSlide() {
+            clearInterval(slideTimer);
+            slideTimer = null;
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebarMenu').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function filtrarPainel() {
+            const termo = document.getElementById('inputBuscaPainel').value.toLowerCase().trim();
+            const dropdown = document.getElementById('searchDropdown');
+            const cartoes = document.querySelectorAll('.card-btn');
+
+            dropdown.innerHTML = '';
+
+            if (!termo) {
+                dropdown.classList.remove('active');
+                cartoes.forEach(btn => btn.style.display = 'flex');
+                return;
+            }
+
+            let encontrou = false;
+
+            cartoes.forEach(btn => {
+                const texto = btn.innerText.toLowerCase();
+                const destino = btn.getAttribute('data-target');
+                const iconeHtml = btn.querySelector('.card-icon-box').innerHTML;
+                const titulo = btn.querySelector('span').innerText;
+
+                if (texto.includes(termo)) {
+                    encontrou = true;
+                    btn.style.display = 'flex';
+
+                    const item = document.createElement('div');
+                    item.className = 'search-dropdown-item';
+                    item.innerHTML = `
+                        <div class="item-left">
+                            <div class="item-icon">${iconeHtml}</div>
+                            <span>${titulo}</span>
+                        </div>
+                        <i data-lucide="arrow-right" size="16" style="color: #94a3b8;"></i>
+                    `;
+                    item.addEventListener('click', () => {
+                        window.location.href = destino;
+                    });
+
+                    dropdown.appendChild(item);
+                } else {
+                    btn.style.display = 'none';
+                }
+            });
+
+            if (encontrou) {
+                dropdown.classList.add('active');
+                if (window.lucide) lucide.createIcons();
+            } else {
+                dropdown.classList.remove('active');
+            }
+        }
+
+        function fazerLogout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('tipoUsuario');
+            localStorage.removeItem('usuarioLogado');
+            localStorage.removeItem('aluno_id');
+            window.location.replace('logincadastro.html');
+        }
+    </script>
 </body>
 </html>

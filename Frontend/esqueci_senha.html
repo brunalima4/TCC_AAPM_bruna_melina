@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AAPM SENAI - Portal do Aluno</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #f12b2c;
+            --primary-hover: #d91f20;
+            --bg-page: #f6f7fb;
+            --text-dark: #120e2e;
+            --text-sub: #64748b;
+            --border-color: #cbd5e1;
+            --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* --- DETALHES DE FUNDO --- */
+        .bg-dots {
+            position: fixed;
+            width: 220px;
+            height: 220px;
+            background-image: radial-gradient(var(--primary) 1.5px, transparent 1.5px);
+            background-size: 14px 14px;
+            opacity: 0.35;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .dots-bottom-left { bottom: 20px; left: 0; }
+        .dots-top-right { top: 0; right: 0; }
+
+        .bg-blur-circle {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.15;
+            background: var(--primary);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .blur-left { width: 400px; height: 400px; left: -100px; bottom: 20%; }
+        .blur-right { width: 500px; height: 500px; right: -100px; bottom: 10%; }
+
+        /* --- NAVEGAÇÃO SUPERIOR --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 80px;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-container img {
+            height: 52px;
+            width: auto;
+        }
+
+        .logo-container span {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-header-login {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-header-login:hover { color: var(--primary); }
+
+        .btn-header-register {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(241, 43, 44, 0.25);
+            transition: 0.2s;
+        }
+
+        .btn-header-register:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1500px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 60px;
+        }
+
+        /* --- LAYOUT DE LOGIN --- */
+        .login-layout {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            gap: 80px;
+        }
+
+        .hero-content {
+            max-width: 580px;
+        }
+
+        .badge-portal {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            color: #4b5563;
+            letter-spacing: 0.5px;
+            margin-bottom: 28px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .badge-portal::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+        }
+
+        .hero-title {
+            font-size: 60px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: var(--text-dark);
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+        }
+
+        .hero-title span {
+            color: var(--primary);
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        /* --- ESTRUTURA DOS CARDS --- */
+        .auth-card {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 50px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            width: 100%;
+        }
+
+        .login-layout .auth-card {
+            max-width: 520px;
+        }
+
+        /* CARD DE CADASTRO E RECUPERAÇÃO */
+        .register-layout,
+        .recovery-layout {
+            display: none;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .register-layout { max-width: 800px; }
+        .recovery-layout { max-width: 520px; }
+
+        .avatar-circle {
+            width: 64px;
+            height: 64px;
+            background-color: #fef2f2;
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .form-header.register-header {
+            text-align: left;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .form-header.register-header h2 {
+            color: var(--text-dark);
+            font-size: 30px;
+        }
+
+        .form-subtitle {
+            font-size: 15px;
+            color: var(--text-sub);
+            margin-top: 6px;
+        }
+
+        .register-tag {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ENTRADAS E CAMPOS */
+        .form-group {
+            margin-bottom: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+
+        .forgot-pass-link {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: -12px;
+            margin-bottom: 20px;
+        }
+
+        .forgot-pass-link a {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .forgot-pass-link a:hover { text-decoration: underline; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        input[type="file"] {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            color: var(--text-dark);
+            background-color: #ffffff;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input::placeholder { color: #94a3b8; }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.12);
+        }
+
+        input[type="file"]::file-selector-button {
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        .payment-box {
+            background-color: #fefce8;
+            border: 1px solid #fef08a;
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .payment-box p {
+            font-size: 13px;
+            color: #713f12;
+            line-height: 1.4;
+        }
+
+        .payment-box strong {
+            display: block;
+            color: #854d0e;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 18px rgba(241, 43, 44, 0.3);
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 14px;
+            color: var(--text-sub);
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .form-footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 1024px) {
+            header { padding: 20px 30px; }
+            main { padding: 20px 30px; }
+            .login-layout { flex-direction: column; gap: 40px; }
+            .hero-content { text-align: center; max-width: 100%; }
+            .hero-title { font-size: 42px; }
+            .form-row { grid-template-columns: 1fr; }
+            .auth-card { padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-dots dots-bottom-left"></div>
+    <div class="bg-dots dots-top-right"></div>
+    <div class="bg-blur-circle blur-left"></div>
+    <div class="bg-blur-circle blur-right"></div>
+
+    <header>
+        <div class="logo-container">
+            <img src="fotoss.png" alt="Logo AAPM SENAI" onerror="this.src='https://via.placeholder.com/52'">
+            <span>AAPM SENAI</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn-header-login" id="navBtnLogin" onclick="mostrarLogin()" style="display: none;">
+                <i data-lucide="log-in" size="18"></i> Entrar
+            </button>
+            <button class="btn-header-login" id="navBtnVoltar" onclick="mostrarLogin()" style="display: none;">
+                &larr; Voltar
+            </button>
+            <button class="btn-header-register" id="navBtnCadastrar" onclick="mostrarCadastro()">
+                <i data-lucide="user-plus" size="18"></i> Cadastre-se
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- TELA DE LOGIN -->
+        <div class="login-layout" id="sectionLogin">
+            <div class="hero-content">
+                <div class="badge-portal">PORTAL OFICIAL DO ALUNO</div>
+                <h1 class="hero-title">Juntos somos <span>mais fortes</span></h1>
+                <p class="hero-description">
+                    Um espaço moderno para acompanhar tudo o que acontece na AAPM SENAI Santo Paschoal Crepaldi.
+                </p>
+            </div>
+
+            <div class="auth-card">
+                <div class="avatar-circle">
+                    <i data-lucide="user" size="30"></i>
+                </div>
+                <div class="form-header">
+                    <h2>EFETUAR LOGIN</h2>
+                    <p class="form-subtitle">Entre para acessar seu portal</p>
+                </div>
+                <form onsubmit="realizarLogin(event)">
+                    <div class="form-group">
+                        <label>E-MAIL</label>
+                        <input type="email" id="loginEmail" placeholder="seu@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>SENHA</label>
+                        <input type="password" id="loginSenha" placeholder="Sua senha" required>
+                    </div>
+
+                    <div class="forgot-pass-link">
+                        <a onclick="mostrarRecuperacao()">Esqueceu a senha?</a>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i data-lucide="log-in" size="20"></i> ENTRAR
+                    </button>
+                </form>
+                <div class="form-footer">
+                    Não tem uma conta? <a onclick="mostrarCadastro()">Cadastre-se</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DE RECUPERAÇÃO DE SENHA -->
+        <div class="recovery-layout" id="sectionRecuperacao">
+            <div class="auth-card">
+                <div class="avatar-circle">
+                    <i data-lucide="key-round" size="30"></i>
+                </div>
+                <div class="form-header">
+                    <h2>RECUPERAR SENHA</h2>
+                    <p class="form-subtitle">Informe o e-mail cadastrado para redefinir sua senha</p>
+                </div>
+                <form onsubmit="realizarRecuperacao(event)">
+                    <div class="form-group">
+                        <label>E-MAIL CADASTRADO</label>
+                        <input type="email" id="recuperarEmail" placeholder="seu@email.com" required>
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        <i data-lucide="send" size="20"></i> RECUPERAR SENHA
+                    </button>
+                </form>
+                <div class="form-footer">
+                    <a onclick="mostrarLogin()">Voltar ao Login</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DE CADASTRO -->
+        <div class="register-layout" id="sectionCadastro">
+            <div class="auth-card">
+                <div class="form-header register-header">
+                    <img src="fotoss.png" alt="Logo" style="height: 60px;" onerror="this.style.display='none'">
+                    <div>
+                        <span class="register-tag">NOVO CADASTRO</span>
+                        <h2>Faça parte da AAPM</h2>
+                    </div>
+                </div>
+                <p class="form-subtitle" style="margin-bottom: 25px;">
+                    Preencha seus dados e envie o comprovante de pagamento da matrícula.
+                </p>
+
+                <form id="formCadastro" onsubmit="realizarCadastro(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>NOME COMPLETO *</label>
+                            <input type="text" id="cadNome" placeholder="Digite seu nome" required>
+                        </div>
+                        <div class="form-group">
+                            <label>DATA DE NASCIMENTO *</label>
+                            <input type="date" id="cadDataNasc" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>MATRÍCULA *</label>
+                            <input type="text" id="cadMatricula" placeholder="Número da matrícula" required>
+                        </div>
+                        <div class="form-group">
+                            <label>E-MAIL *</label>
+                            <input type="email" id="cadEmail" placeholder="seu@email.com" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>SENHA *</label>
+                            <input type="password" id="cadSenha" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label>COMPROVANTE *</label>
+                            <input type="file" id="cadComprovante" accept="image/*,.pdf" required>
+                        </div>
+                    </div>
+
+                    <div class="payment-box">
+                        <i data-lucide="credit-card" size="24" color="#854d0e" style="flex-shrink: 0;"></i>
+                        <div>
+                            <strong>Matrícula: R$ 80,00</strong>
+                            <p>Envie JPG, PNG ou PDF de até 5 MB.</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        ENVIAR MATRÍCULA &rarr;
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        const sectionLogin = document.getElementById('sectionLogin');
+        const sectionCadastro = document.getElementById('sectionCadastro');
+        const sectionRecuperacao = document.getElementById('sectionRecuperacao');
+        const navBtnCadastrar = document.getElementById('navBtnCadastrar');
+        const navBtnVoltar = document.getElementById('navBtnVoltar');
+
+        function inicializarUsuarios() {
+            if (!localStorage.getItem('aapm_usuarios')) {
+                const usuariosPadrao = [
+                    {
+                        email: 'aluno@senai.br',
+                        senha: '123456',
+                        nome: 'Aluno Teste'
+                    }
+                ];
+                localStorage.setItem('aapm_usuarios', JSON.stringify(usuariosPadrao));
+            }
+        }
+        inicializarUsuarios();
+
+        function mostrarCadastro() {
+            sectionLogin.style.display = 'none';
+            sectionRecuperacao.style.display = 'none';
+            sectionCadastro.style.display = 'block';
+            navBtnCadastrar.style.display = 'none';
+            navBtnVoltar.style.display = 'flex';
+        }
+
+        function mostrarLogin() {
+            sectionCadastro.style.display = 'none';
+            sectionRecuperacao.style.display = 'none';
+            sectionLogin.style.display = 'flex';
+            navBtnCadastrar.style.display = 'flex';
+            navBtnVoltar.style.display = 'none';
+        }
+
+        function mostrarRecuperacao() {
+            sectionLogin.style.display = 'none';
+            sectionCadastro.style.display = 'none';
+            sectionRecuperacao.style.display = 'block';
+            navBtnCadastrar.style.display = 'flex';
+            navBtnVoltar.style.display = 'none';
+        }
+
+        function realizarLogin(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const senhaInput = document.getElementById('loginSenha').value;
+
+            const usuarios = JSON.parse(localStorage.getItem('aapm_usuarios')) || [];
+
+            const usuarioEncontrado = usuarios.find(
+                u => u.email.toLowerCase() === emailInput && u.senha === senhaInput
+            );
+
+            if (usuarioEncontrado) {
+                localStorage.setItem('usuarioLogado', JSON.stringify(usuarioEncontrado));
+                window.location.href = 'landingpage.html';
+            } else {
+                alert('E-mail ou senha incorretos! Verifique seus dados ou cadastre-se.');
+            }
+        }
+
+        function realizarRecuperacao(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('recuperarEmail').value.trim().toLowerCase();
+            const usuarios = JSON.parse(localStorage.getItem('aapm_usuarios')) || [];
+
+            const usuario = usuarios.find(u => u.email.toLowerCase() === emailInput);
+
+            if (usuario) {
+                alert(`Instruções para redefinir a senha foram enviadas ao seu e-mail!\n\n(Dica do Sistema: Sua senha atual é: ${usuario.senha})`);
+                mostrarLogin();
+            } else {
+                alert('Este e-mail não foi encontrado no sistema.');
+            }
+        }
+
+        function realizarCadastro(e) {
+            e.preventDefault();
+
+            const nome = document.getElementById('cadNome').value.trim();
+            const email = document.getElementById('cadEmail').value.trim().toLowerCase();
+            const senha = document.getElementById('cadSenha').value;
+            const matricula = document.getElementById('cadMatricula').value.trim();
+            const comprovanteInput = document.getElementById('cadComprovante');
+
+            // Validação do tamanho do arquivo (máximo 5MB)
+            if (comprovanteInput.files.length > 0) {
+                const fileSize = comprovanteInput.files[0].size / 1024 / 1024; // MB
+                if (fileSize > 5) {
+                    alert('O arquivo do comprovante deve ser menor que 5 MB.');
+                    return;
+                }
+            }
+
+            let usuarios = JSON.parse(localStorage.getItem('aapm_usuarios')) || [];
+
+            const existe = usuarios.some(u => u.email.toLowerCase() === email);
+            if (existe) {
+                alert('Este e-mail já está cadastrado!');
+                return;
+            }
+
+            const novoUsuario = { nome, email, senha, matricula };
+            usuarios.push(novoUsuario);
+            localStorage.setItem('aapm_usuarios', JSON.stringify(usuarios));
+
+            alert('Matrícula e cadastro realizados com sucesso! Faça login com sua conta.');
+            
+            // Preenche e limpa os campos
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginSenha').value = '';
+            document.getElementById('formCadastro').reset();
+            
+            mostrarLogin();
+        }
+    </script>
+</body>
+</html>

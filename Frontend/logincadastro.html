@@ -3,297 +3,1323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TELA DE LOGIN E CADASTRO - AAPM</title> 
-    <link rel="stylesheet" href="style.css"> 
-</head>
-
-<body>
-    <h1></h1>
-    
-    <p id="resultado"></p> 
-
-    <!-- QUADRO DE LOGIN -->
-    <div id="quadro-login" class="form-quadro">
-        <h2 class="form-title">LOGIN</h2>
-        <label for="campo-login">Login</label>
-        <input type="text" id="campo-login" placeholder="Digite seu login" required>
-        <label for="campo-senha">Senha</label>
-        <input type="password" id="campo-senha" placeholder="Deixe vazio no primeiro acesso">
-        <button id="btn_login">FAZER LOGIN</button> 
-        <button id="btn_associar">ASSOCIE-SE</button> 
-        <a class="link-transicao" onclick="mudarParaQuadroRecuperacao()">Esqueci minha senha</a>
-        <a class="link-transicao" onclick="mudarParaQuadroContato()">Fale Conosco</a>
-    </div>
-
-    <!-- QUADRO DE CADASTRO (PRIMEIRO ACESSO) -->
-    <div id="quadro-cadastro" class="form-quadro">
-        <h2 class="form-title">COMPLETE SEU CADASTRO</h2>
-        <label for="campo-nome-completo">Nome Completo</label>
-        <input type="text" id="campo-nome-completo" placeholder="Digite seu nome completo" required>
-        <label for="campo-data-nascimento">Data de Nascimento</label>
-        <input type="date" id="campo-data-nascimento" required>
-        <label for="campo-email-pessoal">E-mail Pessoal</label>
-        <input type="email" id="campo-email-pessoal" placeholder="Digite seu e-mail" required>
-        <label for="campo-login-cadastro">Login</label>
-        <input type="text" id="campo-login-cadastro" placeholder="Seu login" readonly required>
-        <label for="campo-senha-cadastro">Senha</label>
-        <input type="password" id="campo-senha-cadastro" placeholder="Crie uma senha (mín. 6 caracteres)" required>
-        <button id="btn_salvar_cadastro">SALVAR</button>
-        <a class="link-transicao" onclick="mudarParaQuadroLogin()">Voltar para Login</a>
-    </div>
-
-    <div id="quadro-recuperacao" class="form-quadro">
-        <h2 class="form-title">REDEFINIR SENHA</h2>
-        <label for="campo-login-recuperacao">Seu Login</label>
-        <input type="text" id="campo-login-recuperacao" placeholder="Digite seu login cadastrado" required>
-        <label for="campo-nova-senha-recuperacao">Nova Senha</label>
-        <input type="password" id="campo-nova-senha-recuperacao" placeholder="Mínimo de 6 caracteres" required>
-        <button id="btn_recuperar_senha">REDEFINIR SENHA</button>
-        <a class="link-transicao" onclick="mudarParaQuadroLogin()">Voltar para Login</a>
-        <a class="link-transicao" onclick="mudarParaQuadroContato()">Fale Conosco</a>
-    </div>
-
-    <div id="quadro-contato" class="form-quadro form-contato">
-        <h2 class="form-title">FALE CONOSCO!</h2>
-        <label for="campo-nome-contato">Nome Completo</label>
-        <input type="text" id="campo-nome-contato" placeholder="Digite seu nome completo" required>
-        <label for="campo-email-contato">E-mail</label>
-        <input type="email" id="campo-email-contato" placeholder="Digite seu e-mail" required>
-        <label for="campo-telefone-contato">Telefone</label>
-        <input type="text" id="campo-telefone-contato" placeholder="(XX) XXXXX-XXXX">
-        <label for="campo-assunto-contato">Assunto</label>
-        <input type="text" id="campo-assunto-contato" placeholder="Digite o assunto" required>
-        <label for="campo-mensagem-contato">Mensagem</label>
-        <textarea id="campo-mensagem-contato" placeholder="Digite sua mensagem" rows="5" required></textarea>
-        <button id="btn_enviar">ENVIAR MENSAGEM</button>
-        <a class="link-transicao" onclick="mudarParaQuadroLogin()">Voltar para Login</a>
-    </div>
-
+    <title>AAPM SENAI - Portal do Aluno & Gestão</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        input[type="date"] {
-            width: 100%;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 16px;
-            background-color: var(--input-bg);
-            transition: border-color 0.3s;
+        :root {
+            --primary: #f12b2c;
+            --primary-hover: #d91f20;
+            --senai-blue: #1C335C;
+            --admin-dark: #0f172a;
+            --admin-accent: #3b82f6;
+            --bg-page: #f8faff;
+            --text-dark: #120e2e;
+            --text-sub: #64748b;
+            --border-color: #cbd5e1;
+            --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            --radius-lg: 28px;
+            --radius-md: 14px;
         }
-        input[type="date"]:focus {
-            border-color: var(--cor-link);
-            border: 2px solid var(--cor-link);
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 60px;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-logo-senai {
+            height: 42px;
+            width: auto;
+        }
+
+        .brand-divider {
+            width: 2px;
+            height: 32px;
+            background-color: #e2e8f0;
+        }
+
+        .brand-aapm {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-aapm img {
+            height: 44px;
+            width: auto;
+        }
+
+        .brand-aapm span {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--senai-blue);
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-header-register {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(241, 43, 44, 0.2);
+        }
+
+        .btn-header-register:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(241, 43, 44, 0.3);
+        }
+
+        .btn-header-admin {
+            background-color: #1e293b;
+            color: #f8fafc;
+            border: 1px solid #334155;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-header-admin:hover {
+            background-color: #0f172a;
+            color: #ffffff;
+            transform: translateY(-2px);
+            border-color: #475569;
+        }
+
+        /* MAIN CONTENT LAYOUT */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 1500px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 60px 40px;
+        }
+
+        .login-layout {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: space-between;
+            gap: 80px;
+        }
+
+        .hero-content {
+            max-width: 580px;
+        }
+
+        .badge-aapm {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #fff1f1;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-admin {
+            background-color: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .hero-title {
+            font-size: 52px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--senai-blue);
+            letter-spacing: -1px;
+        }
+
+        .hero-title span {
+            color: var(--primary);
+        }
+
+        .hero-description {
+            font-size: 17px;
+            color: var(--text-sub);
+            line-height: 1.6;
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+
+        /* CARD DE AUTENTICAÇÃO */
+        .auth-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 44px;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .auth-card h2 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 28px;
+            letter-spacing: -0.5px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .auth-card.admin-mode h2 {
+            color: var(--admin-dark);
+        }
+
+        .alerta-status-login {
+            display: none;
+            background: #fffbeb;
+            border: 1.5px solid #f59e0b;
+            color: #92400e;
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            line-height: 1.45;
+            text-align: center;
+        }
+
+        /* PAINEL DE PAGAMENTO PIX + QR CODE */
+        .pix-payment-box {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%);
+            border: 1.5px solid #bae6fd;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 22px;
+        }
+
+        .qr-code-wrapper {
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 14px;
+            border: 1.5px solid #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
+        }
+
+        .qr-code-wrapper canvas {
+            display: block;
+            border-radius: 6px;
+        }
+
+        .qr-code-caption {
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--senai-blue);
+            margin-top: 6px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .pix-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pix-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .pix-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--senai-blue);
+            margin-bottom: 6px;
+        }
+
+        .pix-title span {
+            color: var(--primary);
+        }
+
+        .pix-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            line-height: 1.45;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .pix-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .pix-code-preview {
+            flex: 1;
+            min-width: 180px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 11.5px;
+            font-family: monospace;
+            color: #334155;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-pix-action {
+            background: var(--senai-blue);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+
+        .btn-pix-action:hover {
+            background: #132340;
+        }
+
+        .btn-pix-secondary {
+            background: #ffffff;
+            color: var(--senai-blue);
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-pix-secondary:hover {
+            background: #f1f5f9;
+        }
+
+        .login-layout .auth-card, .admin-layout .auth-card { max-width: 480px; }
+        .register-layout { display: none; width: 100%; max-width: 860px; margin: 0 auto; }
+        .recovery-layout { display: none; width: 100%; max-width: 500px; margin: 0 auto; }
+        .admin-layout { display: none; width: 100%; align-items: center; justify-content: space-between; gap: 80px; }
+
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        
+        .password-input-wrapper { position: relative; display: flex; align-items: center; }
+        .password-input-wrapper input { padding-right: 48px; }
+
+        .toggle-password-btn {
+            position: absolute; right: 14px; background: none; border: none; color: var(--text-sub); cursor: pointer;
+            padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.2s;
+        }
+        .toggle-password-btn:hover { color: var(--primary); }
+
+        .forgot-pass-container { display: flex; justify-content: flex-end; margin-top: -10px; margin-bottom: 20px; }
+        .forgot-pass-link { font-size: 13px; font-weight: 700; color: var(--primary); cursor: pointer; text-decoration: none; }
+        .forgot-pass-link:hover { text-decoration: underline; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-row-3 { display: grid; grid-template-columns: 1.4fr 1fr 0.8fr; gap: 16px; }
+
+        label { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--senai-blue); letter-spacing: 0.5px; }
+
+        input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="file"], select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.5px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 15px;
             outline: none;
+            transition: all 0.2s ease;
+            background-color: #fafbfc;
+            color: var(--text-dark);
+        }
+
+        input.input-erro {
+            border-color: var(--primary) !important;
+            background-color: #fff1f1 !important;
+            box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.14) !important;
+        }
+
+        .erro-inline {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            display: none;
+            margin-top: -2px;
+        }
+
+        select:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(241, 43, 44, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(241, 43, 44, 0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(241, 43, 44, 0.35);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-submit-admin {
+            background-color: #0f172a;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+        }
+
+        .btn-submit-admin:hover {
+            background-color: #1e293b;
+            box-shadow: 0 12px 25px rgba(15, 23, 42, 0.35);
+        }
+
+        .form-footer { text-align: center; margin-top: 22px; font-size: 14px; color: var(--text-sub); font-weight: 600; }
+        .form-footer a { color: var(--primary); font-weight: 800; cursor: pointer; text-decoration: none; }
+        .form-footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 1024px) {
+            .login-layout, .admin-layout { flex-direction: column; gap: 40px; text-align: center; }
+            .hero-content { max-width: 100%; }
+            header { padding: 20px 30px; }
+            main { padding: 20px 30px; }
+            .form-row, .form-row-3 { grid-template-columns: 1fr; }
+            .pix-payment-box { flex-direction: column; text-align: center; }
+            .pix-actions { justify-content: center; }
         }
     </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/8/8c/SENAI_S%C3%A3o_Paulo_logo.png" alt="Logo SENAI" class="brand-logo-senai">
+            <div class="brand-divider"></div>
+            <div class="brand-aapm">
+                <img src="fotoss.png" alt="Logo AAPM" onerror="this.style.display='none'">
+                <span>AAPM SENAI</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn-header-admin" id="navBtnAdmin" onclick="mostrarLoginAdmin()">
+                <i data-lucide="shield" size="18"></i> Painel Admin
+            </button>
+            <button class="btn-header-register" id="navBtnCadastrar" onclick="mostrarCadastro()">
+                <i data-lucide="user-plus" size="18"></i> Criar Conta
+            </button>
+            <button class="btn-header-register" id="navBtnVoltar" onclick="mostrarLogin()" style="display:none; background:#64748b; box-shadow: none;">
+                <i data-lucide="arrow-left" size="18"></i> Voltar ao Login
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- TELA DE LOGIN ALUNO -->
+        <div class="login-layout" id="sectionLogin">
+            <div class="hero-content">
+                <div class="badge-aapm">
+                    <i data-lucide="shield-check" size="16"></i> Associação de Alunos, Ex-Alunos, Pais e Mestres
+                </div>
+                <h1 class="hero-title">Sua jornada acadêmica com <span>mais vantagens.</span></h1>
+                <p class="hero-description">Acesse a plataforma oficial para gerenciar seus benefícios, acompanhar eventos exclusivos, oficinas e todas as oportunidades da AAPM SENAI.</p>
+            </div>
+
+            <div class="auth-card">
+                <h2>LOGIN</h2>
+                <div id="alertaStatusLogin" class="alerta-status-login"></div>
+                <form onsubmit="realizarLogin(event)">
+                    <div class="form-group">
+                        <label>E-mail Institucional ou Pessoal</label>
+                        <input type="email" id="loginEmail" placeholder="seu.email@exemplo.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="loginSenha" placeholder="Digite sua senha" required>
+                            <button type="button" class="toggle-password-btn" onclick="alternarSenha('loginSenha')">
+                                <i data-lucide="eye" size="18"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="forgot-pass-container">
+                        <a class="forgot-pass-link" onclick="mostrarRecuperacao()">Esqueceu a senha?</a>
+                    </div>
+                    <button type="submit" class="btn-submit" id="btnLoginSubmit">
+                        ENTRAR NO PORTAL <i data-lucide="arrow-right" size="18"></i>
+                    </button>
+                </form>
+                <div class="form-footer">
+                    Ainda não possui cadastro? <a onclick="mostrarCadastro()">Cadastre-se agora</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TELA DE LOGIN ADMINISTRADOR -->
+        <div class="admin-layout" id="sectionAdmin">
+            <div class="hero-content">
+                <div class="badge-aapm badge-admin">
+                    <i data-lucide="lock" size="16"></i> Área Restrita de Gestão
+                </div>
+                <h1 class="hero-title" style="color: #0f172a;">Painel de <span>Administração</span> AAPM.</h1>
+                <p class="hero-description">Gerencie aprovações de comprovantes, alunos cadastrados, avisos, benefícios e eventos da associação em um só lugar.</p>
+            </div>
+
+            <div class="auth-card admin-mode">
+                <h2>ADMINISTRADOR</h2>
+                <form onsubmit="realizarLoginAdmin(event)">
+                    <div class="form-group">
+                        <label>E-mail ou Usuário Admin</label>
+                        <input type="text" id="adminEmail" placeholder="admin@senai.br" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha de Acesso</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="adminSenha" placeholder="Senha administrativa" required>
+                            <button type="button" class="toggle-password-btn" onclick="alternarSenha('adminSenha')">
+                                <i data-lucide="eye" size="18"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit btn-submit-admin" style="margin-top: 15px;">
+                        ACESSAR PAINEL <i data-lucide="shield-check" size="18"></i>
+                    </button>
+                </form>
+                <div class="form-footer">
+                    É um aluno? <a onclick="mostrarLogin()">Voltar ao Portal do Aluno</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECUPERAÇÃO DE SENHA -->
+        <div class="recovery-layout" id="sectionRecuperacao">
+            <div class="auth-card">
+                <h2>Recuperar Senha</h2>
+                <p style="margin-bottom: 24px; color: var(--text-sub); font-size: 14px; line-height: 1.5; text-align: center;" id="recuperarSubtitulo">
+                    Informe o e-mail cadastrado para responder à sua pergunta de segurança.
+                </p>
+
+                <form id="formBuscarEmail" onsubmit="buscarPerguntaSeguranca(event)">
+                    <div class="form-group">
+                        <label>E-mail Cadastrado</label>
+                        <input type="email" id="recuperarEmail" placeholder="seu.email@exemplo.com" required>
+                    </div>
+                    <button type="submit" class="btn-submit">
+                        CONTINUAR <i data-lucide="arrow-right" size="18"></i>
+                    </button>
+                </form>
+
+                <form id="formRespostaSeguranca" onsubmit="redefinirSenha(event)" style="display: none;">
+                    <div class="form-group">
+                        <label>Pergunta de Segurança</label>
+                        <input type="text" id="recuperarPerguntaTexto" readonly style="background-color: #f1f5f9; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label>Sua Resposta *</label>
+                        <input type="text" id="recuperarRespostaInput" placeholder="Sua resposta" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nova Senha *</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="novaSenhaInput" placeholder="Mínimo 6 caracteres" minlength="6" required>
+                            <button type="button" class="toggle-password-btn" onclick="alternarSenha('novaSenhaInput')">
+                                <i data-lucide="eye" size="18"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Nova Senha *</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="confirmarNovaSenhaInput" placeholder="Repita a nova senha" minlength="6" required>
+                            <button type="button" class="toggle-password-btn" onclick="alternarSenha('confirmarNovaSenhaInput')">
+                                <i data-lucide="eye" size="18"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">ALTERAR SENHA</button>
+                </form>
+
+                <div class="form-footer">
+                    Lembrou da senha? <a onclick="mostrarLogin()">Voltar ao Login</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- CADASTRO -->
+        <div class="register-layout" id="sectionCadastro">
+            <div class="auth-card">
+                <h2>Novo Cadastro de Aluno</h2>
+                <p style="margin-top: -18px; margin-bottom: 24px; color: var(--text-sub); font-size: 13.5px; text-align: center; font-weight: 600;">
+                    Escola SENAI "Santo Paschoal Crepaldi" — Presidente Prudente / SP
+                </p>
+
+                <form onsubmit="realizarCadastro(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome Completo *</label>
+                            <input type="text" id="cadNome" placeholder="Ex: Bruna Silva" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Nascimento *</label>
+                            <input type="date" id="cadDataNasc" min="1940-01-01" max="2012-12-31" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Matrícula / RA *</label>
+                            <input type="text" id="cadMatricula" placeholder="Nº da Matrícula (único por aluno)" oninput="limparErroMatricula()" required>
+                            <span class="erro-inline" id="erroMatricula">Esta matrícula já está vinculada a outro aluno.</span>
+                        </div>
+                        <div class="form-group">
+                            <label>E-mail *</label>
+                            <input type="email" id="cadEmail" placeholder="seu.email@exemplo.com" required>
+                        </div>
+                    </div>
+
+                    <!-- SELEÇÃO DE CURSO E TURMA (SENAI PRESIDENTE PRUDENTE - CFP 9.14) -->
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label>Curso (SENAI Pres. Prudente) *</label>
+                            <select id="cadCurso" onchange="atualizarTurmasPorCurso()" required>
+                                <option value="" disabled selected>Selecione o seu curso...</option>
+                                <optgroup label="Itinerário Formativo SESI / SENAI">
+                                    <option value="Itinerário SESI/SENAI - Desenvolvimento de Sistemas">Itinerário SESI/SENAI - Desenvolvimento de Sistemas</option>
+                                    <option value="Itinerário SESI/SENAI - Eletroeletrônica">Itinerário SESI/SENAI - Eletroeletrônica</option>
+                                    <option value="Itinerário SESI/SENAI - Administração">Itinerário SESI/SENAI - Administração</option>
+                                    <option value="Itinerário SESI/SENAI - Logística">Itinerário SESI/SENAI - Logística</option>
+                                    <option value="Itinerário SESI/SENAI - Química">Itinerário SESI/SENAI - Química</option>
+                                </optgroup>
+                                <optgroup label="Cursos Técnicos (SENAI Regular)">
+                                    <option value="Técnico em Desenvolvimento de Sistemas">Técnico em Desenvolvimento de Sistemas</option>
+                                    <option value="Técnico em Eletroeletrônica">Técnico em Eletroeletrônica</option>
+                                    <option value="Técnico em Química">Técnico em Química</option>
+                                    <option value="Técnico em Mecatrônica">Técnico em Mecatrônica</option>
+                                    <option value="Técnico em Logística">Técnico em Logística</option>
+                                    <option value="Técnico em Administração">Técnico em Administração</option>
+                                </optgroup>
+                                <optgroup label="Aprendizagem Industrial (CAI)">
+                                    <option value="CAI - Eletricista de Manutenção Eletroeletrônica">CAI - Eletricista de Manutenção Eletroeletrônica</option>
+                                    <option value="CAI - Mecânico de Usinagem">CAI - Mecânico de Usinagem</option>
+                                    <option value="CAI - Mecânico de Manutenção">CAI - Mecânico de Manutenção</option>
+                                    <option value="CAI - Mecânico de Automóveis Leves">CAI - Mecânico de Automóveis Leves</option>
+                                    <option value="CAI - Assistente Administrativo">CAI - Assistente Administrativo</option>
+                                    <option value="CAI - Almoxarife / Logística">CAI - Almoxarife / Logística</option>
+                                </optgroup>
+                                <optgroup label="Formação Inicial e Continuada (FIC)">
+                                    <option value="FIC - Soldagem">FIC - Soldagem</option>
+                                    <option value="FIC - Comandos Elétricos e Automação">FIC - Comandos Elétricos e Automação</option>
+                                    <option value="FIC - Tornearia e Fresagem CNC">FIC - Tornearia e Fresagem CNC</option>
+                                    <option value="FIC - Tecnologia da Informação / Programação">FIC - Tecnologia da Informação / Programação</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Turma *</label>
+                            <select id="cadTurma" disabled required>
+                                <option value="" disabled selected>Escolha o curso primeiro</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Turno *</label>
+                            <select id="cadTurno" required>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                                <option value="Noite">Noite</option>
+                                <option value="Integral">Integral</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- PERGUNTAS DE SEGURANÇA AMPLIADAS -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Pergunta de Segurança *</label>
+                            <select id="cadPergunta" required>
+                                <option value="" disabled selected>Escolha uma pergunta de segurança...</option>
+                                <option value="Qual o nome do seu primeiro animal de estimação?">Qual o nome do seu primeiro animal de estimação?</option>
+                                <option value="Qual é o nome da sua cidade natal?">Qual é o nome da sua cidade natal?</option>
+                                <option value="Qual era o apelido da sua infância?">Qual era o apelido da sua infância?</option>
+                                <option value="Qual o nome da primeira escola em que você estudou?">Qual o nome da primeira escola em que você estudou?</option>
+                                <option value="Qual é o nome do meio da sua mãe?">Qual é o nome do meio da sua mãe?</option>
+                                <option value="Qual foi o modelo do seu primeiro celular ou bicicleta?">Qual foi o modelo do seu primeiro celular ou bicicleta?</option>
+                                <option value="Qual é o seu filme ou livro favorito?">Qual é o seu filme ou livro favorito?</option>
+                                <option value="Qual é o nome do seu melhor amigo de infância?">Qual é o nome do seu melhor amigo de infância?</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Resposta de Segurança *</label>
+                            <input type="text" id="cadResposta" placeholder="Sua resposta chave" required>
+                        </div>
+                    </div>
+
+                    <!-- QR CODE DE PAGAMENTO PIX (R$ 80,00) -->
+                    <div class="pix-payment-box">
+                        <div class="qr-code-wrapper">
+                            <canvas id="qrCodePixCanvas" width="136" height="136"></canvas>
+                            <span class="qr-code-caption">PIX • R$ 80,00</span>
+                        </div>
+                        <div class="pix-details">
+                            <div class="pix-badge">
+                                <i data-lucide="qr-code" size="13"></i> Pagamento via PIX
+                            </div>
+                            <div class="pix-title">Taxa de Contribuição AAPM: <span>R$ 80,00</span></div>
+                            <p class="pix-desc">
+                                Escaneie o QR Code ao lado ou copie o código PIX para efetuar o pagamento de <strong>R$ 80,00</strong>. Em seguida, anexe o comprovante abaixo para finalizar seu cadastro.
+                            </p>
+                            <div class="pix-actions">
+                                <div class="pix-code-preview" id="pixCopiaColaTexto" title="Código PIX Copia e Cola">00020126580014BR.GOV.BCB.PIX...</div>
+                                <button type="button" class="btn-pix-action" id="btnCopiarPix" onclick="copiarCodigoPix()">
+                                    <i data-lucide="copy" size="14"></i> Copiar PIX
+                                </button>
+                                <button type="button" class="btn-pix-action btn-pix-secondary" onclick="gerarQrCodeAleatorio()">
+                                    <i data-lucide="refresh-cw" size="14"></i> Novo QR Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Senha de Acesso *</label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="cadSenha" placeholder="Crie uma senha" minlength="6" required>
+                                <button type="button" class="toggle-password-btn" onclick="alternarSenha('cadSenha')">
+                                    <i data-lucide="eye" size="18"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Comprovante — R$ 80,00 (Obrigatório) *</label>
+                            <input type="file" id="cadComprovante" accept="image/*,.pdf" onchange="limparErroComprovante()" required>
+                            <span class="erro-inline" id="erroComprovante">Anexe o comprovante de pagamento de R$ 80,00 (imagem ou PDF) para concluir.</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btnEnviarCadastro">
+                        FINALIZAR CADASTRO <i data-lucide="check-circle" size="18"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
 
     <script>
-        const API_URL = 'http://localhost:3002';
-        const QUADROS = ['quadro-login', 'quadro-cadastro', 'quadro-recuperacao', 'quadro-contato'];
+        const API_URL = 'http://localhost:3002/api';
+        let usuarioEmRecuperacao = null;
+        let codigoPixAtual = '';
 
-        function mudarParaQuadro(quadroId) {
-            QUADROS.forEach(id => {
-                const quadro = document.getElementById(id);
-                if (quadro) quadro.style.display = 'none';
-            });
-            const quadroDesejado = document.getElementById(quadroId);
-            if (quadroDesejado) {
-                quadroDesejado.style.display = 'block';
+        if (window.lucide) lucide.createIcons();
+
+        // Gera um QR Code visual aleatório no canvas + código PIX Copia e Cola simulado
+        function gerarQrCodeAleatorio() {
+            const canvas = document.getElementById('qrCodePixCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const size = canvas.width;
+            const modules = 25;
+            const cellSize = Math.floor(size / modules);
+            const offset = Math.floor((size - modules * cellSize) / 2);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, size, size);
+
+            // Matriz aleatória
+            const grid = Array.from({ length: modules }, () =>
+                Array.from({ length: modules }, () => Math.random() > 0.48)
+            );
+
+            // Limpa área dos 3 marcadores de canto (padrão QR Code)
+            function desenharMarcadorCanto(startX, startY) {
+                for (let y = -1; y <= 7; y++) {
+                    for (let x = -1; x <= 7; x++) {
+                        const gx = startX + x;
+                        const gy = startY + y;
+                        if (gx >= 0 && gx < modules && gy >= 0 && gy < modules) {
+                            grid[gy][gx] = false;
+                        }
+                    }
+                }
+                for (let y = 0; y < 7; y++) {
+                    for (let x = 0; x < 7; x++) {
+                        const isBorder = x === 0 || x === 6 || y === 0 || y === 6;
+                        const isCenter = x >= 2 && x <= 4 && y >= 2 && y <= 4;
+                        grid[startY + y][startX + x] = isBorder || isCenter;
+                    }
+                }
             }
-            const resultado = document.getElementById('resultado');
-            if (resultado) {
-                resultado.textContent = ''; 
-                resultado.style.display = 'none';
+
+            desenharMarcadorCanto(0, 0);
+            desenharMarcadorCanto(modules - 7, 0);
+            desenharMarcadorCanto(0, modules - 7);
+
+            // Desenha os módulos pretos
+            ctx.fillStyle = '#0f172a';
+            for (let y = 0; y < modules; y++) {
+                for (let x = 0; x < modules; x++) {
+                    if (grid[y][x]) {
+                        ctx.fillRect(
+                            offset + x * cellSize,
+                            offset + y * cellSize,
+                            cellSize,
+                            cellSize
+                        );
+                    }
+                }
             }
+
+            // Gera código PIX Copia e Cola aleatório para visualização
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let txId = '';
+            for (let i = 0; i < 18; i++) {
+                txId += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            codigoPixAtual = `00020126580014BR.GOV.BCB.PIX0136aapm.senai.pp@sp.senai.br520400005303986540580.005802BR5918AAPM SENAI PRUDENTE6014PRES PRUDENTE62220518${txId}6304A1B2`;
+            const previewEl = document.getElementById('pixCopiaColaTexto');
+            if (previewEl) previewEl.textContent = codigoPixAtual;
         }
 
-        function mudarParaQuadroLogin() { mudarParaQuadro('quadro-login'); }
-        function mudarParaQuadroCadastro() { mudarParaQuadro('quadro-cadastro'); }
-        function mudarParaQuadroRecuperacao() { mudarParaQuadro('quadro-recuperacao'); }
-        function mudarParaQuadroContato() { mudarParaQuadro('quadro-contato'); }
+        function copiarCodigoPix() {
+            if (!codigoPixAtual) gerarQrCodeAleatorio();
+            const btn = document.getElementById('btnCopiarPix');
+            navigator.clipboard.writeText(codigoPixAtual).then(() => {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="check" size="14"></i> Copiado!';
+                if (window.lucide) lucide.createIcons();
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    if (window.lucide) lucide.createIcons();
+                }, 2000);
+            }).catch(() => {
+                alert('Código PIX: ' + codigoPixAtual);
+            });
+        }
 
-        function exibirResultado(msg, sucesso = true) {
-            const resultado = document.getElementById('resultado');
-            if (resultado) {
-                resultado.textContent = msg;
-                resultado.style.backgroundColor = sucesso ? 'green' : 'red';
-                resultado.style.display = 'block'; 
+        const TURMAS_ITINERARIO_SESI = [
+            "1º Ano - Turma A",
+            "1º Ano - Turma B",
+            "2º Ano - Turma A",
+            "2º Ano - Turma B"
+        ];
+
+        const TURMAS_POR_CURSO = {
+            "Itinerário SESI/SENAI - Desenvolvimento de Sistemas": TURMAS_ITINERARIO_SESI,
+            "Itinerário SESI/SENAI - Eletroeletrônica": TURMAS_ITINERARIO_SESI,
+            "Itinerário SESI/SENAI - Administração": TURMAS_ITINERARIO_SESI,
+            "Itinerário SESI/SENAI - Logística": TURMAS_ITINERARIO_SESI,
+            "Itinerário SESI/SENAI - Química": TURMAS_ITINERARIO_SESI,
+
+            "Técnico em Desenvolvimento de Sistemas": [
+                "Módulo I - DS",
+                "Módulo II - DS",
+                "Módulo III - DS"
+            ],
+            "Técnico em Eletroeletrônica": [
+                "Módulo I - Eletroeletrônica",
+                "Módulo II - Eletroeletrônica",
+                "Módulo III - Eletroeletrônica",
+                "Módulo IV - Eletroeletrônica"
+            ],
+            "Técnico em Química": [
+                "Módulo I - Química",
+                "Módulo II - Química",
+                "Módulo III - Química",
+                "Módulo IV - Química"
+            ],
+            "Técnico em Mecatrônica": [
+                "Módulo I - Mecatrônica",
+                "Módulo II - Mecatrônica",
+                "Módulo III - Mecatrônica",
+                "Módulo IV - Mecatrônica"
+            ],
+            "Técnico em Logística": [
+                "Módulo I - Logística",
+                "Módulo II - Logística"
+            ],
+            "Técnico em Administração": [
+                "Módulo I - Administração",
+                "Módulo II - Administração"
+            ],
+
+            "CAI - Eletricista de Manutenção Eletroeletrônica": [
+                "Turma A - 1º Semestre",
+                "Turma B - 2º Semestre",
+                "Turma C - 3º Semestre",
+                "Turma D - 4º Semestre"
+            ],
+            "CAI - Mecânico de Usinagem": [
+                "Turma A - 1º Semestre",
+                "Turma B - 2º Semestre",
+                "Turma C - 3º Semestre",
+                "Turma D - 4º Semestre"
+            ],
+            "CAI - Mecânico de Manutenção": [
+                "Turma A - 1º Semestre",
+                "Turma B - 2º Semestre",
+                "Turma C - 3º Semestre",
+                "Turma D - 4º Semestre"
+            ],
+            "CAI - Mecânico de Automóveis Leves": [
+                "Turma A - 1º Semestre",
+                "Turma B - 2º Semestre",
+                "Turma C - 3º Semestre",
+                "Turma D - 4º Semestre"
+            ],
+            "CAI - Assistente Administrativo": [
+                "Turma A - 1º Semestre",
+                "Turma B - 2º Semestre"
+            ],
+            "CAI - Almoxarife / Logística": [
+                "Turma A - 1º Semestre",
+                "Turma B - 2º Semestre"
+            ],
+
+            "FIC - Soldagem": [
+                "Turma A - Regular",
+                "Turma B - Intensivo"
+            ],
+            "FIC - Comandos Elétricos e Automação": [
+                "Turma A - Regular",
+                "Turma B - Intensivo"
+            ],
+            "FIC - Tornearia e Fresagem CNC": [
+                "Turma A - Regular",
+                "Turma B - Intensivo"
+            ],
+            "FIC - Tecnologia da Informação / Programação": [
+                "Turma A - Regular",
+                "Turma B - Intensivo"
+            ]
+        };
+
+        function atualizarTurmasPorCurso() {
+            const selectCurso = document.getElementById('cadCurso');
+            const selectTurma = document.getElementById('cadTurma');
+            const cursoEscolhido = selectCurso.value;
+
+            selectTurma.innerHTML = '';
+
+            if (!cursoEscolhido || !TURMAS_POR_CURSO[cursoEscolhido]) {
+                selectTurma.disabled = true;
+                selectTurma.innerHTML = '<option value="" disabled selected>Escolha o curso primeiro</option>';
+                return;
             }
+
+            selectTurma.disabled = false;
+            const optDefault = document.createElement('option');
+            optDefault.value = '';
+            optDefault.disabled = true;
+            optDefault.selected = true;
+            optDefault.textContent = 'Selecione a turma...';
+            selectTurma.appendChild(optDefault);
+
+            TURMAS_POR_CURSO[cursoEscolhido].forEach(turma => {
+                const opt = document.createElement('option');
+                opt.value = turma;
+                opt.textContent = turma;
+                selectTurma.appendChild(opt);
+            });
+        }
+
+        function limparErroMatricula() {
+            const inputMat = document.getElementById('cadMatricula');
+            const erroSpan = document.getElementById('erroMatricula');
+            inputMat.classList.remove('input-erro');
+            erroSpan.style.display = 'none';
+        }
+
+        function exibirErroMatricula(mensagem) {
+            const inputMat = document.getElementById('cadMatricula');
+            const erroSpan = document.getElementById('erroMatricula');
+            erroSpan.textContent = mensagem || 'Este número de matrícula já está cadastrado em outra conta.';
+            erroSpan.style.display = 'block';
+            inputMat.classList.add('input-erro');
+            inputMat.focus();
+        }
+
+        function limparErroComprovante() {
+            const inputComp = document.getElementById('cadComprovante');
+            const erroSpan = document.getElementById('erroComprovante');
+            inputComp.classList.remove('input-erro');
+            erroSpan.style.display = 'none';
+        }
+
+        function exibirErroComprovante(mensagem) {
+            const inputComp = document.getElementById('cadComprovante');
+            const erroSpan = document.getElementById('erroComprovante');
+            erroSpan.textContent = mensagem || 'Anexe o comprovante de pagamento de R$ 80,00 (imagem ou PDF) para concluir.';
+            erroSpan.style.display = 'block';
+            inputComp.classList.add('input-erro');
+            inputComp.focus();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            mudarParaQuadroLogin();
-
-            // Associe-se
-            const btnAssociar = document.getElementById('btn_associar');
-            if (btnAssociar) {
-                btnAssociar.addEventListener('click', () => {
-                    window.open('https://docs.google.com/forms/d/e/1FAIpQLSfo7LTzOOmwGTGIIrDDMCDw3CHJ4sLPM2mcWVTotQtc1LrudQ/viewform', '_blank');
-                });
+            gerarQrCodeAleatorio();
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('modo') === 'admin') {
+                mostrarLoginAdmin();
             }
         });
 
-        // LOGIN
-        const btnLogin = document.getElementById('btn_login');
-        if (btnLogin) {
-            btnLogin.addEventListener('click', async (e) => {
-                e.preventDefault();
+        function alternarSenha(id) {
+            const input = document.getElementById(id);
+            if (input) input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function mostrarCadastro() {
+            esconderTodasSecoes();
+            limparErroMatricula();
+            limparErroComprovante();
+            gerarQrCodeAleatorio();
+            document.getElementById('sectionCadastro').style.display = 'block';
+            document.getElementById('navBtnCadastrar').style.display = 'none';
+            document.getElementById('navBtnAdmin').style.display = 'inline-flex';
+            document.getElementById('navBtnVoltar').style.display = 'inline-flex';
+        }
+
+        function mostrarLogin() {
+            esconderTodasSecoes();
+            const alertaBox = document.getElementById('alertaStatusLogin');
+            if (alertaBox) alertaBox.style.display = 'none';
+            document.getElementById('sectionLogin').style.display = 'flex';
+            document.getElementById('navBtnCadastrar').style.display = 'inline-flex';
+            document.getElementById('navBtnAdmin').style.display = 'inline-flex';
+            document.getElementById('navBtnVoltar').style.display = 'none';
+        }
+
+        function mostrarLoginAdmin() {
+            esconderTodasSecoes();
+            document.getElementById('sectionAdmin').style.display = 'flex';
+            document.getElementById('navBtnCadastrar').style.display = 'inline-flex';
+            document.getElementById('navBtnAdmin').style.display = 'none';
+            document.getElementById('navBtnVoltar').style.display = 'inline-flex';
+        }
+
+        function mostrarRecuperacao() {
+            esconderTodasSecoes();
+            document.getElementById('sectionRecuperacao').style.display = 'block';
+            document.getElementById('navBtnCadastrar').style.display = 'inline-flex';
+            document.getElementById('navBtnAdmin').style.display = 'inline-flex';
+            document.getElementById('navBtnVoltar').style.display = 'inline-flex';
+            document.getElementById('formBuscarEmail').style.display = 'block';
+            document.getElementById('formRespostaSeguranca').style.display = 'none';
+        }
+
+        function esconderTodasSecoes() {
+            document.getElementById('sectionLogin').style.display = 'none';
+            document.getElementById('sectionAdmin').style.display = 'none';
+            document.getElementById('sectionCadastro').style.display = 'none';
+            document.getElementById('sectionRecuperacao').style.display = 'none';
+        }
+
+        async function realizarLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const senha = document.getElementById('loginSenha').value;
+            const alertaBox = document.getElementById('alertaStatusLogin');
+
+            alertaBox.style.display = 'none';
+            alertaBox.textContent = '';
+
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, senha })
+                });
+
+                const data = await res.json();
+                const statusComp = (
+                    data.status_comprovante ||
+                    (data.usuario && (data.usuario.status_comprovante || data.usuario.status)) ||
+                    ''
+                ).toUpperCase();
+
+                if (res.status === 403 || statusComp === 'PENDENTE' || (data.usuario && data.usuario.aprovado === false)) {
+                    localStorage.clear();
+                    alertaBox.style.background = '#fffbeb';
+                    alertaBox.style.borderColor = '#f59e0b';
+                    alertaBox.style.color = '#92400e';
+                    alertaBox.textContent = '⏳ ' + (data.mensagem || 'Seu comprovante de pagamento está aguardando aprovação da administração.');
+                    alertaBox.style.display = 'block';
+                    return;
+                }
+
+                if (statusComp === 'RECUSADO' || statusComp === 'REJEITADO') {
+                    localStorage.clear();
+                    alertaBox.style.background = '#fef2f2';
+                    alertaBox.style.borderColor = '#ef4444';
+                    alertaBox.style.color = '#991b1b';
+                    alertaBox.textContent = '❌ ' + (data.mensagem || 'Seu comprovante de pagamento foi recusado. Procure a secretaria da AAPM.');
+                    alertaBox.style.display = 'block';
+                    return;
+                }
+
+                if (res.ok && data.sucesso && data.usuario) {
+                    localStorage.clear();
+
+                    const usuario = data.usuario;
+                    const idAluno = usuario.id || usuario.id_aluno || 1;
+
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('tipoUsuario', 'aluno');
+                    localStorage.setItem('nomeUsuario', usuario.nome_completo || usuario.nome || '');
+                    localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+                    localStorage.setItem('aluno_id', String(idAluno));
+
+                    window.location.replace('landingpage.html');
+                } else {
+                    alert(data.mensagem || 'E-mail ou senha incorretos.');
+                }
+            } catch (err) {
+                alert('Erro ao conectar com o servidor. Verifique se o backend está rodando.');
+            }
+        }
+
+        async function realizarLoginAdmin(e) {
+            e.preventDefault();
+            const login = document.getElementById('adminEmail').value.trim();
+            const senha = document.getElementById('adminSenha').value;
+
+            try {
+                const res = await fetch(`${API_URL}/login_admin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login, senha })
+                });
+
+                const data = await res.json();
                 
-                const login = document.getElementById('campo-login').value.trim();
-                const senha = document.getElementById('campo-senha').value;
+                if (res.ok && data.sucesso) {
+                    localStorage.clear();
 
-                if (login === '') {
-                    exibirResultado('Informe o login.', false);
-                    return;
-                }
-
-                // Se a senha estiver vazia, verifica se é primeiro acesso
-                if (senha === '') {
-                    try {
-                        const response = await fetch(`${API_URL}/primeiro-acesso`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ login })
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            // Primeiro acesso - exibe quadro de cadastro
-                            document.getElementById('campo-login-cadastro').value = login;
-                            mudarParaQuadroCadastro();
-                        } else {
-                            exibirResultado(data.resposta, false);
-                        }
-                    } catch (error) {
-                        exibirResultado('Erro de Conexão: O servidor está offline.', false);
-                    }
-                    return;
-                }
-
-                // Senha preenchida - tenta login normal
-                try {
-                    const response = await fetch(`${API_URL}/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ login, senha })
-                    });
-
-                    const data = await response.json();
+                    const adminDados = data.usuario || { nome: 'Administrador Master', email: login, tipo: 'admin' };
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('tipoUsuario', 'admin');
+                    localStorage.setItem('nomeUsuario', adminDados.nome_completo || adminDados.nome || 'Administrador Master');
+                    localStorage.setItem('usuarioLogado', JSON.stringify(adminDados));
                     
-                    if (response.ok) {
-                        localStorage.setItem('token', data.token); 
-                        exibirResultado('Login realizado com sucesso. Redirecionando...', true); 
-                        
-                        setTimeout(() => {
-                            window.location.href = 'landingpage.html'; 
-                        }, 1500);
-                    } else {
-                        exibirResultado(data.resposta, false);
-                    }
-                    
-                } catch (error) {
-                    exibirResultado('Erro de Conexão: O servidor está offline.', false);
+                    window.location.replace('admin.html');
+                } else {
+                    alert(data.mensagem || 'Credenciais de administrador inválidas.');
                 }
-            });
+            } catch (err) {
+                alert('Erro ao conectar com o servidor. Verifique se o backend está rodando.');
+            }
         }
 
-        // SALVAR CADASTRO (PRIMEIRO ACESSO)
-        const btnSalvarCadastro = document.getElementById('btn_salvar_cadastro');
-        if (btnSalvarCadastro) {
-            btnSalvarCadastro.addEventListener('click', async (e) => {
-                e.preventDefault();
+        async function buscarPerguntaSeguranca(e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('recuperarEmail').value.trim().toLowerCase();
 
-                const login = document.getElementById('campo-login-cadastro').value.trim();
-                const senha = document.getElementById('campo-senha-cadastro').value;
-                const nome_completo = document.getElementById('campo-nome-completo').value.trim();
-                const data_nascimento = document.getElementById('campo-data-nascimento').value;
-                const email = document.getElementById('campo-email-pessoal').value.trim();
+            try {
+                const res = await fetch(`${API_URL}/recuperar-pergunta?email=${encodeURIComponent(emailInput)}`);
+                const data = await res.json();
 
-                if (nome_completo === '' || data_nascimento === '' || email === '' || senha === '') {
-                    exibirResultado('Preencha todos os campos.', false);
-                    return;
+                if (res.ok && data.sucesso) {
+                    usuarioEmRecuperacao = data.usuario;
+                    document.getElementById('recuperarPerguntaTexto').value = data.usuario.pergunta;
+                    document.getElementById('formBuscarEmail').style.display = 'none';
+                    document.getElementById('formRespostaSeguranca').style.display = 'block';
+                } else {
+                    alert(data.mensagem || 'E-mail não encontrado.');
                 }
-
-                try {
-                    const response = await fetch(`${API_URL}/completar-cadastro`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ login, senha, nome_completo, data_nascimento, email })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        exibirResultado(data.resposta, true);
-                        // Limpa campos do cadastro
-                        document.getElementById('campo-nome-completo').value = '';
-                        document.getElementById('campo-data-nascimento').value = '';
-                        document.getElementById('campo-email-pessoal').value = '';
-                        document.getElementById('campo-senha-cadastro').value = '';
-                        // Volta para login após 2 segundos
-                        setTimeout(() => {
-                            mudarParaQuadroLogin();
-                            exibirResultado('Agora faça login com sua senha.', true);
-                        }, 2000);
-                    } else {
-                        exibirResultado(data.resposta, false);
-                    }
-                } catch (error) {
-                    exibirResultado('Erro de Conexão: O servidor está offline.', false);
-                }
-            });
+            } catch (err) {
+                alert('Erro ao buscar o e-mail.');
+            }
         }
 
-        // RECUPERAR SENHA
-        const btnRecuperarSenha = document.getElementById('btn_recuperar_senha');
-        if (btnRecuperarSenha) {
-            btnRecuperarSenha.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const login = document.getElementById('campo-login-recuperacao').value;
-                const nova_senha = document.getElementById('campo-nova-senha-recuperacao').value;
-                try {
-                    const response = await fetch(`${API_URL}/esqueci-senha`, { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ login, nova_senha }) 
-                    });
-                    const data = await response.json();
-                    exibirResultado(data.resposta, response.ok);
-                    if (response.ok) setTimeout(mudarParaQuadroLogin, 3000);
-                } catch (error) {
-                    exibirResultado('Erro de Conexão.', false);
+        async function redefinirSenha(e) {
+            e.preventDefault();
+            const respostaInput = document.getElementById('recuperarRespostaInput').value.trim();
+            const novaSenha = document.getElementById('novaSenhaInput').value;
+            const confirmarNovaSenha = document.getElementById('confirmarNovaSenhaInput').value;
+
+            if (novaSenha !== confirmarNovaSenha) {
+                alert('As senhas não coincidem!');
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/redefinir-senha`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: usuarioEmRecuperacao.email,
+                        resposta: respostaInput,
+                        novaSenha: novaSenha
+                    })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.sucesso) {
+                    alert('Senha alterada com sucesso!');
+                    mostrarLogin();
+                } else {
+                    alert(data.mensagem || 'Erro ao redefinir a senha.');
                 }
-            });
+            } catch (err) {
+                alert('Erro ao redefinir a senha.');
+            }
         }
 
-        // CONTATO
-        const btnEnviar = document.getElementById('btn_enviar');
-        if (btnEnviar) {
-            btnEnviar.addEventListener('click', async (e) => {
-                e.preventDefault();
-                const dados = {
-                    nome_usuario: document.getElementById('campo-nome-contato').value,
-                    email: document.getElementById('campo-email-contato').value,
-                    telefone: document.getElementById('campo-telefone-contato').value,
-                    assunto: document.getElementById('campo-assunto-contato').value,
-                    mensagem: document.getElementById('campo-mensagem-contato').value
-                };
-                try {
-                    const response = await fetch(`${API_URL}/enviar`, { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify(dados) 
-                    });
-                    const data = await response.json();
-                    exibirResultado(data.resposta, response.ok);
-                    if (response.ok) {
-                        document.querySelectorAll('#quadro-contato input, #quadro-contato textarea').forEach(i => i.value = '');
+        async function realizarCadastro(e) {
+            e.preventDefault();
+            limparErroMatricula();
+            limparErroComprovante();
+
+            const dataNascVal = document.getElementById('cadDataNasc').value;
+            if (!dataNascVal || dataNascVal > '2012-12-31') {
+                alert('A data de nascimento não pode ser posterior a 2012.');
+                return;
+            }
+
+            const matriculaVal = document.getElementById('cadMatricula').value.trim();
+            if (!matriculaVal) {
+                exibirErroMatricula('Informe um número de matrícula válido.');
+                return;
+            }
+
+            const inputComprovante = document.getElementById('cadComprovante');
+            const arquivoComprovante = inputComprovante.files && inputComprovante.files[0];
+            if (!arquivoComprovante || arquivoComprovante.size === 0) {
+                exibirErroComprovante('É obrigatório anexar o comprovante de pagamento de R$ 80,00 para finalizar o cadastro.');
+                alert('Por favor, anexe o comprovante de pagamento de R$ 80,00 antes de finalizar o cadastro.');
+                return;
+            }
+
+            const btn = document.getElementById('btnEnviarCadastro');
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('nome', document.getElementById('cadNome').value.trim());
+            formData.append('dataNascimento', dataNascVal);
+            formData.append('matricula', matriculaVal);
+            formData.append('email', document.getElementById('cadEmail').value.trim());
+            formData.append('curso', document.getElementById('cadCurso').value);
+            formData.append('turma', document.getElementById('cadTurma').value);
+            formData.append('turno', document.getElementById('cadTurno').value);
+            formData.append('pergunta', document.getElementById('cadPergunta').value);
+            formData.append('resposta', document.getElementById('cadResposta').value.trim());
+            formData.append('senha', document.getElementById('cadSenha').value);
+            formData.append('comprovante', arquivoComprovante);
+
+            try {
+                const res = await fetch(`${API_URL}/cadastrar`, { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (res.ok && data.sucesso) {
+                    alert('Cadastro efetuado com sucesso! Aguarde a aprovação do comprovante.');
+                    e.target.reset();
+                    atualizarTurmasPorCurso();
+                    mostrarLogin();
+                } else {
+                    const msgErro = data.mensagem || 'Erro no cadastro.';
+                    if (data.campo === 'matricula' || /matr[ií]cula/i.test(msgErro)) {
+                        exibirErroMatricula(msgErro);
+                    } else if (data.campo === 'comprovante' || /comprovante/i.test(msgErro)) {
+                        exibirErroComprovante(msgErro);
                     }
-                } catch (error) {
-                    exibirResultado('Erro de Conexão.', false);
+                    alert(msgErro);
                 }
-            });
+            } catch (err) {
+                alert('Erro ao enviar formulário.');
+            } finally {
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
